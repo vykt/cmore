@@ -9,7 +9,7 @@ The C More library (*libcmore*) provides a robust, minimal, and highly efficient
 
 ## INSTALLATION
 
-Building The C More library requires *make*. Your Linux distribution will package *make* as part of its *build-essential* or *base-devel* meta-packages. Once make is installed, proceed through the following steps:
+Building the C More library requires *make*. Your Linux distribution will package *make* as part of its *build-essential* or *base-devel* meta-packages. Once make is installed, proceed through the following steps:
 
 <br>
 
