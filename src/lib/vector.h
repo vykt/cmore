@@ -21,7 +21,7 @@ cm_byte * cm_vector_get_ref(cm_vector * vector, int index);
 int cm_vector_set(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_insert(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_append(cm_vector * vector, cm_byte * data);
-void cm_vector_remove(cm_vector * vector, int index);
+int cm_vector_remove(cm_vector * vector, int index);
 void cm_vector_empty(cm_vector * vector);
 
 int cm_new_vector(cm_vector * vector, size_t data_size);

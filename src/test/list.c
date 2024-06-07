@@ -53,13 +53,13 @@ void test_list() {
     ret = cm_list_insert(&list, -2, (cm_byte *) &data_4);
 
     //remove
-    cm_list_remove(&list, 1);  //remove data_1
-    cm_list_remove(&list, -1); //remove data_4
+    ret = cm_list_remove(&list, 1);  //remove data_1
+    ret = cm_list_remove(&list, -1); //remove data_4
 
     //set
-    cm_list_set(&list, 2, (cm_byte *) &data_1);
+    cm_list_set(&list, 2, (cm_byte *) &data_2);
     
-    //get by value     | value should equal data_1
+    //get by value     | value should equal data_2
     ret = cm_list_get_val(&list, 2, (cm_byte *) &data_5_val);
 
     //get by reference | pointer should point to data_0

@@ -13,11 +13,10 @@
  *  --- [INTERNAL] ---
  */
 
-static inline int _cm_list_normalise_index(int index) {
+static inline int _cm_list_normalise_index(cm_list * list, int index) {
 
     if (index < 0) { 
-        index *= -1;
-        --index;
+        index = list->len + index;
     }
 
     return index;
@@ -74,6 +73,9 @@ static cm_list_node * _cm_new_list_node(cm_list * list, cm_byte * data) {
         cm_errno = ERR_MALLOC;
         return NULL;
     }
+
+    //copy data into node
+    memcpy(new_node->data, data, list->data_size);
 
     return new_node;
 }
@@ -246,24 +248,30 @@ int cm_list_insert(cm_list * list, int index, cm_byte * data) {
     cm_list_node * new_node = _cm_new_list_node(list, data);
     if (!new_node) return -1;
 
-
     //to simplify, convert a negative index to a positive equivalent
-    index = _cm_list_normalise_index(index);
-
-    //get the _prev_ and _next_ of the new node
-    prev_node = _cm_list_traverse(list, index);
-    if (!prev_node) {
-        _cm_list_del_node(new_node);
-        return -1;
-    }
-    next_node = prev_node->next;
-    if (!next_node) next_node = prev_node;
-
+    index = _cm_list_normalise_index(list, index);
     
-    //if list is empty
-    if (!list->head) {
+    //get the _prev_ and _next_ of the new node as required
+    if (list->len == 0) {
         _cm_list_add_head_node(list, new_node);
-    } else {
+    
+    } else if (list->len == 1) { 
+        next_node = prev_node = list->head; 
+        
+        _cm_list_add_node(list, new_node, prev_node, next_node, index);
+
+    } else { 
+        if (index == list->len) {
+            prev_node = list->head->prev;
+        } else {
+            prev_node = _cm_list_traverse(list, index-1);
+            if (!prev_node) {
+                _cm_list_del_node(new_node);
+                return -1;
+            }
+        }
+        next_node = prev_node->next;
+
         _cm_list_add_node(list, new_node, prev_node, next_node, index);
     }
 
@@ -276,16 +284,15 @@ int cm_list_append(cm_list * list, cm_byte * data) {
 
     cm_list_node * new_node = _cm_new_list_node(list, data);
     if (!new_node) return -1;
- 
-    cm_list_node * prev_node = list->head->prev;
-    if (prev_node == NULL) prev_node = list->head;
 
-
-    //if list is empty
-    if (!list->len) {
+    //add node to list
+    if (list->len == 0) {
         _cm_list_add_head_node(list, new_node);
+    
+    } else if (list->len == 1) {
+        _cm_list_add_node(list, new_node, list->head, list->head, -1);
+    
     } else {
-        //passing -1 as index ensures the appended node can not become the head node
         _cm_list_add_node(list, new_node, list->head->prev, list->head, -1);
     }
 
@@ -305,6 +312,8 @@ int cm_list_remove(cm_list * list, int index) {
 
     _cm_list_sub_node(list, del_node->prev, del_node->next, index);
     _cm_list_del_node(del_node);
+
+    --list->len;
 
     return 0;
 }

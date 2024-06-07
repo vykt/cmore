@@ -53,13 +53,13 @@ void test_vector() {
     ret = cm_vector_insert(&vector, -2, (cm_byte *) &data_4);
 
     //remove
-    cm_vector_remove(&vector, 1);  //remove data_1
-    cm_vector_remove(&vector, -1); //remove data_4
+    ret = cm_vector_remove(&vector, 1);  //remove data_1
+    ret = cm_vector_remove(&vector, -1); //remove data_3
 
     //set
-    cm_vector_set(&vector, 2, (cm_byte *) &data_1);
+    cm_vector_set(&vector, 2, (cm_byte *) &data_2);
     
-    //get by value     | value should equal data_1
+    //get by value     | value should equal data_2
     ret = cm_vector_get_val(&vector, 2, (cm_byte *) &data_5_val);
 
     //get by reference | pointer should point to data_0

@@ -80,7 +80,7 @@ extern int cm_vector_set(cm_vector * vector, int index, cm_byte * data);
 extern int cm_vector_insert(cm_vector * vector, int index, cm_byte * data);
 extern int cm_vector_append(cm_vector * vector, cm_byte * data);
 //void return
-extern void cm_vector_remove(cm_vector * vector, int index);
+extern int cm_vector_remove(cm_vector * vector, int index);
 extern void cm_vector_empty(cm_vector * vector);
 
 //void return

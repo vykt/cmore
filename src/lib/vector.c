@@ -40,11 +40,10 @@ static int _cm_vector_grow(cm_vector * vector) {
 
 
 
-static inline int _cm_vector_normalise_index(int index) {
+static inline int _cm_vector_normalise_index(cm_vector * vector, int index) {
 
     if (index < 0) { 
-        index *= -1;
-        --index;
+        index = vector->len + index;
     }
 
     return index;
@@ -54,7 +53,7 @@ static inline int _cm_vector_normalise_index(int index) {
 
 static cm_byte * _cm_vector_traverse(cm_vector * vector, int index) {
 
-    index = _cm_vector_normalise_index(index);
+    index = _cm_vector_normalise_index(vector, index);
 
     return vector->data + (vector->data_size * index);
 
@@ -64,11 +63,11 @@ static cm_byte * _cm_vector_traverse(cm_vector * vector, int index) {
 
 static void _cm_vector_shift(cm_vector * vector, int index, int mode) {
 
-    index = _cm_vector_normalise_index(index);
+    int diff;
 
     //calculate how many indeces remain from the given index
-    int diff = vector->len - 1 - index;
-    if (diff == 0) return;
+    diff = vector->len - index;
+    if (diff <= 0) return;
 
     //calculate how many bytes the remaining indeces constitute
     int move_size = diff * vector->data_size;
@@ -138,6 +137,9 @@ int cm_vector_set(cm_vector * vector, int index, cm_byte * data) {
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return -1;
 
+    //convert a negative index to a positive equivalent
+    index = _cm_vector_normalise_index(vector, index);
+
     _cm_vector_set(vector, index, data);
 
     return 0;
@@ -153,6 +155,9 @@ int cm_vector_insert(cm_vector * vector, int index, cm_byte * data) {
     if ((size_t) vector->len == vector->size) {
         if(_cm_vector_grow(vector)) return -1;
     }
+
+    //convert a negative index to a positive equivalent
+    index = _cm_vector_normalise_index(vector, index);
 
     _cm_vector_shift(vector, index, VECTOR_SHIFT_UP);
     _cm_vector_set(vector, index, data);
@@ -177,12 +182,17 @@ int cm_vector_append(cm_vector * vector, cm_byte * data) {
 
 
 
-void cm_vector_remove(cm_vector * vector, int index) {
+int cm_vector_remove(cm_vector * vector, int index) {
 
-    _cm_vector_shift(vector, index, VECTOR_SHIFT_DOWN);
+    if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return -1;
+
+    //convert a negative index to a positive equivalent
+    index = _cm_vector_normalise_index(vector, index);
+
+    _cm_vector_shift(vector, index + 1, VECTOR_SHIFT_DOWN);
     --vector->len;
 
-    return;
+    return 0;
 }
 
 
