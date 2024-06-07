@@ -5,7 +5,7 @@ VERSION="v0.0.1"
 DATE="May 2024"
 
 SRC_DIR="md"
-DST_DIR="roff/man.3"
+DST_DIR="roff/man3"
 
 #check that pandoc is installed
 if ! command -v pandoc &> /dev/null; then
