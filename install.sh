@@ -3,12 +3,12 @@
 #TODO [set as required] TODO
 INSTALL_DIR=/usr/local/lib
 INCLUDE_INSTALL_DIR=/usr/local/include
-MAN_INSTALL_DIR=/usr/local/share/man
+MAN_INSTALL_DIR=/usr/local/share/man/man3
 
 # [internal]
 BUILD_DIR=./build/lib
 INCLUDE_DIR=./src/lib
-MAN_DIR=./doc/roff/man.3
+MAN_DIR=./doc/roff/man3
 
 LIBRARY=libcmore.so
 HEADER=libcmore.h
@@ -28,5 +28,6 @@ if [ "$1" == "uninstall" ]; then
 else
     cp ${BUILD_DIR}/${LIBRARY} ${INSTALL_DIR}
     cp ${INCLUDE_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
-    cp -R ${MAN_DIR} ${MAN_INSTALL_DIR}
+    mkdir -p ${MAN_INSTALL_DIR}
+    cp -R ${MAN_DIR}/* ${MAN_INSTALL_DIR}
 fi
