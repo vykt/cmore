@@ -21,8 +21,12 @@ if [ ! -f "build/lib/libcmore.so" ]; then
 fi
 
 #install files
-cp ${BUILD_DIR}/${LIBRARY} ${INSTALL_DIR}
-cp ${INCLUDE_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
-cp -R ${MAN_DIR} ${MAN_INSTALL_DIR}
-
-#TODO add uninstall part of the script
+if [ "$1" == "uninstall" ]; then
+    rm -f ${INSTALL_DIR}/${LIBRARY}
+    rm -f ${INCLUDE_INSTALL_DIR}/${HEADER}
+    rm -f ${MAN_INSTALL_DIR}/libcmore_*
+else
+    cp ${BUILD_DIR}/${LIBRARY} ${INSTALL_DIR}
+    cp ${INCLUDE_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
+    cp -R ${MAN_DIR} ${MAN_INSTALL_DIR}
+fi
