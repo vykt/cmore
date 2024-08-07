@@ -12,7 +12,9 @@ extern "C"{
  *  --- [DATA TYPES] ---
  */
 
-#define cm_byte char
+// [byte]
+typedef char cm_byte;
+typedef unsigned char cm_ubyte;
 
 
 // [list]
