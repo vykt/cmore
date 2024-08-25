@@ -20,7 +20,7 @@ int cm_list_remove(cm_list * list, int index);
 int cm_list_empty(cm_list * list);
 
 void cm_new_list(cm_list * list, size_t data_size);
-int cm_del_list(cm_list * list);
+void cm_del_list(cm_list * list);
 
 
 #endif
