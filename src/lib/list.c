@@ -338,9 +338,7 @@ void cm_new_list(cm_list * list, size_t data_size) {
 
 
 
-int cm_del_list(cm_list * list) {
-
-    if (_cm_list_empty(list)) return -1;
+void cm_del_list(cm_list * list) {
 
     return 0;
 }

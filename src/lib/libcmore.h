@@ -68,7 +68,7 @@ extern int cm_list_empty(cm_list * list);
 //void return
 extern void cm_new_list(cm_list * list, size_t data_size);
 //0 = success, -1 = error, see cm_errno
-extern int cm_del_list(cm_list * list);
+extern void cm_del_list(cm_list * list);
 
 
 // [vector]
