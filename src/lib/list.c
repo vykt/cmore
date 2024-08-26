@@ -320,6 +320,23 @@ int cm_list_remove(cm_list * list, int index) {
 
 
 
+int cm_list_unlink(cm_list * list, int index) {
+
+    if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return -1;
+    
+    //get the node
+    cm_list_node * unlink_node = _cm_list_traverse(list, index);
+    if (!unlink_node) return -1;
+
+    _cm_list_sub_node(list, unlink_node->prev, unlink_node->next, index);
+
+    --list->len;
+
+    return 0;
+}
+
+
+
 int cm_list_empty(cm_list * list) {
 
     if (_cm_list_empty(list)) return -1;

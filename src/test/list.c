@@ -54,7 +54,9 @@ void test_list() {
 
     //remove
     ret = cm_list_remove(&list, 1);  //remove data_1
-    ret = cm_list_remove(&list, -1); //remove data_4
+
+    //unlink
+    ret = cm_list_unlink(&list, -1); //unlink data_4
 
     //set
     cm_list_set(&list, 2, (cm_byte *) &data_2);
