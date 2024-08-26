@@ -357,5 +357,17 @@ void cm_new_list(cm_list * list, size_t data_size) {
 
 void cm_del_list(cm_list * list) {
 
+    int len = list->len;
+    cm_list_node * del_node;
+
+    //delete each node in list
+    for (int i = 0; i < len; ++i) {
+
+        del_node = list->head;
+        _cm_list_sub_node(list, del_node->prev, del_node->next, 0);
+        _cm_list_del_node(del_node);
+    
+    } //end for
+
     return;
 }
