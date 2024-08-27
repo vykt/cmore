@@ -212,7 +212,7 @@ int cm_list_get_val(cm_list * list, int index, cm_byte * buf) {
 
 cm_byte * cm_list_get_ref(cm_list * list, int index) {
 
-    //get the node
+    if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
 
     //get the node
     cm_list_node * node = _cm_list_traverse(list, index);
@@ -223,30 +223,40 @@ cm_byte * cm_list_get_ref(cm_list * list, int index) {
 
 
 
-int cm_list_set(cm_list * list, int index, cm_byte * data) {
+cm_list_node * cm_list_get_node(cm_list * list, int index) {
 
-    if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return -1;
+    if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
 
     //get the node
-    cm_list_node * node = _cm_list_traverse(list, index);
-    if (!node) return -1;
-
-    memcpy(node->data, data, list->data_size);
-
-    return 0;
+    return _cm_list_traverse(list, index);
 }
 
 
 
-int cm_list_insert(cm_list * list, int index, cm_byte * data) {
+cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data) {
+
+    if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
+
+    //get the node
+    cm_list_node * node = _cm_list_traverse(list, index);
+    if (!node) return NULL;
+
+    memcpy(node->data, data, list->data_size);
+
+    return node;
+}
+
+
+
+cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
 
     cm_list_node * prev_node, * next_node;
 
-    if (_cm_list_assert_index_range(list, index, LIST_ADD_INDEX)) return -1;
+    if (_cm_list_assert_index_range(list, index, LIST_ADD_INDEX)) return NULL;
 
     //create new node
     cm_list_node * new_node = _cm_new_list_node(list, data);
-    if (!new_node) return -1;
+    if (!new_node) return NULL;
 
     //to simplify, convert a negative index to a positive equivalent
     index = _cm_list_normalise_index(list, index);
@@ -267,7 +277,7 @@ int cm_list_insert(cm_list * list, int index, cm_byte * data) {
             prev_node = _cm_list_traverse(list, index-1);
             if (!prev_node) {
                 _cm_list_del_node(new_node);
-                return -1;
+                return NULL;
             }
         }
         next_node = prev_node->next;
@@ -275,15 +285,15 @@ int cm_list_insert(cm_list * list, int index, cm_byte * data) {
         _cm_list_add_node(list, new_node, prev_node, next_node, index);
     }
 
-    return 0;
+    return new_node;
 }
 
 
 
-int cm_list_append(cm_list * list, cm_byte * data) {
+cm_list_node * cm_list_append(cm_list * list, cm_byte * data) {
 
     cm_list_node * new_node = _cm_new_list_node(list, data);
-    if (!new_node) return -1;
+    if (!new_node) return NULL;
 
     //add node to list
     if (list->len == 0) {
@@ -296,7 +306,7 @@ int cm_list_append(cm_list * list, cm_byte * data) {
         _cm_list_add_node(list, new_node, list->head->prev, list->head, -1);
     }
 
-    return 0;
+    return new_node;
 }
 
 

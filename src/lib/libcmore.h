@@ -57,11 +57,13 @@ typedef struct {
 extern int cm_list_get_val(cm_list * list, int index, cm_byte * buf);
 //pointer = success, NULL = error, see cm_errno
 extern cm_byte * cm_list_get_ref(cm_list * list, int index);
+//pointer = success, NULL = error, see cm_errno
+extern cm_list_node * cm_list_get_node(cm_list * list, int index);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_list_set(cm_list * list, int index, cm_byte * data);
-extern int cm_list_insert(cm_list * list, int index, cm_byte * data);
-extern int cm_list_append(cm_list * list, cm_byte * data);
+extern cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data);
+extern cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data);
+extern cm_list_node * cm_list_append(cm_list * list, cm_byte * data);
 extern int cm_list_remove(cm_list * list, int index);
 extern int cm_list_unlink(cm_list * list, int index);
 extern int cm_list_empty(cm_list * list);
