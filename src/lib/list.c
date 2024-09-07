@@ -360,6 +360,7 @@ void cm_new_list(cm_list * list, size_t data_size) {
 
     list->len = 0;
     list->data_size = data_size;
+    list->head = NULL;
     return;
 }
 
