@@ -111,27 +111,27 @@ extern _Thread_local int cm_errno;
 // [error codes]
 
 // 1XX - user errors
-#define ERR_USER_INDEX     100
+#define CM_ERR_USER_INDEX     100
 
 // 2XX - internal errors
-#define ERR_INTERNAL_INDEX 200
+#define CM_ERR_INTERNAL_INDEX 200
 
 // 3XX - environment errors
-#define ERR_MALLOC         300
-#define ERR_REALLOC        301
+#define CM_ERR_MALLOC         300
+#define CM_ERR_REALLOC        301
 
 
 // [error code messages]
 
 // 1XX - user errors
-#define ERR_USER_INDEX_MSG     "Index out of range.\n"
+#define CM_ERR_USER_INDEX_MSG     "Index out of range.\n"
 
 // 2XX - internal errors
-#define ERR_INTERNAL_INDEX_MSG "Internal indexing error.\n"
+#define CM_ERR_INTERNAL_INDEX_MSG "Internal indexing error.\n"
 
 // 3XX - environmental errors
-#define ERR_MALLOC_MSG         "Internal malloc() failed.\n"
-#define ERR_REALLOC_MSG        "Internal realloc() failed.\n"
+#define CM_ERR_MALLOC_MSG         "Internal malloc() failed.\n"
+#define CM_ERR_REALLOC_MSG        "Internal realloc() failed.\n"
 
 
 #ifdef __cplusplus

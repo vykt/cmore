@@ -16,7 +16,7 @@ static int _cm_vector_alloc(cm_vector * vector) {
 
     vector->data = malloc(vector->data_size * vector->size);
     if (!vector->data) {
-        cm_errno = ERR_MALLOC;
+        cm_errno = CM_ERR_MALLOC;
         return -1;
     }
 
@@ -31,7 +31,7 @@ static int _cm_vector_grow(cm_vector * vector) {
 
     vector->data = realloc(vector->data, vector->data_size * vector->size);
     if (!vector->data) {
-        cm_errno = ERR_REALLOC;
+        cm_errno = CM_ERR_REALLOC;
         return -1;
     }
 
@@ -98,7 +98,7 @@ static inline int _cm_vector_assert_index_range(cm_vector * vector,
      */
 
     if (abs(index) >= (vector->len + mode)) {
-        cm_errno = ERR_USER_INDEX;
+        cm_errno = CM_ERR_USER_INDEX;
         return -1;
     }
 

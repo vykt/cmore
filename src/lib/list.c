@@ -50,7 +50,7 @@ static cm_list_node * _cm_list_traverse(cm_list * list, int index) {
     }
 
     if (index) {
-        cm_errno = ERR_INTERNAL_INDEX;
+        cm_errno = CM_ERR_INTERNAL_INDEX;
         return NULL;
     }
     return node;
@@ -63,14 +63,14 @@ static cm_list_node * _cm_new_list_node(cm_list * list, cm_byte * data) {
     //allocate node structure
     cm_list_node * new_node = malloc(sizeof(cm_list_node));
     if (!new_node) {
-        cm_errno = ERR_MALLOC;
+        cm_errno = CM_ERR_MALLOC;
         return NULL;
     }
 
     //allocate data
     new_node->data = malloc(list->data_size);
     if (!new_node) {
-        cm_errno = ERR_MALLOC;
+        cm_errno = CM_ERR_MALLOC;
         return NULL;
     }
 
@@ -164,7 +164,7 @@ static int _cm_list_empty(cm_list * list) {
     }
 
     if (index) {
-        cm_errno = ERR_INTERNAL_INDEX;
+        cm_errno = CM_ERR_INTERNAL_INDEX;
         return -1;
     }
 
@@ -182,7 +182,7 @@ static inline int _cm_list_assert_index_range(cm_list * list, int index, int mod
      *  if inserting, maximum index needs to be +1 higher than for other operations
      */
     if (abs(index) >= (list->len + mode)) {
-        cm_errno = ERR_USER_INDEX;
+        cm_errno = CM_ERR_USER_INDEX;
         return -1;
     }
 
