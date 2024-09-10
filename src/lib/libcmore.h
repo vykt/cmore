@@ -111,14 +111,14 @@ extern _Thread_local int cm_errno;
 // [error codes]
 
 // 1XX - user errors
-#define CM_ERR_USER_INDEX     100
+#define CM_ERR_USER_INDEX     1100
 
 // 2XX - internal errors
-#define CM_ERR_INTERNAL_INDEX 200
+#define CM_ERR_INTERNAL_INDEX 1200
 
 // 3XX - environment errors
-#define CM_ERR_MALLOC         300
-#define CM_ERR_REALLOC        301
+#define CM_ERR_MALLOC         1300
+#define CM_ERR_REALLOC        1301
 
 
 // [error code messages]
