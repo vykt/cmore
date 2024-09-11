@@ -21,6 +21,7 @@ typedef struct {
 
 } cm_list;
 
+
 int cm_list_get_val(cm_list * list, int index, cm_byte * buf);
 cm_byte * cm_list_get_ref(cm_list * list, int index);
 cm_list_node * cm_list_get_node(cm_list * list, int index);
@@ -29,6 +30,7 @@ cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data);
 cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data);
 cm_list_node * cm_list_append(cm_list * list, cm_byte * data);
 int cm_list_remove(cm_list * list, int index);
+
 int cm_list_empty(cm_list * list);
 
 void cm_new_list(cm_list * list, size_t data_size);
@@ -70,8 +72,14 @@ The **cm_list_remove()** function removes an element at *list[index]*.
 The **cm_list_empty()** empties the contents of *\*list*. The memory is not overwritten.  
   
 
-### RETURN VALUE
-The **cm_list_get_ref()** function returns a pointer to the value at *list[index]* on success. On error, NULL is returned. **cm_list_get_node()**, **cm_list_set()**, **cm_list_insert()**, and **cm_list_append()** return a pointer to the node at *list[index]* on success. On error, NULL is returned. All other functions return 0 on success or -1 on error. On error, *cm_errno* is set. See **libcmore_error**().  
+### RETURN VALUES
+The **cm_list_get_ref()** function returns a pointer to the value at *list[index]* on success. On error, NULL is returned. 
+
+**cm_list_get_node()**, **cm_list_set()**, **cm_list_insert()**, and **cm_list_append()** return a pointer to the node at *list[index]* on success. On error, NULL is returned. 
+
+All other functions return 0 on success or -1 on error. 
+
+On error, *cm_errno* is set. See **libcmore_error**(3).  
   
 
 ### EXAMPLES

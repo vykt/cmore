@@ -41,6 +41,7 @@ int cm_vector_set(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_insert(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_append(cm_vector * vector, cm_byte * data);
 void cm_vector_remove(cm_vector * vector, int index);
+
 void cm_vector_empty(cm_vector * vector);
 
 int cm_new_vector(cm_vector * vector, size_t data_size);
@@ -100,14 +101,16 @@ The \f[B]cm_vector_remove()\f[R] function removes an element at
 The \f[B]cm_vector_empty()\f[R] empties the contents of
 \f[I]*vector\f[R].
 The memory is not overwritten.
-.SS RETURN VALUE
+.SS RETURN VALUES
 .PP
 The \f[B]cm_vector_get_ref()\f[R] function returns a pointer to the
 value at \f[I]vector[index]\f[R] on success.
 On error, NULL is returned.
+.PP
 All other functions return 0 on success or -1 on error.
+.PP
 On error, \f[I]cm_errno\f[R] is set.
-See \f[B]libcmore_error\f[R]().
+See \f[B]libcmore_error\f[R](3).
 .SS EXAMPLES
 .PP
 See \f[I]src/test/vector.c\f[R] for examples.

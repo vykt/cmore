@@ -41,6 +41,7 @@ typedef struct {
 
 } cm_list;
 
+
 int cm_list_get_val(cm_list * list, int index, cm_byte * buf);
 cm_byte * cm_list_get_ref(cm_list * list, int index);
 cm_list_node * cm_list_get_node(cm_list * list, int index);
@@ -49,6 +50,7 @@ cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data);
 cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data);
 cm_list_node * cm_list_append(cm_list * list, cm_byte * data);
 int cm_list_remove(cm_list * list, int index);
+
 int cm_list_empty(cm_list * list);
 
 void cm_new_list(cm_list * list, size_t data_size);
@@ -106,18 +108,21 @@ The \f[B]cm_list_remove()\f[R] function removes an element at
 .PP
 The \f[B]cm_list_empty()\f[R] empties the contents of \f[I]*list\f[R].
 The memory is not overwritten.
-.SS RETURN VALUE
+.SS RETURN VALUES
 .PP
 The \f[B]cm_list_get_ref()\f[R] function returns a pointer to the value
 at \f[I]list[index]\f[R] on success.
 On error, NULL is returned.
+.PP
 \f[B]cm_list_get_node()\f[R], \f[B]cm_list_set()\f[R],
 \f[B]cm_list_insert()\f[R], and \f[B]cm_list_append()\f[R] return a
 pointer to the node at \f[I]list[index]\f[R] on success.
 On error, NULL is returned.
+.PP
 All other functions return 0 on success or -1 on error.
+.PP
 On error, \f[I]cm_errno\f[R] is set.
-See \f[B]libcmore_error\f[R]().
+See \f[B]libcmore_error\f[R](3).
 .SS EXAMPLES
 .PP
 See \f[I]src/test/list.c\f[R] for examples.

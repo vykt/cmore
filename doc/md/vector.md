@@ -21,6 +21,7 @@ int cm_vector_set(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_insert(cm_vector * vector, int index, cm_byte * data);
 int cm_vector_append(cm_vector * vector, cm_byte * data);
 void cm_vector_remove(cm_vector * vector, int index);
+
 void cm_vector_empty(cm_vector * vector);
 
 int cm_new_vector(cm_vector * vector, size_t data_size);
@@ -60,8 +61,12 @@ The **cm_vector_remove()** function removes an element at *vector[index]*.
 The **cm_vector_empty()** empties the contents of *\*vector*. The memory is not overwritten.  
   
 
-### RETURN VALUE
-The **cm_vector_get_ref()** function returns a pointer to the value at *vector[index]* on success. On error, NULL is returned. All other functions return 0 on success or -1 on error. On error, *cm_errno* is set. See **libcmore_error**().  
+### RETURN VALUES
+The **cm_vector_get_ref()** function returns a pointer to the value at *vector[index]* on success. On error, NULL is returned. 
+
+All other functions return 0 on success or -1 on error. 
+
+On error, *cm_errno* is set. See **libcmore_error**(3).  
   
 
 ### EXAMPLES

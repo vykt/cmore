@@ -39,11 +39,11 @@ Each error number has a corresponding textual description.
 .PP
 There are 3 classes of error numbers:
 .IP \[bu] 2
-\f[I]1XX\f[R] : Errors caused by the user of the library.
+\f[I]11XX\f[R] : Errors caused by the user of the library.
 .IP \[bu] 2
-\f[I]2XX\f[R] : Errors caused by an internal bug in the library.
+\f[I]12XX\f[R] : Errors caused by an internal bug in the library.
 .IP \[bu] 2
-\f[I]3XX\f[R] : Errors caused by the environment (such as a failure to
+\f[I]13XX\f[R] : Errors caused by the environment (such as a failure to
 allocate memory).
 .PP
 The \f[I]cm_errno\f[R] value is stored in thread-local storage.
@@ -51,12 +51,15 @@ Setting it in one thread does not affect its value in any other thread.
 .SS FUNCTIONS
 .PP
 The \f[B]cm_perror()\f[R] function outputs the textual description of
-the last error to occur to standard error.
-In other words, it outputs the textual description of \f[I]cm_errno\f[R]
-to standard error.
+the last error to occur, stored in \f[I]cm_errno\f[R], to standard
+error.
 .PP
 The \f[B]cm_strerror()\f[R] takes a error number and returns a pointer
 to the textual description for the said error number.
+.SS RETURN VALUES
+.PP
+The \f[B]cm_strerror()\f[R] function returns a pointer to the error
+string.
 .SS EXAMPLES
 .PP
 See \f[I]src/test/error.c\f[R] for examples.
