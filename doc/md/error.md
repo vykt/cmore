@@ -4,7 +4,7 @@ C more library (libcmore, -lcmore)
 
 ### SYNOPSIS
 ```c
-int cm_errno;
+_Thread_local int cm_errno;
 
 void cm_perror();
 const char * cm_strerror(int cm_errnum);
