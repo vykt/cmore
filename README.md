@@ -1,4 +1,11 @@
-## ABOUT
+# libcmore
+
+<p align="center">
+    <img src="libcmore.png" width="150" height="150">
+</p>
+
+
+### ABOUT
 
 The C More library (*libcmore*) provides a robust, minimal, and highly efficient implementation of the list and vector data structures for the C language. The goal of the library is to alleviate two major pain points of C programming:
 
@@ -7,7 +14,7 @@ The C More library (*libcmore*) provides a robust, minimal, and highly efficient
 
 <br>
 
-## INSTALLATION
+### INSTALLATION
 
 Building the C More library requires *make*. Your Linux distribution will package *make* as part of its *build-essential* or *base-devel* meta-packages. Once make is installed, proceed through the following steps:
 
@@ -45,7 +52,7 @@ Before running the installation script, open the script in an editor and confirm
 
 <br>
 
-## LINKING
+### LINKING
 
 To use the C More library as part of your project, you must include its header and pass the appropriate linking flags to your C compiler.
 
@@ -64,7 +71,7 @@ If you encounter difficulties at this stage, ensure the installation directory o
 
 <br>
 
-## DOCUMENTATION:
+### DOCUMENTATION:
 
 Documentation is available in the markdown format inside the */doc/md* directory. Roff (manpage) format is installed on the system as part of the installation, and is additionally available under the */doc/roff/man.3* directory. If you are unable to view the manual pages, ensure your manpage path includes the path specified in the installation script (*man 1 manpath*).
 
