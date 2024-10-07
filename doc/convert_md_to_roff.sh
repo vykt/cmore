@@ -2,7 +2,7 @@
 
 PROJECT="libcmore"
 VERSION="v0.0.3"
-DATE="May 2024"
+DATE="Oct 2024"
 
 SRC_DIR="md"
 DST_DIR="roff/man3"
