@@ -5,7 +5,7 @@
 </p>
 
 
-### ABOUT
+### ABOUT:
 
 The C More library (**libcmore**) provides a robust, minimal, and highly efficient implementation of the list and vector data structures for the C language. The goal of the library is to alleviate two major pain points of C programming:
 
@@ -13,7 +13,7 @@ The C More library (**libcmore**) provides a robust, minimal, and highly efficie
 - A lack of an indexable data structure that can be mutated without pointer invalidation.
 
 
-### INSTALLATION
+### INSTALLATION:
 
 Building the C More library requires `make`. Your Linux distribution will likely package `make` as part of its `build-essential` or `base-devel` meta-packages. Once make is installed, proceed through the following steps:
 
@@ -51,7 +51,7 @@ To uninstall:
 ```
 
 
-### LINKING
+### LINKING:
 
 To use the C More library as part of your project, you must include its header and pass the appropriate linking flags to your C compiler.
 
