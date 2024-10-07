@@ -34,8 +34,14 @@ Debug symbols are included with the release build.
 ```
 $ vim install.sh
 # ./install.sh
+# ./install.sh doc   #optionally install markdown docs
 ```
 Before running the installation script, open the script in an editor and confirm the installation paths for the library, the C header, and the manpages.
+
+**4) To uninstall:**
+```
+# ./install.sh uninstall
+```
 
 <br>
 
@@ -50,7 +56,7 @@ To use the C More library as part of your project, you must include its header a
 
 <br>
 
-**2) When compiling the executable, pass the *-lcmore* flag to the compiler driver:**
+**2) When compiling the executable, pass the *-lcmore* flag to the compiler:**
 ```bash
 gcc -o your_executable main.c -lcmore
 ```
@@ -63,7 +69,3 @@ If you encounter difficulties at this stage, ensure the installation directory o
 Documentation is available in the markdown format inside the */doc/md* directory. Roff (manpage) format is installed on the system as part of the installation, and is additionally available under the */doc/roff/man.3* directory. If you are unable to view the manual pages, ensure your manpage path includes the path specified in the installation script (*man 1 manpath*).
 
 <br>
-
-## EXAMPLES:
-
-See the */src/test* directory for examples used during testing.
