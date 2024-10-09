@@ -42,7 +42,7 @@ Before running the installation script, open the script in an editor and confirm
 
 To optionally install markdown documenation:
 ```
-# ./install.sh doc
+# ./install.sh install_doc
 ```
 
 To uninstall:
