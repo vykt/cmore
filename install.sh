@@ -26,7 +26,7 @@ if [ "$1" == "uninstall" ]; then
     exit 0
 
 #install md docs
-elif [ "$1" == "doc" ]; then
+elif [ "$1" == "install_doc" ]; then
     mkdir -pv ${MD_INSTALL_DIR}
     cp -v ${MD_DIR}/* ${MD_INSTALL_DIR}
     exit 0
