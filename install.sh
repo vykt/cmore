@@ -4,7 +4,7 @@
 INSTALL_DIR=/usr/local/lib
 INCLUDE_INSTALL_DIR=/usr/local/include
 MAN_INSTALL_DIR=/usr/local/share/man/man3
-MD_INSTALL_DIR=/usr/local/share/doc/liblain
+MD_INSTALL_DIR=/usr/local/share/doc/libcmore
 
 # [internal]
 BUILD_DIR=./build/lib
