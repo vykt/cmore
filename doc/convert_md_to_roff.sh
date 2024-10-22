@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT="libcmore"
-VERSION="v0.0.3"
+VERSION="v0.0.4"
 DATE="Oct 2024"
 
 SRC_DIR="md"
