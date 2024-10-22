@@ -4,7 +4,7 @@
 #include "error.h"
 
 
-_Thread_local int cm_errno;
+__thread int cm_errno;
 
 
 void cm_perror() {
@@ -39,7 +39,7 @@ void cm_perror() {
 }
 
 
-const char * cm_strerror(int cm_errnum) {
+const char * cm_strerror(const int cm_errnum) {
 
     switch (cm_errnum) {
 
