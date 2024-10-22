@@ -5,6 +5,7 @@ INSTALL_DIR=/usr/local/lib
 INCLUDE_INSTALL_DIR=/usr/local/include
 MAN_INSTALL_DIR=/usr/local/share/man/man3
 MD_INSTALL_DIR=/usr/local/share/doc/libcmore
+LD_DIR=/etc/ld.so.conf.d
 
 # [internal]
 BUILD_DIR=./build/lib
@@ -23,6 +24,8 @@ if [ "$1" == "uninstall" ]; then
     rm -vf ${MAN_INSTALL_DIR}/libcmore_*
     rm -vf ${MD_INSTALL_DIR}/*
     rmdir ${MD_INSTALL_DIR}
+    rm ${LD_DIR}/90cmore.conf
+    ldconfig
     exit 0
 
 #install md docs
@@ -46,4 +49,6 @@ mkdir -pv ${INCLUDE_INSTALL_DIR}
 cp -v ${INCLUDE_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
 mkdir -pv ${MAN_INSTALL_DIR}
 cp -v -R ${MAN_DIR}/* ${MAN_INSTALL_DIR}
+echo "${INSTALL_DIR}" > ${LD_DIR}/90cmore.conf
+ldconfig
 exit 0
