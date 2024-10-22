@@ -40,7 +40,8 @@ static int _cm_vector_grow(cm_vector * vector) {
 
 
 
-static inline int _cm_vector_normalise_index(cm_vector * vector, int index) {
+static inline int _cm_vector_normalise_index(const cm_vector * vector, 
+                                             int index) {
 
     if (index < 0) { 
         index = vector->len + index;
@@ -51,17 +52,17 @@ static inline int _cm_vector_normalise_index(cm_vector * vector, int index) {
 
 
 
-static cm_byte * _cm_vector_traverse(cm_vector * vector, int index) {
+static cm_byte * _cm_vector_traverse(const cm_vector * vector, const int index) {
 
-    index = _cm_vector_normalise_index(vector, index);
+    int normalised_index = _cm_vector_normalise_index(vector, index);
 
-    return vector->data + (vector->data_size * index);
+    return vector->data + (vector->data_size * normalised_index);
 
 }
 
 
 
-static void _cm_vector_shift(cm_vector * vector, int index, int mode) {
+static void _cm_vector_shift(cm_vector * vector, const int index, const int mode) {
 
     int diff;
 
@@ -80,7 +81,8 @@ static void _cm_vector_shift(cm_vector * vector, int index, int mode) {
 
 
 
-static inline void _cm_vector_set(cm_vector * vector, int index, cm_byte * data) {
+static inline void _cm_vector_set(cm_vector * vector, 
+                                  const int index, const cm_byte * data) {
 
     cm_byte * index_data = _cm_vector_traverse(vector, index);
     memcpy(index_data, data, vector->data_size);
@@ -90,8 +92,8 @@ static inline void _cm_vector_set(cm_vector * vector, int index, cm_byte * data)
 
 
 
-static inline int _cm_vector_assert_index_range(cm_vector * vector, 
-                                                int index, int mode) {
+static inline int _cm_vector_assert_index_range(const cm_vector * vector, 
+                                                const int index, const int mode) {
 
     /*
      *  if inserting, maximum index needs to be +1 higher than for other operations
@@ -111,7 +113,7 @@ static inline int _cm_vector_assert_index_range(cm_vector * vector,
  *  --- [EXTERNAL] ---
  */
 
-int cm_vector_get_val(cm_vector * vector, int index, cm_byte * buf) {
+int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf) {
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return -1;
     
@@ -123,7 +125,7 @@ int cm_vector_get_val(cm_vector * vector, int index, cm_byte * buf) {
 
 
 
-cm_byte * cm_vector_get_ref(cm_vector * vector, int index) {
+cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index) {
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return NULL;
     
@@ -133,21 +135,25 @@ cm_byte * cm_vector_get_ref(cm_vector * vector, int index) {
 
 
 
-int cm_vector_set(cm_vector * vector, int index, cm_byte * data) {
+int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data) {
+
+    int normalised_index;
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return -1;
 
     //convert a negative index to a positive equivalent
-    index = _cm_vector_normalise_index(vector, index);
+    normalised_index = _cm_vector_normalise_index(vector, index);
 
-    _cm_vector_set(vector, index, data);
+    _cm_vector_set(vector, normalised_index, data);
 
     return 0;
 }
 
 
 
-int cm_vector_insert(cm_vector * vector, int index, cm_byte * data) {
+int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data) {
+
+    int normalised_index;
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_ADD_INDEX)) return -1;
 
@@ -157,10 +163,10 @@ int cm_vector_insert(cm_vector * vector, int index, cm_byte * data) {
     }
 
     //convert a negative index to a positive equivalent
-    index = _cm_vector_normalise_index(vector, index);
+    normalised_index = _cm_vector_normalise_index(vector, index);
 
-    _cm_vector_shift(vector, index, VECTOR_SHIFT_UP);
-    _cm_vector_set(vector, index, data);
+    _cm_vector_shift(vector, normalised_index, VECTOR_SHIFT_UP);
+    _cm_vector_set(vector, normalised_index, data);
     ++vector->len;
 
     return 0;
@@ -168,7 +174,7 @@ int cm_vector_insert(cm_vector * vector, int index, cm_byte * data) {
 
 
 
-int cm_vector_append(cm_vector * vector, cm_byte * data) {
+int cm_vector_append(cm_vector * vector, const cm_byte * data) {
  
     //grow the vector if there is no space left to insert new elements
     if ((size_t) vector->len == vector->size) {
@@ -182,14 +188,16 @@ int cm_vector_append(cm_vector * vector, cm_byte * data) {
 
 
 
-int cm_vector_remove(cm_vector * vector, int index) {
+int cm_vector_remove(cm_vector * vector, const int index) {
+
+    int normalised_index;
 
     if (_cm_vector_assert_index_range(vector, index, VECTOR_INDEX)) return -1;
 
     //convert a negative index to a positive equivalent
-    index = _cm_vector_normalise_index(vector, index);
+    normalised_index = _cm_vector_normalise_index(vector, index);
 
-    _cm_vector_shift(vector, index + 1, VECTOR_SHIFT_DOWN);
+    _cm_vector_shift(vector, normalised_index + 1, VECTOR_SHIFT_DOWN);
     --vector->len;
 
     return 0;
@@ -206,7 +214,7 @@ void cm_vector_empty(cm_vector * vector) {
 
 
 
-int cm_new_vector(cm_vector * vector, size_t data_size) {
+int cm_new_vector(cm_vector * vector, const size_t data_size) {
 
     vector->len = 0;
     vector->size = VECTOR_DEFAULT_SIZE;

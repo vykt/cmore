@@ -56,42 +56,43 @@ typedef struct {
 
 // [list]
 //0 = success, -1 = error, see cm_errno
-extern int cm_list_get_val(cm_list * list, int index, cm_byte * buf);
+extern int cm_list_get_val(const cm_list * list, const int index, cm_byte * buf);
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_list_get_ref(cm_list * list, int index);
+extern cm_byte * cm_list_get_ref(const cm_list * list, const int index);
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_get_node(cm_list * list, int index);
+extern cm_list_node * cm_list_get_node(const cm_list * list, const int index);
 
 //0 = success, -1 = error, see cm_errno
-extern cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data);
-extern cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data);
-extern cm_list_node * cm_list_append(cm_list * list, cm_byte * data);
-extern int cm_list_remove(cm_list * list, int index);
-extern int cm_list_unlink(cm_list * list, int index);
+extern cm_list_node * cm_list_set(cm_list * list, const int index, const cm_byte * data);
+extern cm_list_node * cm_list_insert(cm_list * list, 
+                                     const int index, const cm_byte * data);
+extern cm_list_node * cm_list_append(cm_list * list, const cm_byte * data);
+extern int cm_list_remove(cm_list * list, const int index);
+extern int cm_list_unlink(cm_list * list, const int index);
 extern int cm_list_empty(cm_list * list);
 
 //void return
-extern void cm_new_list(cm_list * list, size_t data_size);
+extern void cm_new_list(cm_list * list, const size_t data_size);
 //0 = success, -1 = error, see cm_errno
 extern void cm_del_list(cm_list * list);
 
 
 // [vector]
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_get_val(cm_vector * vector, int index, cm_byte * buf);
+extern int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf);
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_vector_get_ref(cm_vector * vector, int index);
+extern cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_set(cm_vector * vector, int index, cm_byte * data);
-extern int cm_vector_insert(cm_vector * vector, int index, cm_byte * data);
-extern int cm_vector_append(cm_vector * vector, cm_byte * data);
+extern int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data);
+extern int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data);
+extern int cm_vector_append(cm_vector * vector, const cm_byte * data);
 //void return
-extern int cm_vector_remove(cm_vector * vector, int index);
+extern int cm_vector_remove(cm_vector * vector, const int index);
 extern void cm_vector_empty(cm_vector * vector);
 
 //void return
-extern int cm_new_vector(cm_vector * vector, size_t data_size);
+extern int cm_new_vector(cm_vector * vector, const size_t data_size);
 //0 = success, -1 = error, see cm_errno
 extern void cm_del_vector(cm_vector * vector);
 
@@ -99,14 +100,14 @@ extern void cm_del_vector(cm_vector * vector);
 // [error handling]
 //void return
 extern void cm_perror();
-extern const char * cm_strerror(int cm_errnum);
+extern const char * cm_strerror(const int cm_errnum);
 
 
 /*
  *  --- [ERROR HANDLING] ---
  */
 
-extern _Thread_local int cm_errno;
+extern __thread int cm_errno;
 
 // [error codes]
 

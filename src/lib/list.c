@@ -13,7 +13,7 @@
  *  --- [INTERNAL] ---
  */
 
-static inline int _cm_list_normalise_index(cm_list * list, int index) {
+static inline int _cm_list_normalise_index(const cm_list * list, int index) {
 
     if (index < 0) { 
         index = list->len + index;
@@ -24,7 +24,7 @@ static inline int _cm_list_normalise_index(cm_list * list, int index) {
 
 
 
-static cm_list_node * _cm_list_traverse(cm_list * list, int index) {
+static cm_list_node * _cm_list_traverse(const cm_list * list, int index) {
 
     cm_list_node * node = list->head;
     bool traverse_forward;
@@ -58,7 +58,7 @@ static cm_list_node * _cm_list_traverse(cm_list * list, int index) {
 
 
 
-static cm_list_node * _cm_new_list_node(cm_list * list, cm_byte * data) {
+static cm_list_node * _cm_new_list_node(cm_list * list, const cm_byte * data) {
 
     //allocate node structure
     cm_list_node * new_node = malloc(sizeof(cm_list_node));
@@ -95,8 +95,8 @@ static void _cm_list_add_head_node(cm_list * list, cm_list_node * node) {
 
 
 static void _cm_list_add_node(cm_list * list, cm_list_node * node,
-                   cm_list_node * prev_node, cm_list_node * next_node,
-                   int index) {
+                              cm_list_node * prev_node, cm_list_node * next_node,
+                              const int index) {
 
     prev_node->next = node;
     node->prev = prev_node;
@@ -123,7 +123,8 @@ static void _cm_list_del_node(cm_list_node * node) {
 
 
 static void _cm_list_sub_node(cm_list * list, 
-                   cm_list_node * prev_node, cm_list_node * next_node, int index) {
+                              cm_list_node * prev_node, cm_list_node * next_node, 
+                              const int index) {
 
     //if there are no nodes left
     if (prev_node == NULL && next_node == NULL) {
@@ -176,7 +177,8 @@ static int _cm_list_empty(cm_list * list) {
 
 
 
-static inline int _cm_list_assert_index_range(cm_list * list, int index, int mode) {
+static inline int _cm_list_assert_index_range(const cm_list * list, 
+                                              const int index, const int mode) {
    
     /*
      *  if inserting, maximum index needs to be +1 higher than for other operations
@@ -195,7 +197,7 @@ static inline int _cm_list_assert_index_range(cm_list * list, int index, int mod
  *  --- [EXTERNAL] ---
  */
 
-int cm_list_get_val(cm_list * list, int index, cm_byte * buf) {
+int cm_list_get_val(const cm_list * list, const int index, cm_byte * buf) {
 
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return -1;
 
@@ -210,7 +212,7 @@ int cm_list_get_val(cm_list * list, int index, cm_byte * buf) {
 
 
 
-cm_byte * cm_list_get_ref(cm_list * list, int index) {
+cm_byte * cm_list_get_ref(const cm_list * list, const int index) {
 
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
 
@@ -223,7 +225,7 @@ cm_byte * cm_list_get_ref(cm_list * list, int index) {
 
 
 
-cm_list_node * cm_list_get_node(cm_list * list, int index) {
+cm_list_node * cm_list_get_node(const cm_list * list, const int index) {
 
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
 
@@ -233,7 +235,7 @@ cm_list_node * cm_list_get_node(cm_list * list, int index) {
 
 
 
-cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data) {
+cm_list_node * cm_list_set(cm_list * list, const int index, const cm_byte * data) {
 
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return NULL;
 
@@ -248,9 +250,10 @@ cm_list_node * cm_list_set(cm_list * list, int index, cm_byte * data) {
 
 
 
-cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
+cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * data) {
 
     cm_list_node * prev_node, * next_node;
+    int normalised_index;
 
     if (_cm_list_assert_index_range(list, index, LIST_ADD_INDEX)) return NULL;
 
@@ -259,7 +262,7 @@ cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
     if (!new_node) return NULL;
 
     //to simplify, convert a negative index to a positive equivalent
-    index = _cm_list_normalise_index(list, index);
+    normalised_index = _cm_list_normalise_index(list, index);
     
     //get the _prev_ and _next_ of the new node as required
     if (list->len == 0) {
@@ -268,13 +271,13 @@ cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
     } else if (list->len == 1) { 
         next_node = prev_node = list->head; 
         
-        _cm_list_add_node(list, new_node, prev_node, next_node, index);
+        _cm_list_add_node(list, new_node, prev_node, next_node, normalised_index);
 
     } else { 
-        if (index == list->len) {
+        if (normalised_index == list->len) {
             prev_node = list->head->prev;
         } else {
-            prev_node = _cm_list_traverse(list, index-1);
+            prev_node = _cm_list_traverse(list, normalised_index-1);
             if (!prev_node) {
                 _cm_list_del_node(new_node);
                 return NULL;
@@ -282,7 +285,7 @@ cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
         }
         next_node = prev_node->next;
 
-        _cm_list_add_node(list, new_node, prev_node, next_node, index);
+        _cm_list_add_node(list, new_node, prev_node, next_node, normalised_index);
     }
 
     return new_node;
@@ -290,7 +293,7 @@ cm_list_node * cm_list_insert(cm_list * list, int index, cm_byte * data) {
 
 
 
-cm_list_node * cm_list_append(cm_list * list, cm_byte * data) {
+cm_list_node * cm_list_append(cm_list * list, const cm_byte * data) {
 
     cm_list_node * new_node = _cm_new_list_node(list, data);
     if (!new_node) return NULL;
@@ -311,7 +314,7 @@ cm_list_node * cm_list_append(cm_list * list, cm_byte * data) {
 
 
 
-int cm_list_remove(cm_list * list, int index) {
+int cm_list_remove(cm_list * list, const int index) {
 
     
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return -1;
@@ -330,7 +333,7 @@ int cm_list_remove(cm_list * list, int index) {
 
 
 
-int cm_list_unlink(cm_list * list, int index) {
+int cm_list_unlink(cm_list * list, const int index) {
 
     if (_cm_list_assert_index_range(list, index, LIST_INDEX)) return -1;
     
@@ -356,7 +359,7 @@ int cm_list_empty(cm_list * list) {
 
 
 
-void cm_new_list(cm_list * list, size_t data_size) {
+void cm_new_list(cm_list * list, const size_t data_size) {
 
     list->len = 0;
     list->data_size = data_size;
