@@ -8,13 +8,15 @@
 
 #define VECTOR_DEFAULT_SIZE 8
 
-#define VECTOR_ADD_INDEX 1
-#define VECTOR_INDEX 0
 
-#define VECTOR_SHIFT_UP 1
-#define VECTOR_SHIFT_DOWN -1
+//controls if user provided index should be verified for accessing elements 
+//or for adding new elements
+enum _index_mode {INDEX = 0, ADD_INDEX = 1};
 
+//controls if vector elements are shifted up or down in memory
+enum _shift_mode {SHIFT_UP = 1, SHIFT_DOWN = -1};
 
+//function signatures
 int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf);
 cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index);
 

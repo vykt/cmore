@@ -50,6 +50,51 @@ typedef struct {
 } cm_vector;
 
 
+// [red-black tree]
+enum cm_rb_tree_colour {RED, BLACK};
+enum cm_rb_tree_eval {LESS, EQUAL, MORE, ROOT};
+
+
+struct _cm_rb_tree_node {
+
+    cm_byte * data;
+    cm_byte * key;
+
+    struct _cm_rb_tree_node * left;
+    struct _cm_rb_tree_node * right;
+    
+    struct _cm_rb_tree_node * parent;
+    enum cm_rb_tree_eval parent_eval; //if this node is parent's left or right
+
+    enum cm_rb_tree_colour colour; 
+};
+typedef struct _cm_rb_tree_node cm_rb_tree_node;
+
+
+typedef struct {
+
+    int size;
+    size_t key_size;
+    size_t data_size;
+    cm_rb_tree_node * root;
+
+    enum cm_rb_tree_eval (*compare)(const cm_byte *, const cm_byte *);
+
+} cm_rb_tree;
+
+/*
+ *  When using libcmore's red-black trees, you must implement a 
+ *  compare() function for use with the data held by the nodes of 
+ *  the red-black tree. That compare function must return:
+ *
+ *      'enum cm_rb_tree_eval' that holds one of:
+ *
+ *          LESS, EQUAL, MORE
+ *
+ *  The ROOT value is reserved for internal use.
+ */
+
+
 /*
  *  --- [FUNCTIONS] ---
  */
@@ -112,27 +157,31 @@ extern __thread int cm_errno;
 // [error codes]
 
 // 1XX - user errors
-#define CM_ERR_USER_INDEX     1100
+#define CM_ERR_USER_INDEX       1100
+#define CM_ERR_USER_KEY         1101
 
 // 2XX - internal errors
-#define CM_ERR_INTERNAL_INDEX 1200
+#define CM_ERR_INTERNAL_INDEX   1200
+#define CM_ERR_RB_INVALID_STATE 1201
 
 // 3XX - environment errors
-#define CM_ERR_MALLOC         1300
-#define CM_ERR_REALLOC        1301
+#define CM_ERR_MALLOC           1300
+#define CM_ERR_REALLOC          1301
 
 
 // [error code messages]
 
 // 1XX - user errors
-#define CM_ERR_USER_INDEX_MSG     "Index out of range.\n"
+#define CM_ERR_USER_INDEX_MSG       "Index out of range.\n"
+#define CM_ERR_USER_KEY_MSG         "Key not present in tree.\n"
 
 // 2XX - internal errors
-#define CM_ERR_INTERNAL_INDEX_MSG "Internal indexing error.\n"
+#define CM_ERR_INTERNAL_INDEX_MSG   "Internal indexing error.\n"
+#define CM_ERR_RB_INVALID_STATE_MSG "Red-Black tree reached invalid state.\n"
 
 // 3XX - environmental errors
-#define CM_ERR_MALLOC_MSG         "Internal malloc() failed.\n"
-#define CM_ERR_REALLOC_MSG        "Internal realloc() failed.\n"
+#define CM_ERR_MALLOC_MSG           "Internal malloc() failed.\n"
+#define CM_ERR_REALLOC_MSG          "Internal realloc() failed.\n"
 
 
 #ifdef __cplusplus

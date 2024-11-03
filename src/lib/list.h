@@ -6,10 +6,12 @@
 #include "libcmore.h"
 
 
-#define LIST_ADD_INDEX 1
-#define LIST_INDEX 0
+//controls if user provided index should be verified for accessing elements
+//or for adding new elements
+enum _index_mode {INDEX = 0, ADD_INDEX = 1};
 
 
+//function declarations
 int cm_list_get_val(const cm_list * list, const int index, cm_byte * buf);
 cm_byte * cm_list_get_ref(const cm_list * list, const int index);
 cm_list_node * cm_list_get_node(const cm_list * list, const int index);

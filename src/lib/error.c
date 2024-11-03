@@ -16,10 +16,17 @@ void cm_perror() {
             fprintf(stderr, CM_ERR_USER_INDEX_MSG);
             break;
 
+        case CM_ERR_USER_KEY:
+            fprintf(stderr, CM_ERR_USER_KEY_MSG);
+            break;
+
         // 2XX - internal errors
         case CM_ERR_INTERNAL_INDEX:
             fprintf(stderr, CM_ERR_INTERNAL_INDEX_MSG);
             break;
+
+        case CM_ERR_RB_INVALID_STATE:
+            fprintf(stderr, CM_ERR_RB_INVALID_STATE_MSG);
 
         // 3XX - environmental errors
         case CM_ERR_MALLOC:
@@ -47,9 +54,15 @@ const char * cm_strerror(const int cm_errnum) {
         case CM_ERR_USER_INDEX:
             return CM_ERR_USER_INDEX_MSG;
 
+        case CM_ERR_USER_KEY:
+            return CM_ERR_USER_KEY_MSG;
+
         // 2XX - internal errors
         case CM_ERR_INTERNAL_INDEX:
             return CM_ERR_INTERNAL_INDEX_MSG;
+
+        case CM_ERR_RB_INVALID_STATE:
+            return CM_ERR_RB_INVALID_STATE_MSG;
 
         // 3XX - environmental errors
         case CM_ERR_MALLOC:
