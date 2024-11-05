@@ -10,9 +10,10 @@
 //stores pointers to nodes relevant for correction operations
 struct _fix_data {
 
-    cm_rb_tree_node * parent;
     cm_rb_tree_node * grandparent;
+    cm_rb_tree_node * parent;
     cm_rb_tree_node * uncle;
+    cm_rb_tree_node * sibling;
 };
 
 
