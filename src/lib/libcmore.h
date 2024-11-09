@@ -74,7 +74,6 @@ typedef struct _cm_rb_tree_node cm_rb_tree_node;
 typedef struct {
 
     int size;
-    size_t key_size;
     size_t data_size;
     cm_rb_tree_node * root;
 
@@ -140,6 +139,32 @@ extern void cm_vector_empty(cm_vector * vector);
 extern int cm_new_vector(cm_vector * vector, const size_t data_size);
 //0 = success, -1 = error, see cm_errno
 extern void cm_del_vector(cm_vector * vector);
+
+
+// [red-black tree]
+//0 = success, -1 = error, see cm_errno
+extern int cm_rb_tree_get_val(const cm_rb_tree * tree, 
+                              const cm_byte * key, cm_byte * buf);
+
+//pointer = success, NULL = error, see cm_errno
+extern cm_byte * cm_rb_tree_get_ref(const cm_rb_tree * tree, 
+                                   const cm_byte * key);
+extern cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, 
+                                            const cm_byte * key);
+extern cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
+                                       const cm_byte * key, const cm_byte * data);
+
+//0 = success, -1 = error, see cm_errno
+extern int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key);
+extern int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
+//void return
+extern void cm_rb_tree_empty(cm_rb_tree * tree);
+
+//void return
+extern void cm_new_rb_tree(cm_rb_tree * tree, const size_t data_size,
+                           enum cm_rb_tree_eval (*compare)
+                           (const cm_byte *, const cm_byte *));
+extern void cm_del_rb_tree(cm_rb_tree * tree);
 
 
 // [error handling]

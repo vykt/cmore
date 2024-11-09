@@ -224,6 +224,30 @@ static cm_rb_tree_node * _right_min(cm_rb_tree_node * node) {
 
 
 
+//get colour of node's children
+static void _get_child_colours(const cm_rb_tree_node * node,
+                               enum cm_rb_tree_colour * left,
+                               enum cm_rb_tree_colour * right) {
+
+    //get sibling's left child's colour
+    if (node->left == NULL) {
+        *left = BLACK;
+    } else {
+        *left = node->left->colour == BLACK ? BLACK : RED;
+    }
+
+    //get sibling's right child's colour
+    if (node->right == NULL) {
+        *right = BLACK;
+    } else {
+        *right = node->right->colour == BLACK ? BLACK : RED;
+    }
+
+    return;
+}
+
+
+
 /*
  *  If uncle is red, parent must be red & grandparent must be black. Set uncle and 
  *  parent to black, set grandparent to red.
@@ -316,36 +340,84 @@ static inline void _ins_case_4(cm_rb_tree * tree,
 
 
 
+/*
+ *  Sibling is red.
+ *
+ *  Swap sibling and parent colours, then rotate parent left to make sibling 
+ *  the new grandparent.
+ */
+
 //remove case 1
 static inline void _rem_case_1(cm_rb_tree * tree,
-                               cm_rb_tree_node ** node, struct _fix_data * f_data) {
+                               cm_rb_tree_node * node, struct _fix_data * f_data) {
+
+    //recolour sibling and parent
+    f_data->sibling->colour = BLACK;
+    f_data->parent->colour  = RED;
+
+    //rotate parent to make sibling the new grandparent
+    _left_rotate(tree, f_data->parent);
 
     return;
 }
 
 
+
+/*
+ *  Sibling is black, both of sibling's children are black. Set sibling to red and 
+ *  advance target node up to parent.
+ */
 
 //remove case 2
 static inline void _rem_case_2(cm_rb_tree * tree,
                                cm_rb_tree_node ** node, struct _fix_data * f_data) {
 
+    f_data->sibling->colour = RED;
+    *node = (*node)->parent; 
+
     return;
 }
 
 
 
-//remove case 1
+/*
+ *  Sibling is black, sibling's left child is red, sibling's right child is black.
+ *  Swap sibling's and sibling's left child's colours, then right rotate sibling.
+ */
+
+//remove case 3
 static inline void _rem_case_3(cm_rb_tree * tree,
-                               cm_rb_tree_node ** node, struct _fix_data * f_data) {
+                               cm_rb_tree_node * node, struct _fix_data * f_data) {
+
+    f_data->sibling->left->colour = BLACK;
+    f_data->sibling->colour       = RED;
+
+    _right_rotate(tree, f_data->sibling);
 
     return;
 }
 
 
 
-//remove case 1
+/*
+ *  Sibling is black, sibling's right child is red. Set sibling's colour to 
+ *  parent's colour. Set sibling's right child's colour to black. Set parent's 
+ *  colour to black. Then left rotate parent and advance node up to root.
+ */
+
+//remove case 4
 static inline void _rem_case_4(cm_rb_tree * tree,
                                cm_rb_tree_node ** node, struct _fix_data * f_data) {
+
+    //recolour nodes
+    f_data->sibling->colour        = f_data->parent->colour;
+    f_data->sibling->right->colour = BLACK;
+    f_data->parent->colour         = BLACK;
+
+    //rotate parent left
+    _left_rotate(tree, f_data->parent);
+
+    *node = tree->root;
 
     return;
 }
@@ -437,21 +509,8 @@ static inline int _determine_rem_case(const cm_rb_tree * tree,
     //if sibling is red, case 1
     if (f_data->sibling->colour == RED) return 1;
 
-
-    //get sibling's left child's colour
-    if (f_data->sibling->left == NULL) {
-        left_colour = BLACK;
-    } else {
-        left_colour = f_data->sibling->left->colour == BLACK ? BLACK : RED;
-    }
-
-    //get sibling's right child's colour
-    if (f_data->sibling->right == NULL) {
-        right_colour = BLACK;
-    } else {
-        right_colour = f_data->sibling->right->colour == BLACK ? BLACK : RED;
-    }
-
+    //get sibling's child colours
+    _get_child_colours(f_data->sibling, &left_colour, &right_colour);
 
     //if both sibling's children are black, case 2
     if ((left_colour == BLACK) && (right_colour == BLACK)) return 2;
@@ -522,9 +581,36 @@ static int _fix_remove(cm_rb_tree * tree,
     int fix_case;
 
     //move up tree and correct violations until fixed or root is reached
-    while (node != tree->root) {
+    while (node != tree->root && node->colour == BLACK) {
 
+        //determine remove case
+        fix_case = _determine_rem_case(tree, node, f_data);
+        if (fix_case <= 0) return fix_case; //-1 or 0
 
+        //dispatch remove case
+        switch(fix_case) {
+
+            case 1:
+                _rem_case_1(tree, node, f_data);
+                break;
+
+            case 2:
+                _rem_case_2(tree, &node, f_data);
+
+            case 3:
+                _rem_case_3(tree, node, f_data);
+                _populate_fix_data(node, f_data);
+                _rem_case_4(tree, &node, f_data);
+                return 0;
+            
+            case 4:
+                _rem_case_4(tree, &node, f_data);
+                return 0;
+
+        }
+
+        //update fix_data struct for next iteration
+        _populate_fix_data(node, f_data); 
 
     } //end while
 
@@ -561,20 +647,19 @@ static inline int _add_node(cm_rb_tree * tree,
 
 
 
-static inline int _remove_node(cm_rb_tree * tree, cm_rb_tree_node * node) {
+static int _remove_node(cm_rb_tree * tree, cm_rb_tree_node * node) {
  
     int ret;
     
-    enum cm_rb_tree_colour colour = node->colour;
     cm_rb_tree_node * min_node;
-
     struct _fix_data f_data;
 
 
     //node has no children
     if (node->left == NULL && node->right == NULL) {
 
-        //TODO just delete?
+        //bootstrap fix_data if node removal will require fixes
+        if (node->colour == BLACK) _populate_fix_data(node, &f_data);
 
     //node only has a right child
     } else if (node->left == NULL) {
@@ -614,12 +699,47 @@ static inline int _remove_node(cm_rb_tree * tree, cm_rb_tree_node * node) {
 
     //remove node from tree
     tree->size -= 1;
-    _del_cm_rb_tree_node(node);
 
     //if a black node was removed, must correct tree
-    if (colour == BLACK) ret = _fix_remove(tree, node, &f_data);
-
+    if (node->colour == BLACK) ret = _fix_remove(tree, node, &f_data);
+    if (ret == -1) return -1;
+    
     return 0;
+}
+
+
+
+static void _empty_recurse(cm_rb_tree_node * node) {
+
+    if (node == NULL) return;
+    if (node->left != NULL) _del_cm_rb_tree_node(node->left);
+    if (node->right != NULL) _del_cm_rb_tree_node(node->right);
+
+    return;
+}
+
+
+
+static cm_rb_tree_node * _unlink_node(cm_rb_tree * tree, const cm_byte * key) {
+
+    int ret;
+
+    enum cm_rb_tree_eval eval;
+
+    //get relevant node
+    cm_rb_tree_node * node = _traverse(tree, key, &eval);
+
+    //if a node doesn't exist for this key, error out
+    if (eval != EQUAL || node == NULL) {
+        cm_errno = CM_ERR_USER_KEY;
+        return NULL;
+    }
+
+    //remove node
+    ret = _remove_node(tree, node);
+    if (ret == -1) return NULL;
+
+    return node;
 }
 
 
@@ -709,21 +829,53 @@ cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
 
 int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key) {
 
-    int ret;
-
-    enum cm_rb_tree_eval eval;
-
     //get relevant node
-    cm_rb_tree_node * node = _traverse(tree, key, &eval);
+    cm_rb_tree_node * node = _unlink_node(tree, key);
+    if (node == NULL) return -1;
 
-    //if a node doesn't exist for this key, error out
-    if (eval != EQUAL || node == NULL) {
-        cm_errno = CM_ERR_USER_KEY;
-        return -1;
-    }
-
-    //remove node
-    ret = _remove_node(tree, node);
+    _del_cm_rb_tree_node(node);
 
     return 0;
+}
+
+
+
+int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key) {
+
+    //get relevant node
+    cm_rb_tree_node * node = _unlink_node(tree, key);
+    if (node == NULL) return -1;
+
+    return 0;
+}
+
+
+
+void cm_rb_tree_empty(cm_rb_tree * tree) {
+
+    _empty_recurse(tree->root);
+
+    return;
+}
+
+
+
+void cm_new_rb_tree(cm_rb_tree * tree, const size_t data_size,
+                    enum cm_rb_tree_eval (*compare)
+                    (const cm_byte *, const cm_byte *)) {
+
+    tree->size      = 0;
+    tree->data_size = data_size;
+    tree->root      = NULL;
+
+    return;
+}
+
+
+
+void cm_del_rb_tree(cm_rb_tree * tree) {
+
+    _empty_recurse(tree->root);
+
+    return;
 }
