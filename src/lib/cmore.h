@@ -1,5 +1,5 @@
-#ifndef LIBCMORE_H
-#define LIBCMORE_H
+#ifndef CMORE_H
+#define CMORE_H
 
 #ifdef __cplusplus
 extern "C"{
@@ -82,7 +82,7 @@ typedef struct {
 } cm_rb_tree;
 
 /*
- *  When using libcmore's red-black trees, you must implement a 
+ *  When using cmore's red-black trees, you must implement a 
  *  compare() function for use with the data held by the nodes of 
  *  the red-black tree. That compare function must return:
  *
@@ -106,13 +106,15 @@ extern cm_byte * cm_list_get_ref(const cm_list * list, const int index);
 //pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_get_node(const cm_list * list, const int index);
 
-//0 = success, -1 = error, see cm_errno
+//pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_set(cm_list * list, const int index, const cm_byte * data);
 extern cm_list_node * cm_list_insert(cm_list * list, 
                                      const int index, const cm_byte * data);
 extern cm_list_node * cm_list_append(cm_list * list, const cm_byte * data);
+extern cm_list_node * cm_list_unlink(cm_list * list, const int index);
+
+//0 = success, -1 = error, see cm_errno
 extern int cm_list_remove(cm_list * list, const int index);
-extern int cm_list_unlink(cm_list * list, const int index);
 extern int cm_list_empty(cm_list * list);
 
 //void return

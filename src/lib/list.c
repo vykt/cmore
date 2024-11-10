@@ -4,7 +4,7 @@
 
 #include <unistd.h>
 
-#include "libcmore.h"
+#include "cmore.h"
 #include "list.h"
 
 
@@ -330,19 +330,19 @@ int cm_list_remove(cm_list * list, const int index) {
 
 
 
-int cm_list_unlink(cm_list * list, const int index) {
+cm_list_node * cm_list_unlink(cm_list * list, const int index) {
 
-    if (_assert_index_range(list, index, INDEX)) return -1;
+    if (_assert_index_range(list, index, INDEX)) return NULL;
     
     //get the node
     cm_list_node * unlink_node = _traverse(list, index);
-    if (!unlink_node) return -1;
+    if (!unlink_node) return NULL;
 
     _sub_node(list, unlink_node->prev, unlink_node->next, index);
 
     --list->len;
 
-    return 0;
+    return unlink_node;
 }
 
 

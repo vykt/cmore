@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "libcmore.h"
+#include "cmore.h"
 #include "error.h"
 
 
@@ -27,6 +27,7 @@ void cm_perror() {
 
         case CM_ERR_RB_INVALID_STATE:
             fprintf(stderr, CM_ERR_RB_INVALID_STATE_MSG);
+            break;
 
         // 3XX - environmental errors
         case CM_ERR_MALLOC:

@@ -6,14 +6,15 @@
 #	CFLAGS    - Compiler flags.
 #   BUILD_DIR - Library build directory.
 
+CFLAGS:=
 LDFLAGS:=
+WARN_OPTS:=
 
 SOURCES_LIB=list.c vector.c error.c
-HEADERS_LIB=list.h vector.h error.h libcmore.h
 OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
 
-SHARED=libcmore.so
-STATIC=libcmore.a
+SHARED=cmore.so
+STATIC=cmore.a
 
 
 shared: ${SHARED}
@@ -31,7 +32,7 @@ ${STATIC}: ${OBJECTS_LIB}
 > ar rcs $@ $^
 
 ${BUILD_DIR}/%.o: %.c
-> ${CC} ${CFLAGS} -c $< -o $@
+> ${CC} ${CFLAGS} -c $< -o $@ ${WARN_OPTS}
 
 clean:
 > -rm -v ${BUILD_DIR}/{*.o,${SHARED},${STATIC}}

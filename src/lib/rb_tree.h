@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 
-#include "libcmore.h"
+#include "cmore.h"
 
 
 //stores pointers to nodes relevant for correction operations

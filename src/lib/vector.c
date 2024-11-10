@@ -3,7 +3,7 @@
 
 #include <unistd.h>
 
-#include "libcmore.h"
+#include "cmore.h"
 #include "vector.h"
 
 

@@ -2,7 +2,7 @@
 
 #TODO [set as required] TODO
 CC=gcc
-CFLAGS=-ggdb -Wall
+CFLAGS=-ggdb -Wall -Wextra
 
 LIB_DIR="./src/lib"
 TEST_DIR="./src/test"
@@ -19,8 +19,9 @@ endif
 
 
 #[process targets]
-test: lib
+test: shared
 > $(MAKE) -C ${TEST_DIR} test CC='${CC}' BUILD_DIR='${BUILD_DIR}/test'
+                                         LIB_BIN_DIR='${BUILD_DIR}/lib'
 
 all: shared static
 

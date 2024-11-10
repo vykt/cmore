@@ -9,8 +9,6 @@
 typedef struct {
 
     int  x;
-    long y;
-    char z[Z_LEN];
 
 } data;
 

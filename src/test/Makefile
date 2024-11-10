@@ -2,28 +2,29 @@
 
 # This makefile takes the following variables:
 #
-# CC        - Compiler.
-# BUILD_DIR - Unit test build directory.
+# CC          - Compiler.
+# BUILD_DIR   - Unit test build directory.
+# LIB_BIN_DIR - Library artifact directory.
 
-CFLAGS:=-ggdb 
-LDFLAGS:= -lcheck
+CFLAGS:= -ggdb -Wall
+LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck
+WARN_OPTS:= -Wno-unused-variable -Wno-unused-but-set-variable
 
-SOURCES_TEST=check_vectpr.c
-HEADERS_TEST=test_data.h
-OBJECTS_TEST=${SOURCES_LIB:%.c=${BUILD_DIR}/$.o}
+SOURCES_TEST=main.c check_vector.c
+OBJECTS_TEST=${SOURCES_TEST:%.c=${BUILD_DIR}/%.o}
 
 UNIT_TESTS=unit_tests
 
 
 test: ${UNIT_TESTS}
 > mkdir -p ${BUILD_DIR}
-> mv ${SHARED} ${BUILD_DIR}
+> mv ${UNIT_TESTS} ${BUILD_DIR}
 
 ${UNIT_TESTS}: ${OBJECTS_TEST}
-> ${CC} ${CFLAGS} -o $@
+> ${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 ${BUILD_DIR}/%.o: %.c
-> ${CC} ${CFLAGS} -c $< -o $@
+> ${CC} ${CFLAGS} -c $< -o $@ ${WARN_OPTS}
 
 clean:
 > -rm -v ${BUILD_DIR}/{*.o,${UNIT_TESTS}}

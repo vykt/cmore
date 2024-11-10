@@ -1,0 +1,10 @@
+libcheck adds the '_fn' suffix to the function names of all unit tests 
+defined through the START_TEST() macro. For example:
+
+    START_TEST(test_foo) {
+        ...
+    }
+
+To break at test_foo:
+
+    gdb > b test_foo_fn
