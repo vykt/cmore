@@ -13,8 +13,8 @@ WARN_OPTS:=
 SOURCES_LIB=list.c vector.c error.c
 OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
 
-SHARED=cmore.so
-STATIC=cmore.a
+SHARED=libcmore.so
+STATIC=libcmore.a
 
 
 shared: ${SHARED}
