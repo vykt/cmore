@@ -13,13 +13,14 @@ INCLUDE_DIR=./src/lib
 MAN_DIR=./doc/roff/man3
 MD_DIR=./doc/md
 
-LIBRARY=libcmore.so
+SHARED=libcmore.so
+STATIC=libcmore.a
 HEADER=libcmore.h
 
 
 #uninstall
 if [ "$1" == "uninstall" ]; then
-    rm -vf ${INSTALL_DIR}/${LIBRARY}
+    rm -vf ${INSTALL_DIR}/{${SHARED},${STATIC}}
     rm -vf ${INCLUDE_INSTALL_DIR}/${HEADER}
     rm -vf ${MAN_INSTALL_DIR}/libcmore_*
     rm -vf ${MD_INSTALL_DIR}/*
@@ -37,14 +38,14 @@ fi
 
 
 #check that the library has been built
-if [ ! -f "build/lib/libcmore.so" ]; then
-    echo "'libcmore.so' build artifact missing. Please remember to run 'make lib'."
+if [ ! -f "${BUILD_DIR}/${SHARED}" ] && [ ! -f "${BUILD_DIR}/${STATIC}"]; then
+    echo "Build artifacts missing. Try running 'make all'."
     exit 1
 fi
 
 #install files
 mkdir -pv ${INSTALL_DIR}
-cp -v ${BUILD_DIR}/${LIBRARY} ${INSTALL_DIR}
+cp -v ${BUILD_DIR}/{${SHARED},${STATIC}} ${INSTALL_DIR}
 mkdir -pv ${INCLUDE_INSTALL_DIR}
 cp -v ${INCLUDE_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
 mkdir -pv ${MAN_INSTALL_DIR}

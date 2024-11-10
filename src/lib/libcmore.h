@@ -147,12 +147,11 @@ extern int cm_rb_tree_get_val(const cm_rb_tree * tree,
                               const cm_byte * key, cm_byte * buf);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_rb_tree_get_ref(const cm_rb_tree * tree, 
-                                   const cm_byte * key);
+extern cm_byte * cm_rb_tree_get_ref(const cm_rb_tree * tree, const cm_byte * key);
 extern cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, 
-                                            const cm_byte * key);
+                                             const cm_byte * key);
 extern cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
-                                       const cm_byte * key, const cm_byte * data);
+                                        const cm_byte * key, const cm_byte * data);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key);

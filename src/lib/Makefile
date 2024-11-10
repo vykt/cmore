@@ -4,28 +4,34 @@
 #
 #	CC        - Compiler.
 #	CFLAGS    - Compiler flags.
-#   BUILD_DIR - Base build directory.
+#   BUILD_DIR - Library build directory.
+
+LDFLAGS:=
 
 SOURCES_LIB=list.c vector.c error.c
 HEADERS_LIB=list.h vector.h error.h libcmore.h
-OBJECTS_LIB=${SOURCES_LIB:.c=.o}
+OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
 
-LIB=libcmore.so
+SHARED=libcmore.so
+STATIC=libcmore.a
 
-lib: ${LIB}
-> mkdir -p ${BUILD_DIR}/lib
-> mv ${LIB} ${BUILD_DIR}/lib
 
-${LIB}: ${OBJECTS_LIB}
-> ${CC} ${CFLAGS} -shared -o ${LIB} ${OBJECTS_LIB} ${HEADERS_LIB}
+shared: ${SHARED}
+> mkdir -p ${BUILD_DIR}
+> mv ${SHARED} ${BUILD_DIR}
 
-${OBJECTS_LIB}: ${SOURCES_LIB} ${HEADERS_LIB}
-> ${CC} ${CFLAGS} -c ${SOURCES_LIB}
+static: ${STATIC}
+> mkdir -p ${BUILD_DIR}
+> mv ${STATIC} ${BUILD_DIR}
 
-clean_all: clean_src clean_build
+${SHARED}: ${OBJECTS_LIB}
+> ${CC} ${CFLAGS} -shared -o $@ $^ ${LDFLAGS}
 
-clean_src:
-> -rm -f *.o
+${STATIC}: ${OBJECTS_LIB}
+> ar rcs $@ $^
 
-clean_build:
-> -rm ${BUILD_DIR}/lib/${LIB}
+${BUILD_DIR}/%.o: %.c
+> ${CC} ${CFLAGS} -c $< -o $@
+
+clean:
+> -rm -v ${BUILD_DIR}/{*.o,${SHARED},${STATIC}}

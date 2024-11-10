@@ -2,32 +2,28 @@
 
 # This makefile takes the following variables:
 #
-#	CC        - Compiler.
-#   BUILD_DIR - Base build directory.
+# CC        - Compiler.
+# BUILD_DIR - Unit test build directory.
 
-CFLAGS=-O0 -ggdb -Wno-unused-but-set-variable -L${BUILD_DIR}/lib -Wl,-rpath=${BUILD_DIR}/lib -lcmore
+CFLAGS:=-ggdb 
+LDFLAGS:= -lcheck
 
-SOURCES_TEST=list.c vector.c error.c main.c
-HEADERS_TEST=test.h
-OBJECTS_TEST=${SOURCES_TEST:.c=.o}
+SOURCES_TEST=check_vectpr.c
+HEADERS_TEST=test_data.h
+OBJECTS_TEST=${SOURCES_LIB:%.c=${BUILD_DIR}/$.o}
 
-TEST=run_test
+UNIT_TESTS=unit_tests
 
-test:${TEST}
-> mkdir -p ${BUILD_DIR}/test
-> mv ${TEST} ${BUILD_DIR}/test
 
-${TEST}: ${OBJECTS_TEST}
-> ${CC} ${CFLAGS} ${OBJECTS_TEST} ${HEADERS_TEST} \
-  -o ${TEST}
+test: ${UNIT_TESTS}
+> mkdir -p ${BUILD_DIR}
+> mv ${SHARED} ${BUILD_DIR}
 
-${OBJECTS_LIB}: ${SOURCES_LIB} ${HEADERS_LIB}
-> ${CC} ${CFLAGS} -c ${SOURCES_TEST} -o ${OBJECTS_TEST}
+${UNIT_TESTS}: ${OBJECTS_TEST}
+> ${CC} ${CFLAGS} -o $@
 
-clean_all: clean_src clean_build
+${BUILD_DIR}/%.o: %.c
+> ${CC} ${CFLAGS} -c $< -o $@
 
-clean_src:
-> -rm -f *.o
-
-clean_build:
-> -rm ${BUILD_DIR}/test/${TEST}
+clean:
+> -rm -v ${BUILD_DIR}/{*.o,${UNIT_TESTS}}

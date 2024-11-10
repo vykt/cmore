@@ -1,0 +1,2 @@
+tb main
+run
