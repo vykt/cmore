@@ -133,8 +133,9 @@ extern cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index);
 extern int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data);
 extern int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data);
 extern int cm_vector_append(cm_vector * vector, const cm_byte * data);
-//void return
 extern int cm_vector_remove(cm_vector * vector, const int index);
+extern int cm_vector_shrink_to_fit(cm_vector * vector);
+//void return
 extern void cm_vector_empty(cm_vector * vector);
 
 //void return

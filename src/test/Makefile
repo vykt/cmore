@@ -6,7 +6,7 @@
 # BUILD_DIR   - Unit test build directory.
 # LIB_BIN_DIR - Library artifact directory.
 
-CFLAGS:= -ggdb -Wall
+CFLAGS:= -ggdb -Wall -fsanitize=address
 LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck
 WARN_OPTS:= -Wno-unused-variable -Wno-unused-but-set-variable
 

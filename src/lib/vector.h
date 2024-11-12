@@ -24,6 +24,7 @@ int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data);
 int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data);
 int cm_vector_append(cm_vector * vector, const cm_byte * data);
 int cm_vector_remove(cm_vector * vector, const int index);
+int cm_vector_shrink_to_fit(cm_vector * vector);
 void cm_vector_empty(cm_vector * vector);
 
 int cm_new_vector(cm_vector * vector, const size_t data_size);

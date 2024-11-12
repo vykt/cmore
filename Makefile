@@ -20,7 +20,7 @@ endif
 
 #[process targets]
 test: shared
-> $(MAKE) -C ${TEST_DIR} test CC='${CC}' BUILD_DIR='${BUILD_DIR}/test'
+> $(MAKE) -C ${TEST_DIR} test CC='${CC}' BUILD_DIR='${BUILD_DIR}/test' \
                                          LIB_BIN_DIR='${BUILD_DIR}/lib'
 
 all: shared static
