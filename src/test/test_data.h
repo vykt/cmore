@@ -3,9 +3,6 @@
 
 
 //test data
-#define Z_LEN 7
-#define DATA(data, X, Y, Z) data.x = X; data.y = Y; strncpy(data.z, Z, Z_LEN);
-
 typedef struct {
 
     int  x;

@@ -58,7 +58,6 @@ static inline int _normalise_index(const cm_vector * vector,
 static cm_byte * _traverse(const cm_vector * vector, const int index) {
 
     return vector->data + (vector->data_size * index);
-
 }
 
 
@@ -101,7 +100,8 @@ static inline int _assert_index_range(const cm_vector * vector,
      *  if inserting, maximum index needs to be +1 higher than for other operations
      */
 
-    if (index >= (vector->len + (int) mode)) {
+    //check for < 0 to range-check normalised negative indeces
+    if (index >= (vector->len + (int) mode) || index < 0) {
         cm_errno = CM_ERR_USER_INDEX;
         return -1;
     }

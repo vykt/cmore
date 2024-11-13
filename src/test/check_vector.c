@@ -1,5 +1,6 @@
 //standard library
 #include <stdio.h>
+#include <stdlib.h>
 
 //system headers
 #include <unistd.h>
@@ -9,6 +10,7 @@
 
 //local headers
 #include "test_data.h"
+#include "suites.h"
 
 //remote headers
 #include "../lib/cmore.h"
@@ -34,10 +36,25 @@ void setup_empty() {
     cm_new_vector(&v, sizeof(d));
     d.x = 0;
 
+    return;
 }
 
 
 
+//false populated vector setup
+void setup_facade() {
+
+    v.len = 10;
+    v.size = VECTOR_DEFAULT_SIZE;
+    v.data_size = sizeof(d);
+    v.data = malloc(v.data_size * v.size);
+
+    return;
+}
+
+
+
+//populated vector setup
 #define TEST_LEN_FULL 10
 void setup_full() {
 
@@ -48,6 +65,8 @@ void setup_full() {
         cm_vector_append(&v, (cm_byte *) &d);
         d.x++;
     }
+
+    return;
 }
 
 
@@ -56,6 +75,8 @@ void teardown() {
 
     cm_del_vector(&v);
     d.x = -1;
+
+    return;
 }
 
 
@@ -124,6 +145,20 @@ START_TEST(test_new_vector) {
     //cleanup
     cm_del_vector(&v);
 
+    return;
+
+} END_TEST
+
+
+
+//cm_del_vector()
+START_TEST(test_del_vector) {
+
+    //run test
+    cm_del_vector(&v);
+
+    return;
+
 } END_TEST
 
 
@@ -172,7 +207,7 @@ START_TEST(test__grow) {
 
 
 
-//cm_vector_get_val
+//cm_vector_get_val()
 START_TEST(test_vector_get_val) {
 
     int ret;
@@ -197,13 +232,25 @@ START_TEST(test_vector_get_val) {
 
     } //end for
 
+    //get invalid index (+ve index)
+    cm_errno = 0;
+    ret = cm_vector_get_val(&v, TEST_LEN_FULL, (cm_byte *) &d);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
+
+    //get invalid index (-ve index)
+    cm_errno = 0;
+    ret = cm_vector_get_val(&v, -TEST_LEN_FULL - 1, (cm_byte *) &d);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
+
     return;
     
 } END_TEST
 
 
 
-//cm_vector_get_ref
+//cm_vector_get_ref()
 START_TEST(test_vector_get_ref) {
 
     data * p;
@@ -226,13 +273,25 @@ START_TEST(test_vector_get_ref) {
 
     } //end for
 
+    //get ref to invalid index (+ve index)
+    cm_errno = 0;
+    p = (data *) cm_vector_get_ref(&v, TEST_LEN_FULL);
+    ck_assert_ptr_null(p);
+    ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
+
+    //get ref to invalid index (-ve index)
+    cm_errno = 0;
+    p = (data *) cm_vector_get_ref(&v, -TEST_LEN_FULL - 1);
+    ck_assert_ptr_null(p);
+    ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
+
     return;
 
 } END_TEST
 
 
 
-//cm_vector_set
+//cm_vector_set()
 START_TEST(test_vector_set) {
 
     int ret;
@@ -266,7 +325,7 @@ START_TEST(test_vector_set) {
 
 
     //set every vector entry (negative index)
-    for (int i = (TEST_LEN_FULL * -1) + 1; i < 0; ++i) {
+    for (int i = TEST_LEN_FULL * -1; i < 0; ++i) {
 
         //value of e.x will range from -11 to -19 (skip index 0)
         e.x = -TEST_LEN_FULL - (TEST_LEN_FULL + i);
@@ -284,7 +343,20 @@ START_TEST(test_vector_set) {
     printf("[test_vector_set] final values (-ve index):    ");
     _print_vector();
     printf("[test_vector_set] expected values (-ve index): \
-0 -11 -12 -13 -14 -15 -16 -17 -18 -19\n");
+-20 -11 -12 -13 -14 -15 -16 -17 -18 -19\n");
+
+
+    //set invalid index (+ve index)
+    cm_errno = 0;
+    ret = cm_vector_set(&v, TEST_LEN_FULL, (cm_byte *) &d);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
+
+    //set invalid index (-ve index)
+    cm_errno = 0;
+    ret = cm_vector_set(&v, -TEST_LEN_FULL - 1, (cm_byte *) &d);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
 
     return;
 
@@ -292,7 +364,7 @@ START_TEST(test_vector_set) {
 
 
 
-//cm_vector_insert
+//cm_vector_insert()
 START_TEST(test_vector_insert) {
 
     int ret;
@@ -360,7 +432,7 @@ START_TEST(test_vector_insert) {
     ret = cm_vector_insert(&v, len * -1, (cm_byte *) &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, 1, (cm_byte *) &d);
+    ret = cm_vector_set(&v, 1, (cm_byte *) &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -6);
     len++;
@@ -370,6 +442,19 @@ START_TEST(test_vector_insert) {
     _print_vector();
     printf("[test_vector_insert] expected values: \
 -5 -6 0 1 2 -1 3 4 5 6 7 -2 8 9 -3 -4\n");
+
+
+    //insert invalid index (+ve index)
+    cm_errno = 0;
+    ret = cm_vector_insert(&v, len+1, (cm_byte *) &e);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
+
+    //insert invalid index (-ve index)
+    cm_errno = 0;
+    ret = cm_vector_insert(&v, (len+2) * -1, (cm_byte *) &e);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
 
     return;
 
@@ -457,6 +542,19 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 2);
 
+
+    //remove invalid index (+ve index)
+    cm_errno = 0;
+    ret = cm_vector_remove(&v, 99);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
+
+    //remove invalid index (-ve index)
+    cm_errno = 0;
+    ret = cm_vector_remove(&v, -99);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
+
     return;
 
 } END_TEST;
@@ -526,6 +624,7 @@ Suite * vector_suite() {
 
     //test cases
     TCase * tc_new_vector;
+    TCase * tc_del_vector;
     TCase * tc_vector_append;
     TCase * tc__grow;
     TCase * tc_vector_get_val;
@@ -542,6 +641,11 @@ Suite * vector_suite() {
     //cm_new_vector()
     tc_new_vector = tcase_create("new_vector");
     tcase_add_test(tc_new_vector, test_new_vector);
+
+    //cm_del_vector()
+    tc_del_vector = tcase_create("del_vector");
+    tcase_add_checked_fixture(tc_del_vector, setup_facade, NULL);
+    tcase_add_test(tc_del_vector, test_del_vector);
 
     //cm_vector_append()
     tc_vector_append = tcase_create("vector_append");
@@ -591,6 +695,7 @@ Suite * vector_suite() {
 
     //add test cases to vector suite
     suite_add_tcase(s, tc_new_vector);
+    suite_add_tcase(s, tc_del_vector);
     suite_add_tcase(s, tc_vector_append);
     suite_add_tcase(s, tc__grow);
     suite_add_tcase(s, tc_vector_get_val);

@@ -2,7 +2,7 @@
 #include <check.h>
 
 //local headers
-#include "check_vector.h"
+#include "suites.h"
 
 
 /*

@@ -1,5 +1,5 @@
-#ifndef CHECK_VECTOR_H
-#define CHECK_VECTOR_H
+#ifndef SUITES_H
+#define SUITES_H
 
 #include <check.h>
 

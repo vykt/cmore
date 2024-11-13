@@ -13,17 +13,6 @@
  *  --- [INTERNAL] ---
  */
 
-static inline int _normalise_index(const cm_list * list, int index) {
-
-    if (index < 0) { 
-        index = list->len + index;
-    }
-
-    return index;
-}
-
-
-
 static cm_list_node * _traverse(const cm_list * list, int index) {
 
     cm_list_node * node = list->head;
@@ -42,17 +31,18 @@ static cm_list_node * _traverse(const cm_list * list, int index) {
 
         if (traverse_forward) {
             node = node->next;
+            index--;
         } else {
             node = node->prev;
+            index++;
         }
-
-        --index;
     }
 
     if (index) {
         cm_errno = CM_ERR_INTERNAL_INDEX;
         return NULL;
     }
+
     return node;
 }
 
@@ -181,7 +171,8 @@ static inline int _assert_index_range(const cm_list * list,
     /*
      *  if inserting, maximum index needs to be +1 higher than for other operations
      */
-    if (abs(index) >= (list->len + mode)) {
+
+    if (abs(index) >= (list->len + (int) mode)) {
         cm_errno = CM_ERR_USER_INDEX;
         return -1;
     }
@@ -251,41 +242,33 @@ cm_list_node * cm_list_set(cm_list * list, const int index, const cm_byte * data
 cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * data) {
 
     cm_list_node * prev_node, * next_node;
-    int normalised_index;
 
     if (_assert_index_range(list, index, ADD_INDEX)) return NULL;
 
     //create new node
     cm_list_node * new_node = _new_cm_list_node(list, data);
     if (!new_node) return NULL;
-
-    //to simplify, convert a negative index to a positive equivalent
-    normalised_index = _normalise_index(list, index);
     
     //get the _prev_ and _next_ of the new node as required
     if (list->len == 0) {
         _set_head_node(list, new_node);
-    
+        return new_node;
+
     } else if (list->len == 1) { 
         next_node = prev_node = list->head; 
-        
-        _add_node(list, new_node, prev_node, next_node, normalised_index);
+        _add_node(list, new_node, prev_node, next_node, index);
 
     } else { 
-        if (normalised_index == list->len) {
-            prev_node = list->head->prev;
-        } else {
-            prev_node = _traverse(list, normalised_index-1);
-            if (!prev_node) {
-                _del_cm_list_node(new_node);
-                return NULL;
-            }
+        next_node = _traverse(list, index);
+        if (!next_node) {
+            _del_cm_list_node(new_node);
+            return NULL;
         }
-        next_node = prev_node->next;
-
-        _add_node(list, new_node, prev_node, next_node, normalised_index);
+        prev_node = next_node->prev;
+        _add_node(list, new_node, prev_node, next_node, index);
     }
 
+    if (index == 0) _set_head_node(list, new_node);
     return new_node;
 }
 
