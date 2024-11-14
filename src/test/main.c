@@ -20,10 +20,11 @@ int main() {
 
     //initialise test suites
     s_vector = vector_suite();
-
+    s_list = list_suite();
 
     //create suite runner
     sr = srunner_create(s_vector);
+    srunner_add_suite(sr, s_list);
 
     //run tests
     srunner_run_all(sr, CK_VERBOSE);

@@ -321,8 +321,8 @@ cm_list_node * cm_list_unlink(cm_list * list, const int index) {
     cm_list_node * unlink_node = _traverse(list, index);
     if (!unlink_node) return NULL;
 
+    //unlink it from the list
     _sub_node(list, unlink_node->prev, unlink_node->next, index);
-
     --list->len;
 
     return unlink_node;

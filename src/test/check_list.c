@@ -25,13 +25,13 @@
  */
 
 //globals
-cm_list l;
-data d;
+static cm_list l;
+static data d;
 
 
 
 //empty list setup
-void setup_empty() {
+static void _setup_empty() {
 
     cm_new_list(&l, sizeof(d));
     d.x = 0;
@@ -42,7 +42,7 @@ void setup_empty() {
 
 
 //false populated list setup
-void setup_facade() {
+static void _setup_facade() {
 
     l.len = 3;
     l.data_size = sizeof(d);
@@ -73,7 +73,7 @@ void setup_facade() {
 
 ///populated list setup
 #define TEST_LEN_FULL 10
-void setup_full() {
+static void _setup_full() {
 
     cm_new_list(&l, sizeof(d));
     d.x = 0;
@@ -88,7 +88,7 @@ void setup_full() {
 
 
 
-void teardown() {
+static void _teardown() {
 
     cm_del_list(&l);
     d.x = -1;
@@ -504,7 +504,105 @@ START_TEST(test_list_insert) {
 //cm_list_unlink()
 START_TEST(test_list_unlink) {
 
-    //TODO implement
+    /*
+     *  TODO This test depends on the _setup_full() initialisation. If it 
+     *       is changed, the values this test compares against must be 
+     *       adjusted.
+     */
+
+    int ret;
+    int len = TEST_LEN_FULL;
+
+    data e;
+    cm_list_node * n;
+
+
+    //starting state of the list
+    printf("[test_list_unlink] starting values: ");
+    _print_list();
+
+    //remove the third index (positive index)
+    n = cm_list_unlink(&l, 3);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ck_assert_int_eq(GET_NODE_DATA(n)->x, -6);
+    ret = cm_list_get_val(&l, 3, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 4);
+
+    //remove the third from last index (negative index)
+    n = cm_list_unlink(&l, -3);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ret = cm_list_get_val(&l, -3, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 6);
+
+    //remove at end (positive index)
+    n = cm_list_unlink(&l, len - 1);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 8);
+
+    //remove at end (negative index)
+    n = cm_list_unlink(&l, -1);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 6);
+
+    //remove at start (zero index)
+    n = cm_list_unlink(&l, 0);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 1);
+
+    //remove at start (max negative index)
+    n = cm_list_unlink(&l, (len) * -1);
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(l.len, len - 1);
+    len--;
+
+    ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(e.x, 2);
+
+
+    //remove invalid index (+ve index)
+    cm_errno = 0;
+    n = cm_list_unlink(&l, 99);
+    ck_assert_ptr_null(n);
+    ck_assert_int_eq(cm_errno, 1100);
+
+    //remove invalid index (-ve index)
+    cm_errno = 0;
+    n = cm_list_unlink(&l, -99);
+    ck_assert_ptr_null(n);
+    ck_assert_int_eq(cm_errno, 1100);
+
+
+    //state of the list after every type of removal
+    printf("[test_list_remove] final values:    ");
+    _print_list();
+    printf("[test_list_remove] expected values: \
+1 2 4 5 6\n");
+
+    return;
 
 } END_TEST
 
@@ -514,14 +612,13 @@ START_TEST(test_list_unlink) {
 START_TEST(test_list_remove) {
 
     /*
-     *  TODO This test depends on the setup_full() initialisation. If it 
+     *  TODO This test depends on the _setup_full() initialisation. If it 
      *       is changed, the values this test compares against must be 
      *       adjusted.
      */
 
     int ret;
     int len = TEST_LEN_FULL;
-    size_t size = v.size;
 
     data e;
 
@@ -533,7 +630,7 @@ START_TEST(test_list_remove) {
     //remove the third index (positive index)
     ret = cm_list_remove(&l, 3);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, 3, (cm_byte *) &e);
@@ -543,7 +640,7 @@ START_TEST(test_list_remove) {
     //remove the third from last index (negative index)
     ret = cm_list_remove(&l, -3);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, -3, (cm_byte *) &e);
@@ -553,7 +650,7 @@ START_TEST(test_list_remove) {
     //remove at end (positive index)
     ret = cm_list_remove(&l, len - 1);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
@@ -563,7 +660,7 @@ START_TEST(test_list_remove) {
     //remove at end (negative index)
     ret = cm_list_remove(&l, -1);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
@@ -573,7 +670,7 @@ START_TEST(test_list_remove) {
     //remove at start (zero index)
     ret = cm_list_remove(&l, 0);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
@@ -583,7 +680,7 @@ START_TEST(test_list_remove) {
     //remove max negative index
     ret = cm_list_remove(&l, (len) * -1);
     ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.len, len - 1);
+    ck_assert_int_eq(l.len, len - 1);
     len--;
 
     ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
@@ -603,43 +700,12 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
-    return;
 
-} END_TEST;
-
-
-
-//cm_list_shrink_to_fit()
-START_TEST(test_list_shrink_to_fit) {
-
-    int ret;
-    int min_len = VECTOR_DEFAULT_SIZE;
-    int expand_len = min_len * 4;
-
-    //expand list to size of min_len * 4 (realloc for more memory twice)
-    for (int i = 0; i < expand_len; ++i) {
-
-        d.x = i;
-        ret = cm_list_append(&l, (cm_byte *) &d);
-        ck_assert_int_eq(ret, 0);
-
-    } //end for
-    
-    //check size is has grown thrice
-    ck_assert_int_eq(v.size, expand_len);
-
-    //reduce list length down to VECTOR_DEFAULT_SIZE
-    for (int i = 0; i < (expand_len - (min_len)); ++i) {
-
-        ret = cm_list_remove(&l, 0);
-        ck_assert_int_eq(ret, 0);
-    
-    } //end for
-
-    //shrink to size
-    ret = cm_list_shrink_to_fit(&v);
-    ck_assert_int_eq(ret, 0);
-    ck_assert_int_eq(v.size, min_len);
+    //state of the vector after every type of removal
+    printf("[test_list_remove] final values:    ");
+    _print_list();
+    printf("[test_list_remove] expected values: \
+1 2 4 5 6\n");
 
     return;
 
@@ -655,8 +721,8 @@ START_TEST(test_list_empty) {
      *  catch memory leaks during emptying.
      */
 
-    cm_list_empty(&v);
-    ck_assert_int_eq(v.len, 0);
+    cm_list_empty(&l);
+    ck_assert_int_eq(l.len, 0);
 
     return;
 
@@ -674,13 +740,13 @@ Suite * list_suite() {
     TCase * tc_new_list;
     TCase * tc_del_list;
     TCase * tc_list_append;
-    TCase * tc__grow;
     TCase * tc_list_get_val;
     TCase * tc_list_get_ref;
+    TCase * tc_list_get_node;
     TCase * tc_list_set;
     TCase * tc_list_insert;
+    TCase * tc_list_unlink;
     TCase * tc_list_remove;
-    TCase * tc_list_shrink_to_fit;
     TCase * tc_list_empty;
 
     Suite * s = suite_create("list");
@@ -692,52 +758,52 @@ Suite * list_suite() {
     
     //cm_del_vector()
     tc_del_list = tcase_create("del_list");
-    tcase_add_checked_fixture(tc_del_list, setup_facade, teardown);
+    tcase_add_checked_fixture(tc_del_list, _setup_facade, _teardown);
     tcase_add_test(tc_del_list, test_del_list);
 
     //cm_list_append()
     tc_list_append = tcase_create("list_append");
-    tcase_add_checked_fixture(tc_list_append, setup_empty, teardown);   
+    tcase_add_checked_fixture(tc_list_append, _setup_empty, _teardown);   
     tcase_add_test(tc_list_append, test_list_append);
-    
-    //_grow()
-    tc__grow = tcase_create("_grow");
-    tcase_add_checked_fixture(tc__grow, setup_empty, teardown);
-    tcase_add_test(tc__grow, test__grow);
 
     //cm_list_get_val()
     tc_list_get_val = tcase_create("list_get_val");
-    tcase_add_checked_fixture(tc_list_get_val, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_get_val, _setup_full, _teardown);
     tcase_add_test(tc_list_get_val, test_list_get_val);
 
     //cm_list_get_ref()
     tc_list_get_ref = tcase_create("list_get_ref");
-    tcase_add_checked_fixture(tc_list_get_ref, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_get_ref, _setup_full, _teardown);
     tcase_add_test(tc_list_get_ref, test_list_get_ref);
+
+    //cm_list_get_node()
+    tc_list_get_node = tcase_create("list_get_node");
+    tcase_add_checked_fixture(tc_list_get_node, _setup_full, _teardown);
+    tcase_add_test(tc_list_get_node, test_list_get_node);
 
     //cm_list_set()
     tc_list_set = tcase_create("list_set");
-    tcase_add_checked_fixture(tc_list_set, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_set, _setup_full, _teardown);
     tcase_add_test(tc_list_set, test_list_set);
   
     //cm_list_insert()
     tc_list_insert = tcase_create("list_insert");
-    tcase_add_checked_fixture(tc_list_insert, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_insert, _setup_full, _teardown);
     tcase_add_test(tc_list_insert, test_list_insert);
+
+    //cm_list_unlink()
+    tc_list_unlink = tcase_create("list_unlink");
+    tcase_add_checked_fixture(tc_list_unlink, _setup_full, _teardown);
+    tcase_add_test(tc_list_unlink, test_list_unlink);
 
     //cm_list_remove()
     tc_list_remove = tcase_create("list_remove");
-    tcase_add_checked_fixture(tc_list_remove, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_remove, _setup_full, _teardown);
     tcase_add_test(tc_list_remove, test_list_remove);
-
-    //cm_list_shrink_to_fit()
-    tc_list_shrink_to_fit = tcase_create("list_shrink_to_fit");
-    tcase_add_checked_fixture(tc_list_shrink_to_fit, setup_empty, teardown);
-    tcase_add_test(tc_list_shrink_to_fit, test_list_shrink_to_fit);
 
     //cm_list_empty()
     tc_list_empty = tcase_create("list_empty");
-    tcase_add_checked_fixture(tc_list_empty, setup_full, teardown);
+    tcase_add_checked_fixture(tc_list_empty, _setup_full, _teardown);
     tcase_add_test(tc_list_empty, test_list_empty);
 
 
@@ -745,13 +811,11 @@ Suite * list_suite() {
     suite_add_tcase(s, tc_new_list);
     suite_add_tcase(s, tc_del_list);
     suite_add_tcase(s, tc_list_append);
-    suite_add_tcase(s, tc__grow);
     suite_add_tcase(s, tc_list_get_val);
     suite_add_tcase(s, tc_list_get_ref);
     suite_add_tcase(s, tc_list_set);
     suite_add_tcase(s, tc_list_insert);
     suite_add_tcase(s, tc_list_remove);
-    suite_add_tcase(s, tc_list_shrink_to_fit);
     suite_add_tcase(s, tc_list_empty);
 
     return s;

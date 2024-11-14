@@ -25,13 +25,13 @@
  */
 
 //globals
-cm_vector v;
-data d;
+static cm_vector v;
+static data d;
 
 
 
 //empty vector setup
-void setup_empty() {
+static void _setup_empty() {
 
     cm_new_vector(&v, sizeof(d));
     d.x = 0;
@@ -42,7 +42,7 @@ void setup_empty() {
 
 
 //false populated vector setup
-void setup_facade() {
+static void _setup_facade() {
 
     v.len = 10;
     v.size = VECTOR_DEFAULT_SIZE;
@@ -56,7 +56,7 @@ void setup_facade() {
 
 //populated vector setup
 #define TEST_LEN_FULL 10
-void setup_full() {
+static void _setup_full() {
 
     cm_new_vector(&v, sizeof(d));
     d.x = 0;
@@ -71,7 +71,7 @@ void setup_full() {
 
 
 
-void teardown() {
+static void _teardown() {
 
     cm_del_vector(&v);
     d.x = -1;
@@ -427,7 +427,7 @@ START_TEST(test_vector_insert) {
     ck_assert_int_eq(d.x, -5);
     len++;
 
-    //insert at max negative index
+    //insert at the beginning (max negative index)
     e.x = -6;
     ret = cm_vector_insert(&v, len * -1, (cm_byte *) &e);
     ck_assert_int_eq(ret, 0);
@@ -466,14 +466,13 @@ START_TEST(test_vector_insert) {
 START_TEST(test_vector_remove) {
 
     /*
-     *  TODO This test depends on the setup_full() initialisation. If it 
+     *  TODO This test depends on the _setup_full() initialisation. If it 
      *       is changed, the values this test compares against must be 
      *       adjusted.
      */
 
     int ret;
     int len = TEST_LEN_FULL;
-    size_t size = v.size;
 
     data e;
 
@@ -532,7 +531,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
-    //remove max negative index
+    //remove at start (max negative index)
     ret = cm_vector_remove(&v, (len) * -1);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(v.len, len - 1);
@@ -554,6 +553,13 @@ START_TEST(test_vector_remove) {
     ret = cm_vector_remove(&v, -99);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
+
+
+    //state of the vector after every type of removal
+    printf("[test_vector_remove] final values:    ");
+    _print_vector();
+    printf("[test_vector_remove] expected values: \
+1 2 4 5 6\n");
 
     return;
 
@@ -644,52 +650,52 @@ Suite * vector_suite() {
 
     //cm_del_vector()
     tc_del_vector = tcase_create("del_vector");
-    tcase_add_checked_fixture(tc_del_vector, setup_facade, NULL);
+    tcase_add_checked_fixture(tc_del_vector, _setup_facade, NULL);
     tcase_add_test(tc_del_vector, test_del_vector);
 
     //cm_vector_append()
     tc_vector_append = tcase_create("vector_append");
-    tcase_add_checked_fixture(tc_vector_append, setup_empty, teardown);   
+    tcase_add_checked_fixture(tc_vector_append, _setup_empty, _teardown);   
     tcase_add_test(tc_vector_append, test_vector_append);
     
     //_grow()
     tc__grow = tcase_create("_grow");
-    tcase_add_checked_fixture(tc__grow, setup_empty, teardown);
+    tcase_add_checked_fixture(tc__grow, _setup_empty, _teardown);
     tcase_add_test(tc__grow, test__grow);
 
     //cm_vector_get_val()
     tc_vector_get_val = tcase_create("vector_get_val");
-    tcase_add_checked_fixture(tc_vector_get_val, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_get_val, _setup_full, _teardown);
     tcase_add_test(tc_vector_get_val, test_vector_get_val);
 
     //cm_vector_get_ref()
     tc_vector_get_ref = tcase_create("vector_get_ref");
-    tcase_add_checked_fixture(tc_vector_get_ref, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_get_ref, _setup_full, _teardown);
     tcase_add_test(tc_vector_get_ref, test_vector_get_ref);
 
     //cm_vector_set()
     tc_vector_set = tcase_create("vector_set");
-    tcase_add_checked_fixture(tc_vector_set, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_set, _setup_full, _teardown);
     tcase_add_test(tc_vector_set, test_vector_set);
   
     //cm_vector_insert()
     tc_vector_insert = tcase_create("vector_insert");
-    tcase_add_checked_fixture(tc_vector_insert, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_insert, _setup_full, _teardown);
     tcase_add_test(tc_vector_insert, test_vector_insert);
 
     //cm_vector_remove()
     tc_vector_remove = tcase_create("vector_remove");
-    tcase_add_checked_fixture(tc_vector_remove, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_remove, _setup_full, _teardown);
     tcase_add_test(tc_vector_remove, test_vector_remove);
 
     //cm_vector_shrink_to_fit()
     tc_vector_shrink_to_fit = tcase_create("vector_shrink_to_fit");
-    tcase_add_checked_fixture(tc_vector_shrink_to_fit, setup_empty, teardown);
+    tcase_add_checked_fixture(tc_vector_shrink_to_fit, _setup_empty, _teardown);
     tcase_add_test(tc_vector_shrink_to_fit, test_vector_shrink_to_fit);
 
     //cm_vector_empty()
     tc_vector_empty = tcase_create("vector_empty");
-    tcase_add_checked_fixture(tc_vector_empty, setup_full, teardown);
+    tcase_add_checked_fixture(tc_vector_empty, _setup_full, _teardown);
     tcase_add_test(tc_vector_empty, test_vector_empty);
 
 

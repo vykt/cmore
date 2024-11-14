@@ -10,7 +10,7 @@ CFLAGS:= -ggdb -Wall -fsanitize=address
 LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck
 WARN_OPTS:= -Wno-unused-variable -Wno-unused-but-set-variable
 
-SOURCES_TEST=main.c check_vector.c
+SOURCES_TEST=main.c check_list.c check_vector.c
 OBJECTS_TEST=${SOURCES_TEST:%.c=${BUILD_DIR}/%.o}
 
 UNIT_TESTS=unit_tests

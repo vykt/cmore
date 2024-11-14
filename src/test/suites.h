@@ -4,6 +4,7 @@
 #include <check.h>
 
 
+Suite * list_suite();
 Suite * vector_suite();
 
 
