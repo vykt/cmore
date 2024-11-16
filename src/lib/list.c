@@ -22,7 +22,6 @@ static cm_list_node * _traverse(const cm_list * list, int index) {
     if (index >= 0) {
         traverse_forward = true;
     } else {
-        index *= -1;
         traverse_forward = false;
     }
 
@@ -85,9 +84,8 @@ static void _del_cm_list_node(cm_list_node * node) {
 static void _set_head_node(cm_list * list, cm_list_node * node) {
 
     node->next = node->prev = NULL;
-
     list->head = node;
-    ++list->len;
+    list->len++;
 
     return;
 }
@@ -169,7 +167,7 @@ static inline int _assert_index_range(const cm_list * list,
                                       const int index, enum _index_mode mode) {
    
     /*
-     *  if inserting, maximum index needs to be +1 higher than for other operations
+     *  If inserting, maximum index needs to be +1 higher than for other operations.
      */
 
     if (abs(index) >= (list->len + (int) mode)) {
@@ -259,7 +257,13 @@ cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * d
         _add_node(list, new_node, prev_node, next_node, index);
 
     } else { 
-        next_node = _traverse(list, index);
+        
+        //get appropriate next_node depending on index +/-
+        if (index >= 0) {
+            next_node = _traverse(list, index);
+        } else {
+            next_node = _traverse(list, index + 1);
+        }
         if (!next_node) {
             _del_cm_list_node(new_node);
             return NULL;
@@ -268,7 +272,6 @@ cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * d
         _add_node(list, new_node, prev_node, next_node, index);
     }
 
-    if (index == 0) _set_head_node(list, new_node);
     return new_node;
 }
 
@@ -282,7 +285,7 @@ cm_list_node * cm_list_append(cm_list * list, const cm_byte * data) {
     //add node to list
     if (list->len == 0) {
         _set_head_node(list, new_node);
-    
+
     } else if (list->len == 1) {
         _add_node(list, new_node, list->head, list->head, -1);
     
@@ -291,6 +294,23 @@ cm_list_node * cm_list_append(cm_list * list, const cm_byte * data) {
     }
 
     return new_node;
+}
+
+
+
+cm_list_node * cm_list_unlink(cm_list * list, const int index) {
+
+    if (_assert_index_range(list, index, INDEX)) return NULL;
+    
+    //get the node
+    cm_list_node * unlink_node = _traverse(list, index);
+    if (!unlink_node) return NULL;
+
+    //unlink it from the list
+    _sub_node(list, unlink_node->prev, unlink_node->next, index);
+    --list->len;
+
+    return unlink_node;
 }
 
 
@@ -309,23 +329,6 @@ int cm_list_remove(cm_list * list, const int index) {
     --list->len;
 
     return 0;
-}
-
-
-
-cm_list_node * cm_list_unlink(cm_list * list, const int index) {
-
-    if (_assert_index_range(list, index, INDEX)) return NULL;
-    
-    //get the node
-    cm_list_node * unlink_node = _traverse(list, index);
-    if (!unlink_node) return NULL;
-
-    //unlink it from the list
-    _sub_node(list, unlink_node->prev, unlink_node->next, index);
-    --list->len;
-
-    return unlink_node;
 }
 
 
@@ -362,6 +365,15 @@ void cm_del_list(cm_list * list) {
         _del_cm_list_node(del_node);
     
     } //end for
+
+    return;
+}
+
+
+
+void cm_del_list_node(cm_list_node * node) {
+
+    _del_cm_list_node(node);
 
     return;
 }

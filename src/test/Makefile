@@ -6,8 +6,8 @@
 # BUILD_DIR   - Unit test build directory.
 # LIB_BIN_DIR - Library artifact directory.
 
-CFLAGS:= -ggdb -Wall -fsanitize=address
-LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck
+CFLAGS:= -O0 -ggdb -Wall -fsanitize=address
+LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck -static-libasan
 WARN_OPTS:= -Wno-unused-variable -Wno-unused-but-set-variable
 
 SOURCES_TEST=main.c check_list.c check_vector.c

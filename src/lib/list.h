@@ -26,6 +26,6 @@ int cm_list_empty(cm_list * list);
 
 void cm_new_list(cm_list * list, const size_t data_size);
 void cm_del_list(cm_list * list);
-
+void cm_del_list_node(cm_list_node * node);
 
 #endif

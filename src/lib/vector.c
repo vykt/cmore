@@ -97,7 +97,7 @@ static inline int _assert_index_range(const cm_vector * vector,
                                       const int index, const enum _index_mode mode) {
 
     /*
-     *  if inserting, maximum index needs to be +1 higher than for other operations
+     *  If inserting, maximum index needs to be +1 higher than for other operations.
      */
 
     //check for < 0 to range-check normalised negative indeces

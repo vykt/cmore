@@ -4,6 +4,7 @@
 #
 #	CC        - Compiler.
 #	CFLAGS    - Compiler flags.
+#   LDFLAGS   - Linker flags.
 #   BUILD_DIR - Library build directory.
 
 CFLAGS:=

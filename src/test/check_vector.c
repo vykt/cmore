@@ -429,10 +429,10 @@ START_TEST(test_vector_insert) {
 
     //insert at the beginning (max negative index)
     e.x = -6;
-    ret = cm_vector_insert(&v, len * -1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, len * -1 -1, (cm_byte *) &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_set(&v, 1, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, 0, (cm_byte *) &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -6);
     len++;
@@ -609,8 +609,7 @@ START_TEST(test_vector_shrink_to_fit) {
 START_TEST(test_vector_empty) {
 
     /*
-     *  Debug builds of cmore build with -fsanitize=address, which should
-     *  catch memory leaks during emptying.
+     *  Using ASAN to check for leaks here.
      */
 
     cm_vector_empty(&v);

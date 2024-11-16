@@ -13,6 +13,7 @@ BUILD_DIR=$(shell pwd)/build
 #[set build options]
 ifeq ($(build),debug)
 	CFLAGS += -O0 -fsanitize=address
+	LDFLAGS += -static-libasan
 else
 	CFLAGS += -O3
 endif
@@ -27,10 +28,12 @@ all: shared static
 
 shared:
 > $(MAKE) -C ${LIB_DIR} shared CC='${CC}' CFLAGS='${CFLAGS} -fPIC' \
+	                                      LDFLAGS='${LDFLAGS}' \
 	                                      BUILD_DIR='${BUILD_DIR}/lib'
 
 static:
 > $(MAKE) -C ${LIB_DIR} static CC='${CC}' CFLAGS='${CFLAGS}' \
+	                                      LDFLAGS='${LDFLAGS}' \
 	                                      BUILD_DIR='${BUILD_DIR}/lib'
 
 clean:

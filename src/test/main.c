@@ -1,3 +1,6 @@
+//standard library
+#include <stdio.h>
+
 //external libraries
 #include <check.h>
 
@@ -28,7 +31,7 @@ int main() {
 
     //run tests
     srunner_run_all(sr, CK_VERBOSE);
-    
+
     //cleanup
     srunner_free(sr);
 
