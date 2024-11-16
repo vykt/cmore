@@ -343,7 +343,7 @@ START_TEST(test_vector_set) {
     printf("[test_vector_set] final values (-ve index):    ");
     _print_vector();
     printf("[test_vector_set] expected values (-ve index): \
--20 -11 -12 -13 -14 -15 -16 -17 -18 -19\n");
+-10 -11 -12 -13 -14 -15 -16 -17 -18 -19\n");
 
 
     //set invalid index (+ve index)
@@ -429,7 +429,7 @@ START_TEST(test_vector_insert) {
 
     //insert at the beginning (max negative index)
     e.x = -6;
-    ret = cm_vector_insert(&v, len * -1 -1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, (len * -1) - 1, (cm_byte *) &e);
     ck_assert_int_eq(ret, 0);
 
     ret = cm_vector_get_val(&v, 0, (cm_byte *) &d);
@@ -441,7 +441,7 @@ START_TEST(test_vector_insert) {
     printf("[test_vector_insert] final values:    ");
     _print_vector();
     printf("[test_vector_insert] expected values: \
--5 -6 0 1 2 -1 3 4 5 6 7 -2 8 9 -3 -4\n");
+-6 -5 0 1 2 -1 3 4 5 6 7 -2 8 9 -3 -4\n");
 
 
     //insert invalid index (+ve index)
@@ -559,7 +559,7 @@ START_TEST(test_vector_remove) {
     printf("[test_vector_remove] final values:    ");
     _print_vector();
     printf("[test_vector_remove] expected values: \
-1 2 4 5 6\n");
+2 4 5 6\n");
 
     return;
 

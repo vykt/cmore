@@ -724,7 +724,7 @@ START_TEST(test_list_remove) {
     printf("[test_list_remove] final values:    ");
     _print_list();
     printf("[test_list_remove] expected values: \
-1 2 4 5 6\n");
+1 4 5 6\n");
 
     return;
 
