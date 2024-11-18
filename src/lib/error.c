@@ -1,5 +1,7 @@
+//standard library
 #include <stdio.h>
 
+//local headers
 #include "cmore.h"
 #include "error.h"
 

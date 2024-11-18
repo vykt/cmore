@@ -10,4 +10,11 @@ typedef struct {
 } data;
 
 
+typedef struct {
+
+    int x;
+
+} key;
+
+
 #endif

@@ -12,12 +12,19 @@
 #include "test_data.h"
 #include "suites.h"
 
-//remote headers
+//test target headers
 #include "../lib/cmore.h"
 #include "../lib/vector.h"
 
 
 #define V_GET(v, i) (((data *) v.data) + i)
+
+
+/*
+ *  [BASIC TEST]
+ *
+ *     Vectors are simple; internal functions are tested through exported functions.
+ */
 
 
 /*

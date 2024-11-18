@@ -12,7 +12,7 @@ BUILD_DIR=$(shell pwd)/build
 
 #[set build options]
 ifeq ($(build),debug)
-	CFLAGS += -O0 -fsanitize=address
+	CFLAGS += -O0 -fsanitize=address -DDEBUG
 	LDFLAGS += -static-libasan
 else
 	CFLAGS += -O3

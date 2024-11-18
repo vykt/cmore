@@ -11,7 +11,7 @@ CFLAGS:=
 LDFLAGS:=
 WARN_OPTS:=
 
-SOURCES_LIB=list.c vector.c error.c
+SOURCES_LIB=list.c vector.c error.c rb_tree.c
 OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
 
 SHARED=libcmore.so

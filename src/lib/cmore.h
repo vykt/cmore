@@ -5,9 +5,12 @@
 extern "C"{
 #endif
 
+//standard library
 #include <stdbool.h>
 
+//system headers
 #include <unistd.h>
+
 
 
 /*
@@ -17,6 +20,7 @@ extern "C"{
 // [byte]
 typedef char cm_byte;
 typedef unsigned char cm_ubyte;
+
 
 
 // [list]
@@ -39,6 +43,7 @@ typedef struct {
 } cm_list;
 
 
+
 // [vector]
 typedef struct {
 
@@ -48,6 +53,7 @@ typedef struct {
     cm_byte * data;
 
 } cm_vector;
+
 
 
 // [red-black tree]
@@ -74,6 +80,7 @@ typedef struct _cm_rb_tree_node cm_rb_tree_node;
 typedef struct {
 
     int size;
+    size_t key_size;
     size_t data_size;
     cm_rb_tree_node * root;
 
@@ -125,6 +132,7 @@ extern void cm_del_list(cm_list * list);
 void cm_del_list_node(cm_list_node * node);
 
 
+
 // [vector]
 //0 = success, -1 = error, see cm_errno
 extern int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf);
@@ -146,6 +154,7 @@ extern int cm_new_vector(cm_vector * vector, const size_t data_size);
 extern void cm_del_vector(cm_vector * vector);
 
 
+
 // [red-black tree]
 //0 = success, -1 = error, see cm_errno
 extern int cm_rb_tree_get_val(const cm_rb_tree * tree, 
@@ -165,10 +174,11 @@ extern int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
 extern void cm_rb_tree_empty(cm_rb_tree * tree);
 
 //void return
-extern void cm_new_rb_tree(cm_rb_tree * tree, const size_t data_size,
-                           enum cm_rb_tree_eval (*compare)
+extern void cm_new_rb_tree(cm_rb_tree * tree, const size_t key_size, 
+                           const size_t data_size, enum cm_rb_tree_eval (*compare)
                            (const cm_byte *, const cm_byte *));
 extern void cm_del_rb_tree(cm_rb_tree * tree);
+extern void cm_del_rb_tree_node(cm_rb_tree_node * node);
 
 
 // [error handling]
@@ -177,11 +187,13 @@ extern void cm_perror();
 extern const char * cm_strerror(const int cm_errnum);
 
 
+
 /*
  *  --- [ERROR HANDLING] ---
  */
 
 extern __thread int cm_errno;
+
 
 // [error codes]
 

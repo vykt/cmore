@@ -12,12 +12,19 @@
 #include "test_data.h"
 #include "suites.h"
 
-//remote headers
+//test target headers
 #include "../lib/cmore.h"
 #include "../lib/list.h"
 
 
 #define GET_NODE_DATA(node) ((data *) (node->data))
+
+
+/*
+ *  [BASIC TEST]
+ *
+ *      Lists are simple; internal functions are tested through exported functions.
+ */
 
 
 /*
@@ -49,10 +56,10 @@ static void _setup_facade() {
     
     cm_list_node * n[3];
     
-    //allocate data storage for each node
+    //allocate each node
     for (int i = 0; i < 3; ++i) {
         n[i]       = malloc(sizeof(cm_list_node));
-        n[i]->data = malloc(sizeof(d));
+        n[i]->data = malloc(l.data_size);
     }
 
     //link n together
@@ -136,6 +143,7 @@ static void _assert_state(const int len, const int index, const int value) {
 
     return;
 }
+
 
 
 /*

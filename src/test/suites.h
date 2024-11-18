@@ -6,6 +6,7 @@
 
 Suite * list_suite();
 Suite * vector_suite();
+Suite * rb_tree_suite();
 
 
 #endif
