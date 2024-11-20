@@ -4,6 +4,7 @@
 
 //system headers
 #include <unistd.h>
+#include <limits.h>
 
 //external libraries
 #include <check.h>
@@ -16,12 +17,14 @@
 #include "../lib/rb_tree.h"
 
 
+#define DATA_NULL INT_MAX
 #define GET_NODE_DATA(node) ((data *) (node->data))
 
 /*
  *  [ADVANCED TEST]
  *
  *      Red-black trees are complicated; internal functions will be tested directly.
+ *      For simplicity, key and data values are kept the same.
  */
 
 
@@ -32,7 +35,6 @@
 //globals
 static cm_rb_tree t;
 static data d;
-static key k;
 
 
 
@@ -53,8 +55,7 @@ enum cm_rb_tree_eval compare(const cm_byte * k_1_ptr, const cm_byte * k_2_ptr) {
 //empty red-black tree setup
 static void _setup_empty() {
 
-    cm_new_rb_tree(&t, sizeof(k), sizeof(d), compare);
-    k.x = 0;
+    cm_new_rb_tree(&t, sizeof(d), sizeof(d), compare);
     d.x = 0;
 
     return;
@@ -85,16 +86,14 @@ static inline void _setup_facade_node(cm_rb_tree_node * node, cm_rb_tree_node * 
 static void _setup_facade() {
 
     t.size = 5;
-    t.key_size = sizeof(k);
-    t.data_size = sizeof(d);
 
-    cm_rb_tree_node * n[5];
+    cm_rb_tree_node * n[7];
 
     //allocate each node
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 7; ++i) {
         n[i] = malloc(sizeof(cm_rb_tree_node));
-        n[i]->key = malloc(t.key_size);
-        n[i]->data = malloc(t.data_size);
+        n[i]->key = malloc(sizeof(d));
+        n[i]->data = malloc(sizeof(d));
     }
 
     //link n together 
@@ -102,10 +101,24 @@ static void _setup_facade() {
 
     //link n together
     _setup_facade_node(n[0], n[1], n[2], NULL, ROOT, BLACK);
-    _setup_facade_node(n[1], NULL, NULL, n[0], LESS, BLACK);
-    _setup_facade_node(n[2], n[3], n[4], n[0], MORE, RED);
-    _setup_facade_node(n[3], NULL, NULL, n[2], LESS, BLACK);
-    _setup_facade_node(n[4], NULL, NULL, n[2], MORE, BLACK);
+    _setup_facade_node(n[1], n[3], NULL, n[0], LESS, BLACK);
+    _setup_facade_node(n[2], n[4], n[5], n[0], MORE, BLACK);
+    _setup_facade_node(n[3], NULL, NULL, n[1], LESS, BLACK);
+    _setup_facade_node(n[4], NULL, n[6], n[2], LESS, RED);
+    _setup_facade_node(n[5], NULL, NULL, n[2], MORE, BLACK);
+    _setup_facade_node(n[6], NULL, NULL, n[4], MORE, BLACK);
+
+    /*
+     *  Facade tree (not sorted by value):
+     *
+     *       0
+     *     /   \
+     *    1     2
+     *   /     / \
+     *  3     4   5
+     *         \
+     *          6
+     */
 
     return;
 }
@@ -116,13 +129,11 @@ static void _setup_facade() {
 #define TEST_LEN_FULL 10
 static void _setup_full() {
 
-    cm_new_rb_tree(&t, sizeof(k), sizeof(d), compare);
-    k.x = 0;
+    cm_new_rb_tree(&t, sizeof(d), sizeof(d), compare);
     d.x = 0;
 
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
-        cm_rb_tree_set(&t, (cm_byte *) &k, (cm_byte *) &d);
-        k.x++;
+        cm_rb_tree_set(&t, (cm_byte *) &d, (cm_byte *) &d);
         d.x++;
     }
 
@@ -134,7 +145,6 @@ static void _setup_full() {
 static void teardown() {
 
     cm_del_rb_tree(&t); 
-    k.x = -1;
     d.x = -1;
 
     return;
@@ -146,21 +156,93 @@ static void teardown() {
  *  --- [HELPERS] ---
  */
 
+//assert node's position in the tree is correct
+static void _assert_node(cm_rb_tree_node * n, int n_data,
+                         int left_data, int right_data, int parent_data) {
+
+    /*
+     *  If called on adjascent nodes, there are substantial redundant checks.
+     */
+
+    data * temp_data;
+
+    //check node
+    ck_assert_ptr_nonnull(n);
+    temp_data = GET_NODE_DATA(n);
+    ck_assert_int_eq(temp_data->x, n_data);
+
+    //check left
+    if (left_data != DATA_NULL) {
+    ck_assert_ptr_nonnull(n->left);
+        ck_assert(n->left->parent_eval == LESS);
+        temp_data = GET_NODE_DATA(n->left);
+        ck_assert_int_eq(temp_data->x, left_data);
+    } else {
+        ck_assert_ptr_null(n->left);
+    }
+
+    //check right
+    if (right_data != DATA_NULL) {
+        ck_assert_ptr_nonnull(n->right);
+        ck_assert(n->right->parent_eval == MORE);
+        temp_data = GET_NODE_DATA(n->right);
+        ck_assert_int_eq(temp_data->x, right_data);
+    } else {
+        ck_assert_ptr_null(n->right);
+    }
+
+    //check parent
+    if (parent_data != DATA_NULL) {
+        ck_assert_ptr_nonnull(n->parent);
+        
+        if (n->parent_eval == LESS) {
+            ck_assert_ptr_eq(n->parent->left, n);
+        }
+
+        if (n->parent_eval == MORE) {
+            ck_assert_ptr_eq(n->parent->right, n);
+        }
+
+        if (n->parent_eval == ROOT) {
+            ck_assert_ptr_eq(t.root, n);
+        }
+
+        temp_data = GET_NODE_DATA(n->right);
+        ck_assert_int_eq(temp_data->x, right_data);
+    } else {
+        ck_assert_ptr_null(n->parent);
+        ck_assert_ptr_eq(t.root, n);
+    }
+
+    return;
+}
+
+
+
+static void _assert_node_fast(cm_rb_tree_node * n, int n_data) {
+
+    //check node
+    ck_assert_ptr_nonnull(n);
+    ck_assert_int_eq(GET_NODE_DATA(n)->x, n_data);
+   
+    return;
+}
+
 
 
 /*
  *  --- [UNIT TESTS] ---
  */
 
-//cm_new_rb_tree()
+//cm_new_rb_tree() [no fixture]
 START_TEST(test_new_cm_rb_tree) {
 
     //run test
-    cm_new_rb_tree(&t, sizeof(k), sizeof(d), compare);
+    cm_new_rb_tree(&t, sizeof(d), sizeof(d), compare);
 
     //assert result
     ck_assert_int_eq(t.size, 0);
-    ck_assert_int_eq(t.key_size, sizeof(k));
+    ck_assert_int_eq(t.data_size, sizeof(d));
     ck_assert_int_eq(t.data_size, sizeof(d));
     ck_assert_ptr_null(t.root);
     ck_assert_ptr_eq(t.compare, compare);
@@ -174,7 +256,7 @@ START_TEST(test_new_cm_rb_tree) {
 
 
 
-//cm_del_rb_tree()
+//cm_del_rb_tree() [facade fixture]
 START_TEST(test_del_cm_rb_tree) {
 
     /*
@@ -190,17 +272,16 @@ START_TEST(test_del_cm_rb_tree) {
 
 
 
-//_rb_tree_new_cm_rb_tree_node()
-START_TEST(test_rb_tree_new_cm_rb_tree_node) {
+//_rb_tree_new_cm_rb_tree_node() [no fixture]
+START_TEST(test__rb_tree_new_cm_rb_tree_node) {
     
     //setup test
     cm_rb_tree_node * n;
 
-    k.x = 0;
     d.x = 0;
 
     //run test
-    n = _rb_tree_new_cm_rb_tree_node(&t, (const cm_byte *) &k, (const cm_byte *) &d);
+    n = _rb_tree_new_cm_rb_tree_node(&t, (cm_byte *) &d, (cm_byte *) &d);
 
     //assert results
     ck_assert_ptr_nonnull(n);
@@ -214,8 +295,8 @@ START_TEST(test_rb_tree_new_cm_rb_tree_node) {
 
 
 
-//_rb_tree_del_cm_rb_tree_node()
-START_TEST(test_rb_tree_del_cm_rb_tree_node) {
+//_rb_tree_del_cm_rb_tree_node() [no fixture]
+START_TEST(test__rb_tree_del_cm_rb_tree_node) {
 
     /*
      *  Using ASAN to check for leaks here.
@@ -223,7 +304,7 @@ START_TEST(test_rb_tree_del_cm_rb_tree_node) {
         
     //setup test
     cm_rb_tree_node * n = malloc(sizeof(cm_rb_tree_node));
-    n->key = malloc(sizeof(k));
+    n->key = malloc(sizeof(d));
     n->data = malloc(sizeof(d));
     
     //run test
@@ -233,16 +314,156 @@ START_TEST(test_rb_tree_del_cm_rb_tree_node) {
 
 
 
+//_rb_tree_left_rotate() [facade fixture]
+START_TEST(test__rb_tree_left_rotate) {
+
+    //rotate node 2 left
+    _rb_tree_left_rotate(&t, t.root->right);
+
+    //assert result
+    _assert_node(t.root->right, 5, 2, DATA_NULL, 0);
+    _assert_node(t.root->right->left, 2, 4, DATA_NULL, 5);
+    _assert_node(t.root->right->left->left, 4, DATA_NULL, 6, 2);
+    _assert_node(t.root, 0, 1, 5, DATA_NULL);
+
+    //rotate node 0 left
+    _rb_tree_left_rotate(&t, t.root);
+
+    //assert result
+    _assert_node(t.root, 5, 1, DATA_NULL, DATA_NULL);
+    _assert_node(t.root->left, 1, 3, 2, 5);
+    ck_assert_ptr_null(t.root->right);
+
+    return;
+
+} END_TEST
+
+
+
+//_rb_tree_right_rotate() [facade fixture]
+START_TEST(test__rb_tree_right_rotate) {
+
+    //rotate node 2 right
+    _rb_tree_right_rotate(&t, t.root->right);
+
+    //assert result
+    _assert_node(t.root->right, 4, DATA_NULL, 2, 0);
+    ck_assert_ptr_null(t.root->right->left);
+    _assert_node(t.root->right->right, 2, 6, 5, 4);
+    _assert_node(t.root, 0, 1, 4, DATA_NULL);
+
+    //rotate node 0 right
+    _rb_tree_right_rotate(&t, t.root);
+
+    //assert result
+    _assert_node(t.root, 1, 3, 0, DATA_NULL);
+    _assert_node(t.root->left, 3, DATA_NULL, DATA_NULL, 1);
+    _assert_node(t.root->right, 0, DATA_NULL, 4, 0);
+
+    return;
+
+} END_TEST
+
+
+
+//_rb_tree_transplant() [facade fixture]
+START_TEST(test__rb_tree_transplant) {
+
+    /*
+     *  These are very specific test cases; transplant() can't be called 
+     *  on arbitrary nodes (per red-black tree theory).
+     */
+
+    cm_rb_tree_node * n_1, * n_2, *n_3;
+
+    //transplant 5 into 2
+    n_1 = t.root->right;
+    _rb_tree_transplant(&t, t.root->right, t.root->right->right);
+    _assert_node(t.root->right, 5, 4, DATA_NULL, 0);
+    _rb_tree_del_cm_rb_tree_node(n_1);
+
+    //transplant 6 to 4
+    n_2 = t.root->right->left;
+    _rb_tree_transplant(&t, t.root->right->left, t.root->right->left->right);
+    _assert_node(t.root->right->left, 6, DATA_NULL, DATA_NULL, 5);
+    _rb_tree_del_cm_rb_tree_node(n_2);
+
+    //transplant 6 to 0
+    n_3 = t.root;
+    _rb_tree_transplant(&t, t.root, t.root->right->left);
+    _assert_node(t.root, 6, DATA_NULL, 5, DATA_NULL);
+    _rb_tree_del_cm_rb_tree_node(n_3->left->left);
+    _rb_tree_del_cm_rb_tree_node(n_3->left);
+    _rb_tree_del_cm_rb_tree_node(n_3);
+
+    return;
+
+} END_TEST
+
+
+
+//_rb_tree_right_min() [facade fixture]
+START_TEST(test__rb_tree_right_min) {
+
+    cm_rb_tree_node * n;
+
+    //typical case
+    n = _rb_tree_right_min(t.root->right);
+    _assert_node_fast(n, 5);
+
+    //root
+    n = _rb_tree_right_min(t.root);
+    _assert_node_fast(n, 4);
+
+    //no right node
+    n = _rb_tree_right_min(t.root->left);
+    _assert_node_fast(n, 1);
+
+    return;
+
+} END_TEST
+
+
+
+//_rb_tree_get_child_colours
+START_TEST(test__rb_tree_get_child_colours) {
+
+    enum cm_rb_tree_colour left, right;
+
+    //set opposite values
+    left = BLACK;
+    right = RED;
+
+    //2 children
+    _rb_tree_get_child_colours(t.root->right, &left, &right);
+    ck_assert(left == RED);
+    ck_assert(right == BLACK);
+
+    //set opposite values
+    left = RED;
+    right = RED;
+
+    //1 child
+    _rb_tree_get_child_colours(t.root->right->left, &left, &right);
+    ck_assert(left == BLACK);
+    ck_assert(right == BLACK);
+
+    //set opposite values
+    left = RED;
+    right = RED;
+
+    //no children
+    _rb_tree_get_child_colours(t.root->right->left->right, &left, &right);
+    ck_assert(left == BLACK);
+    ck_assert(right == BLACK);
+
+    return;
+
+} END_TEST
+
+
 /*
  *  TODO
- *
- *  - Test left & right rotations (use facade fixture & make it bigger if needed)
- *
- *  - Test transplant (on facade fixture)
- *
- *  - Test right min (on facade fixture)
- *
- *  - Test get child colours (on facade fixture)
  *
  *  - Test _rb_tree_populate_fix_data() (on facade fixture)
  *
