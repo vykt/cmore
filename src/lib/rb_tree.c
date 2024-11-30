@@ -62,9 +62,9 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_traverse(const cm_rb_tree * tree,
 
 
 
-DBG_STATIC cm_rb_tree_node * _rb_tree_new_cm_rb_tree_node(const cm_rb_tree * tree,
-                                                          const cm_byte * key, 
-                                                          const cm_byte * data) {
+DBG_STATIC cm_rb_tree_node * _rb_tree_new_node(const cm_rb_tree * tree,
+                                               const cm_byte * key, 
+                                               const cm_byte * data) {
 
     //allocate node structure
     cm_rb_tree_node * new_node = malloc(sizeof(cm_rb_tree_node));
@@ -104,7 +104,7 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_new_cm_rb_tree_node(const cm_rb_tree * tre
 
 
 
-DBG_STATIC void _rb_tree_del_cm_rb_tree_node(cm_rb_tree_node * node) {
+DBG_STATIC void _rb_tree_del_node(cm_rb_tree_node * node) {
 
     free(node->key);
     free(node->data);
@@ -149,8 +149,14 @@ DBG_STATIC void _rb_tree_left_rotate(cm_rb_tree * tree, cm_rb_tree_node * node) 
         node->right->parent_eval = node->right->parent_eval == MORE ? LESS : MORE;
     }
 
-    //update tree's root node if necessary
-    if (tree->root == node) _rb_tree_set_root(tree, right_child);
+    //update parent
+    if (tree->root == node) {    
+        _rb_tree_set_root(tree, right_child);
+    
+    } else {
+        if (parent_eval == LESS) parent->left = right_child;
+        if (parent_eval == MORE) parent->right = right_child;
+    }
 
     return;
 }
@@ -176,11 +182,17 @@ DBG_STATIC void _rb_tree_right_rotate(cm_rb_tree * tree, cm_rb_tree_node * node)
     //rotate former right child's left child
     if (node->left != NULL) {
         node->left->parent = node;
-        node->right->parent_eval = node->right->parent_eval == MORE ? LESS : MORE;
+        node->left->parent_eval = node->left->parent_eval == MORE ? LESS : MORE;
     }
 
-    //update tree's root node if necessary
-    if (tree->root == node) _rb_tree_set_root(tree, left_child);
+    //update parent
+    if (tree->root == node) {
+        _rb_tree_set_root(tree, left_child);
+    
+    } else {
+        if (parent_eval == LESS) parent->left = left_child;
+        if (parent_eval == MORE) parent->right = left_child;
+    }
 
     return;
 }
@@ -194,9 +206,18 @@ DBG_STATIC void _rb_tree_transplant(cm_rb_tree * tree,
     //if deleting root, disconnect subject and target nodes and set target node as root
     if (tree->root == subj_node) {
 
+        //detach tgt_node from current parent
+        if (tgt_node->parent_eval == MORE) tgt_node->parent->right = NULL;
+        if (tgt_node->parent_eval == LESS) tgt_node->parent->left  = NULL;
+
+        //set root
         tree->root            = tgt_node;
         tgt_node->parent      = NULL;
         tgt_node->parent_eval = ROOT;
+
+        //re-attach right branch
+        tgt_node->right         = subj_node->right;
+        tgt_node->right->parent = tgt_node;
    
     } else {
         
@@ -231,26 +252,11 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_right_min(cm_rb_tree_node * node) {
 
 
 
-//get colour of node's children
-DBG_STATIC void _rb_tree_get_child_colours(const cm_rb_tree_node * node,
-                                           enum cm_rb_tree_colour * left,
-                                           enum cm_rb_tree_colour * right) {
+DBG_STATIC_INLINE enum cm_rb_tree_colour _rb_tree_get_colour(
+                                                    const cm_rb_tree_node * node) {
 
-    //get sibling's left child's colour
-    if (node->left == NULL) {
-        *left = BLACK;
-    } else {
-        *left = node->left->colour == BLACK ? BLACK : RED;
-    }
-
-    //get sibling's right child's colour
-    if (node->right == NULL) {
-        *right = BLACK;
-    } else {
-        *right = node->right->colour == BLACK ? BLACK : RED;
-    }
-
-    return;
+    if (node == NULL) return BLACK;
+    return node->colour == BLACK ? BLACK : RED;
 }
 
 
@@ -365,8 +371,11 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_1(cm_rb_tree * tree,
     f_data->sibling->colour = BLACK;
     f_data->parent->colour  = RED;
 
-    //rotate parent to make sibling the new grandparent
-    _rb_tree_left_rotate(tree, f_data->parent);
+    //rotate parent to make sibling the new grandparent 
+    if (f_data->sibling->parent_eval == LESS)
+        _rb_tree_right_rotate(tree, f_data->parent);
+    if (f_data->sibling->parent_eval == MORE)
+        _rb_tree_left_rotate(tree, f_data->parent);
 
     return;
 }
@@ -374,11 +383,11 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_1(cm_rb_tree * tree,
 
 
 /*
- *  Sibling is black, both of sibling's children are black. Set sibling to red and 
- *  advance target node up to parent.
+ *  Sibling is black, both of sibling's children are black. Parent is black.
+ *  Set sibling to red and advance target node up to parent.
  */
 
-//remove case 2
+//remove case 3
 DBG_STATIC_INLINE void _rb_tree_rem_case_2(cm_rb_tree_node ** node, 
                                            struct _rb_tree_fix_data * f_data) {
 
@@ -399,10 +408,20 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_2(cm_rb_tree_node ** node,
 DBG_STATIC_INLINE void _rb_tree_rem_case_3(cm_rb_tree * tree, 
                                            struct _rb_tree_fix_data * f_data) {
 
-    f_data->sibling->left->colour = BLACK;
-    f_data->sibling->colour       = RED;
+    //colour close nephew black, set sibling's colour to RED, rotate 
+    if (f_data->sibling->parent_eval == LESS) {
+        
+        f_data->sibling->right->colour = BLACK;
+        f_data->sibling->colour       = RED;
+        _rb_tree_left_rotate(tree, f_data->sibling);
+    }
 
-    _rb_tree_right_rotate(tree, f_data->sibling);
+    if (f_data->sibling->parent_eval == MORE) {
+        
+        f_data->sibling->left->colour = BLACK; 
+        f_data->sibling->colour       = RED;
+        _rb_tree_right_rotate(tree, f_data->sibling);
+    }
 
     return;
 }
@@ -422,11 +441,18 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_4(cm_rb_tree * tree,
 
     //recolour nodes
     f_data->sibling->colour        = f_data->parent->colour;
-    f_data->sibling->right->colour = BLACK;
     f_data->parent->colour         = BLACK;
 
-    //rotate parent left
-    _rb_tree_left_rotate(tree, f_data->parent);
+    //colour far nephew black, rotate
+    if (f_data->sibling->parent_eval == LESS) {
+        f_data->sibling->left->colour = BLACK;
+        _rb_tree_right_rotate(tree, f_data->parent);
+    }
+
+    if (f_data->sibling->parent_eval == MORE) {
+        f_data->sibling->right->colour = BLACK;
+        _rb_tree_left_rotate(tree, f_data->parent);
+    }
 
     *node = tree->root;
 
@@ -454,9 +480,9 @@ DBG_STATIC_INLINE void _rb_tree_populate_fix_data(const cm_rb_tree_node * node,
         f_data->uncle = f_data->grandparent->left;
 
     //get sibling
-    if (f_data->parent->parent_eval == LESS)
+    if (node->parent_eval == LESS)
         f_data->sibling = f_data->parent->right;
-    if (f_data->parent->parent_eval == MORE)
+    if (node->parent_eval == MORE)
         f_data->sibling = f_data->parent->left;
 
     return;
@@ -465,26 +491,27 @@ DBG_STATIC_INLINE void _rb_tree_populate_fix_data(const cm_rb_tree_node * node,
 
 
 //determines which case applies for inserting nodes
-DBG_STATIC_INLINE int _rb_tree_determine_ins_case(const cm_rb_tree * tree, 
-                                                  const cm_rb_tree_node * node,
+DBG_STATIC_INLINE int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
                                                   const struct 
                                                   _rb_tree_fix_data * f_data) {
 
     bool uncle_black;
 
+    //if parent is root, no fix necessary
+    if (f_data->parent->parent_eval == ROOT) return 0;
+
     //if parent is black, no fix necessary
     if (f_data->parent->colour == BLACK) return 0;
 
+    //determine if uncle is black
+    uncle_black = _rb_tree_get_colour(f_data->uncle) == BLACK ? true : false;
+
     //if uncle is red, case 1
-    if (f_data->uncle != NULL)
+    if (!uncle_black)
         if (f_data->uncle->colour == RED) return 1;
 
-    //determine if uncle is black
-    uncle_black = (f_data->uncle == NULL);
-    if (f_data->uncle != NULL) {
-        if (f_data->uncle->colour == BLACK) uncle_black = true;
-        if (f_data->uncle->colour == RED) uncle_black |= true;
-    }
+    //if grandparent is root, case 2
+    if (f_data->grandparent->parent_eval == ROOT) return 2;
 
     //determine 'triangle' or 'line' case
     if (uncle_black) {
@@ -496,9 +523,6 @@ DBG_STATIC_INLINE int _rb_tree_determine_ins_case(const cm_rb_tree * tree,
         if (node->parent_eval == f_data->parent->parent_eval) return 4;
 
     }
-
-    //if grandparent is root, case 2
-    if (tree->root == f_data->grandparent) return 2;
 
     //otherwise invalid state, error out
     cm_errno = CM_ERR_RB_INVALID_STATE;
@@ -514,23 +538,34 @@ DBG_STATIC_INLINE int _rb_tree_determine_rem_case(const struct
     enum cm_rb_tree_colour left_colour;
     enum cm_rb_tree_colour right_colour;
 
-    //if sibling doesn't exist, no fix necessary
-    if (f_data->sibling == NULL) return 0;
+    enum cm_rb_tree_colour close_colour;
+    enum cm_rb_tree_colour distant_colour;
+
+
+    //if parent is root, no fix necessary
+    if (f_data->parent->parent_eval == ROOT) return 0;
 
     //if sibling is red, case 1
     if (f_data->sibling->colour == RED) return 1;
 
     //get sibling's child colours
-    _rb_tree_get_child_colours(f_data->sibling, &left_colour, &right_colour);
+    left_colour = _rb_tree_get_colour(f_data->sibling->left);
+    right_colour = _rb_tree_get_colour(f_data->sibling->right);
 
     //if both sibling's children are black, case 2
     if ((left_colour == BLACK) && (right_colour == BLACK)) return 2;
 
+    //case 3 and 4 work with 'close' and 'distant' nephews
+    close_colour = f_data->sibling->parent_eval == LESS 
+                   ? right_colour : left_colour;
+    distant_colour = f_data->sibling->parent_eval == LESS 
+                     ? left_colour : right_colour;
+
     //if sibling's left child is red and right child is black, case 3
-    if ((left_colour == RED) && (right_colour == BLACK)) return 3;
+    if ((close_colour == RED) && (distant_colour == BLACK)) return 3;
 
     //if sibling's right child's colour is red, case 4
-    if (right_colour == RED) return 4;
+    if (distant_colour == RED) return 4;
 
     //otherwise invalid state, error out
     cm_errno = CM_ERR_RB_INVALID_STATE;
@@ -550,7 +585,7 @@ DBG_STATIC int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node) {
         _rb_tree_populate_fix_data(node, &f_data);
         
         //if fix case is 0, no further corrections necessary
-        fix_case = _rb_tree_determine_ins_case(tree, node, &f_data);
+        fix_case = _rb_tree_determine_ins_case(node, &f_data);
         if (fix_case <= 0) return fix_case; //-1 or 0
         
         /*
@@ -640,7 +675,7 @@ DBG_STATIC_INLINE cm_rb_tree_node * _rb_tree_add_node(cm_rb_tree * tree,
     int ret;
 
     //create new node
-    cm_rb_tree_node * node = _rb_tree_new_cm_rb_tree_node(tree, key, data);
+    cm_rb_tree_node * node = _rb_tree_new_node(tree, key, data);
 
     //if tree is empty, set root
     if (tree->size == 0) {
@@ -730,8 +765,9 @@ DBG_STATIC int _rb_tree_remove_node(cm_rb_tree * tree, cm_rb_tree_node * node) {
 DBG_STATIC void _rb_tree_empty_recurse(cm_rb_tree_node * node) {
 
     if (node == NULL) return;
-    if (node->left != NULL) _rb_tree_del_cm_rb_tree_node(node->left);
-    if (node->right != NULL) _rb_tree_del_cm_rb_tree_node(node->right);
+    if (node->left != NULL) _rb_tree_empty_recurse(node->left);
+    if (node->right != NULL) _rb_tree_empty_recurse(node->right);
+    _rb_tree_del_node(node);
 
     return;
 }
@@ -847,7 +883,7 @@ int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key) {
     cm_rb_tree_node * node = _rb_tree_unlink_node(tree, key);
     if (node == NULL) return -1;
 
-    _rb_tree_del_cm_rb_tree_node(node);
+    _rb_tree_del_node(node);
 
     return 0;
 }

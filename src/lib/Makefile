@@ -2,14 +2,17 @@
 
 # This makefile takes the following variables:
 #
-#	CC        - Compiler.
-#	CFLAGS    - Compiler flags.
-#   LDFLAGS   - Linker flags.
-#   BUILD_DIR - Library build directory.
+#	CC         - Compiler.
+#   BUILD_DIR  - Library build directory.
+#
+#   _LDFLAGS   - Linker flags.
+#	_CFLAGS    - Compiler flags.
+#   _WARN_OPTS - Compiler warnings.
 
-CFLAGS:=
-LDFLAGS:=
-WARN_OPTS:=
+
+CFLAGS=${_CFLAGS}
+WARN_OPTS=${_WARN_OPTS}
+LDFLAGS=${_LDFLAGS}
 
 SOURCES_LIB=list.c vector.c error.c rb_tree.c
 OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
@@ -33,7 +36,7 @@ ${STATIC}: ${OBJECTS_LIB}
 > ar rcs $@ $^
 
 ${BUILD_DIR}/%.o: %.c
-> ${CC} ${CFLAGS} -c $< -o $@ ${WARN_OPTS}
+> ${CC} ${CFLAGS} ${WARN_OPTS} -c $< -o $@
 
 clean:
 > -rm -v ${BUILD_DIR}/{*.o,${SHARED},${STATIC}}

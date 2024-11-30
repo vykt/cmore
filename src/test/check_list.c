@@ -49,7 +49,7 @@ static void _setup_empty() {
 
 
 //false populated list setup
-static void _setup_facade() {
+static void _setup_stub() {
 
     l.len = 3;
     l.data_size = sizeof(d);
@@ -789,7 +789,7 @@ Suite * list_suite() {
     
     //cm_del_list()
     tc_del_list = tcase_create("del_list");
-    tcase_add_checked_fixture(tc_del_list, _setup_facade, NULL);
+    tcase_add_checked_fixture(tc_del_list, _setup_stub, NULL);
     tcase_add_test(tc_del_list, test_del_list);
 
     //cm_list_append()

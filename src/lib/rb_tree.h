@@ -19,21 +19,19 @@ struct _rb_tree_fix_data {
 };
 
 
+#ifdef DEBUG
 //internal
 cm_rb_tree_node * _rb_tree_traverse(const cm_rb_tree * tree, const cm_byte * key,
                                     enum cm_rb_tree_eval * eval);
-cm_rb_tree_node * _rb_tree_new_cm_rb_tree_node(const cm_rb_tree * tree,
-                                               const cm_byte * key, 
-                                               const cm_byte * data);
-void _rb_tree_del_cm_rb_tree_node(cm_rb_tree_node * node);
+cm_rb_tree_node * _rb_tree_new_node(const cm_rb_tree * tree,
+                                    const cm_byte * key, const cm_byte * data);
+void _rb_tree_del_node(cm_rb_tree_node * node);
 void _rb_tree_left_rotate(cm_rb_tree * tree, cm_rb_tree_node * node);
 void _rb_tree_right_rotate(cm_rb_tree * tree, cm_rb_tree_node * node);
 void _rb_tree_transplant(cm_rb_tree * tree, 
                          cm_rb_tree_node * subj_node, cm_rb_tree_node * tgt_node);
 cm_rb_tree_node * _rb_tree_right_min(cm_rb_tree_node * node);
-void _rb_tree_get_child_colours(const cm_rb_tree_node * node,
-                                enum cm_rb_tree_colour * left,
-                                enum cm_rb_tree_colour * right);
+enum cm_rb_tree_colour _rb_tree_get_colour(const cm_rb_tree_node * node);
 void _rb_tree_ins_case_1(const cm_rb_tree * tree, cm_rb_tree_node ** node,
                          struct _rb_tree_fix_data * f_data);
 void _rb_tree_ins_case_2(struct _rb_tree_fix_data * f_data);
@@ -48,7 +46,7 @@ void _rb_tree_rem_case_4(cm_rb_tree * tree, cm_rb_tree_node ** node,
                          struct _rb_tree_fix_data * f_data);
 void _rb_tree_populate_fix_data(const cm_rb_tree_node * node,
                                 struct _rb_tree_fix_data * f_data);
-int _rb_tree_determine_ins_case(const cm_rb_tree * tree, const cm_rb_tree_node * node,
+int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
                                 const struct _rb_tree_fix_data * f_data);
 int _rb_tree_determine_rem_case(const struct _rb_tree_fix_data * f_data);
 int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node);
@@ -60,6 +58,7 @@ cm_rb_tree_node * _rb_tree_add_node(cm_rb_tree * tree, const cm_byte * key,
 int _rb_tree_remove_node(cm_rb_tree * tree, cm_rb_tree_node * node);
 void _rb_tree_empty_recurse(cm_rb_tree_node * node);
 cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree, const cm_byte * key);
+#endif
 
 
 //external

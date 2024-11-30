@@ -51,7 +51,7 @@ DBG_STATIC cm_list_node * _list_traverse(const cm_list * list, int index) {
 
 
 
-DBG_STATIC cm_list_node * _list_new_cm_list_node(const cm_list * list, 
+DBG_STATIC cm_list_node * _list_new_node(const cm_list * list, 
                                                  const cm_byte * data) {
 
     //allocate node structure
@@ -76,7 +76,7 @@ DBG_STATIC cm_list_node * _list_new_cm_list_node(const cm_list * list,
 
 
 
-DBG_STATIC void _list_del_cm_list_node(cm_list_node * node) {
+DBG_STATIC void _list_del_node(cm_list_node * node) {
 
     free(node->data);
     free(node);
@@ -151,7 +151,7 @@ DBG_STATIC int _list_empty(cm_list * list) {
     while ((node != NULL) && (index != 0)) {
 
         next_node = node->next;
-        _list_del_cm_list_node(node);
+        _list_del_node(node);
         node = next_node;
         --index;
     }
@@ -250,7 +250,7 @@ cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * d
     if (_list_assert_index_range(list, index, ADD_INDEX)) return NULL;
 
     //create new node
-    cm_list_node * new_node = _list_new_cm_list_node(list, data);
+    cm_list_node * new_node = _list_new_node(list, data);
     if (!new_node) return NULL;
     
     //get the _list_prev_ and _list_next_ of the new node as required
@@ -271,7 +271,7 @@ cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * d
             next_node = _list_traverse(list, index + 1);
         }
         if (!next_node) {
-            _list_del_cm_list_node(new_node);
+            _list_del_node(new_node);
             return NULL;
         }
         prev_node = next_node->prev;
@@ -285,7 +285,7 @@ cm_list_node * cm_list_insert(cm_list * list, const int index, const cm_byte * d
 
 cm_list_node * cm_list_append(cm_list * list, const cm_byte * data) {
 
-    cm_list_node * new_node = _list_new_cm_list_node(list, data);
+    cm_list_node * new_node = _list_new_node(list, data);
     if (!new_node) return NULL;
 
     //add node to list
@@ -330,7 +330,7 @@ int cm_list_remove(cm_list * list, const int index) {
     if(!del_node) return -1;
 
     _list_sub_node(list, del_node->prev, del_node->next, index);
-    _list_del_cm_list_node(del_node);
+    _list_del_node(del_node);
 
     --list->len;
 
@@ -368,7 +368,7 @@ void cm_del_list(cm_list * list) {
 
         del_node = list->head;
         _list_sub_node(list, del_node->prev, del_node->next, 0);
-        _list_del_cm_list_node(del_node);
+        _list_del_node(del_node);
     
     } //end for
 
@@ -379,7 +379,7 @@ void cm_del_list(cm_list * list) {
 
 void cm_del_list_node(cm_list_node * node) {
 
-    _list_del_cm_list_node(node);
+    _list_del_node(node);
 
     return;
 }

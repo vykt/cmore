@@ -5,10 +5,14 @@
 # CC          - Compiler.
 # BUILD_DIR   - Unit test build directory.
 # LIB_BIN_DIR - Library artifact directory.
+#
+# _CFLAGS     - Compiler flags.
+# _WARN_OPTS  - Compiler warnings.
 
-CFLAGS:= -O0 -ggdb -Wall -fsanitize=address
-LDFLAGS:= -L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck -static-libasan
-WARN_OPTS:= -Wno-unused-variable -Wno-unused-but-set-variable
+
+CFLAGS=${_CFLAGS} -fsanitize=address
+WARN_OPTS+=${_WARN_OPTS} -Wno-unused-variable -Wno-unused-but-set-variable
+LDFLAGS=-L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck -static-libasan
 
 SOURCES_TEST=main.c check_list.c check_vector.c check_rb_tree.c
 OBJECTS_TEST=${SOURCES_TEST:%.c=${BUILD_DIR}/%.o}
@@ -21,10 +25,10 @@ test: ${UNIT_TESTS}
 > mv ${UNIT_TESTS} ${BUILD_DIR}
 
 ${UNIT_TESTS}: ${OBJECTS_TEST}
-> ${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
+> ${CC} ${CFLAGS} ${WARN_OPTS} -o $@ $^ ${LDFLAGS}
 
 ${BUILD_DIR}/%.o: %.c
-> ${CC} ${CFLAGS} -c $< -o $@ ${WARN_OPTS}
+> ${CC} ${CFLAGS} ${WARN_OPTS} -c $< -o $@
 
 clean:
 > -rm -v ${BUILD_DIR}/{*.o,${UNIT_TESTS}}

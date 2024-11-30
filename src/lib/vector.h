@@ -20,6 +20,7 @@ enum _vector_index_mode {INDEX = 0, ADD_INDEX = 1};
 enum _vector_shift_mode {SHIFT_UP = 1, SHIFT_DOWN = -1};
 
 
+#ifdef DEBUG
 //internal
 int _vector_alloc(cm_vector * vector);
 int _vector_grow(cm_vector * vector);
@@ -31,6 +32,7 @@ void _vector_shift(cm_vector * vector, const int index,
 void _vector_set(cm_vector * vector, const int index, const cm_byte * data);
 int _vector_assert_index_range(const cm_vector * vector, 
                                const int index, const enum _vector_index_mode mode);
+#endif
 
 
 //external

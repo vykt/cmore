@@ -49,7 +49,7 @@ static void _setup_empty() {
 
 
 //false populated vector setup
-static void _setup_facade() {
+static void _setup_stub() {
 
     v.len = 10;
     v.size = VECTOR_DEFAULT_SIZE;
@@ -656,7 +656,7 @@ Suite * vector_suite() {
 
     //cm_del_vector()
     tc_del_vector = tcase_create("del_vector");
-    tcase_add_checked_fixture(tc_del_vector, _setup_facade, NULL);
+    tcase_add_checked_fixture(tc_del_vector, _setup_stub, NULL);
     tcase_add_test(tc_del_vector, test_del_vector);
 
     //cm_vector_append()
