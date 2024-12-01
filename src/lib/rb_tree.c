@@ -387,7 +387,7 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_1(cm_rb_tree * tree,
  *  Set sibling to red and advance target node up to parent.
  */
 
-//remove case 3
+//remove case 2
 DBG_STATIC_INLINE void _rb_tree_rem_case_2(cm_rb_tree_node ** node, 
                                            struct _rb_tree_fix_data * f_data) {
 
@@ -496,6 +496,9 @@ DBG_STATIC_INLINE int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
                                                   _rb_tree_fix_data * f_data) {
 
     bool uncle_black;
+
+    //if node is root, no fix necessary
+    if (node->parent_eval == ROOT) return 0;
 
     //if parent is root, no fix necessary
     if (f_data->parent->parent_eval == ROOT) return 0;
