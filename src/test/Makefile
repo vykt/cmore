@@ -17,18 +17,18 @@ LDFLAGS=-L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} -lcmore -lcheck -static-libas
 SOURCES_TEST=main.c check_list.c check_vector.c check_rb_tree.c
 OBJECTS_TEST=${SOURCES_TEST:%.c=${BUILD_DIR}/%.o}
 
-UNIT_TESTS=unit_tests
+TESTS=test
 
 
-test: ${UNIT_TESTS}
+tests: ${TESTS}
 > mkdir -p ${BUILD_DIR}
-> mv ${UNIT_TESTS} ${BUILD_DIR}
+> mv ${TESTS} ${BUILD_DIR}
 
-${UNIT_TESTS}: ${OBJECTS_TEST}
+${TESTS}: ${OBJECTS_TEST}
 > ${CC} ${CFLAGS} ${WARN_OPTS} -o $@ $^ ${LDFLAGS}
 
 ${BUILD_DIR}/%.o: %.c
 > ${CC} ${CFLAGS} ${WARN_OPTS} -c $< -o $@
 
 clean:
-> -rm -v ${BUILD_DIR}/{*.o,${UNIT_TESTS}}
+> -rm -v ${BUILD_DIR}/{*.o,${TESTS}}

@@ -1,2 +1,2 @@
 #!/bin/sh
-gdb -x init.gdb --args ./unit_tests
+gdb -x init.gdb --args ./test "$@"

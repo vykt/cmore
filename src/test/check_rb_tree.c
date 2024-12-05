@@ -40,13 +40,15 @@ static data d;
 
 
 
-enum cm_rb_tree_eval compare(const cm_byte * k_1_ptr, const cm_byte * k_2_ptr) {
+enum cm_rb_tree_eval compare(const cm_byte * b_1, const cm_byte * b_2) {
 
-    int k_1 = *((int *) k_1_ptr);
-    int k_2 = *((int *) k_2_ptr);
+    data * d_1, * d_2;
 
-    if (k_1 > k_2) return MORE;
-    if (k_1 < k_2) return LESS;
+    d_1 = (data *) b_1;
+    d_2 = (data *) b_2;
+
+    if (d_1->x > d_2->x) return MORE;
+    if (d_1->x < d_2->x) return LESS;
 
     return EQUAL;
 }
@@ -114,15 +116,66 @@ static void _setup_stub() {
     _setup_stub_node(n[6], NULL, NULL, n[4], MORE, RED);
 
     /*
-     *  Facade tree (not sorted by value):
+     *  Stub tree (not sorted by value):
      *
-     *       0
+     *       0b
      *     /   \
-     *    1     2
+     *    1r    2r
      *   /     / \
-     *  3     4   5
+     *  3b    4b  5b
      *         \
-     *          6
+     *          6r
+     */
+
+    return;
+}
+
+
+
+//sorted stub red-black tree
+static void _setup_sorted_stub() {
+
+    t.size = 10;
+
+    cm_rb_tree_node * n[10];
+    int values[10] = {20, 10, 40, 5, 15, 30, 50, 25, 45, 55};
+
+    //allocate each node
+    for (int i = 0; i < 7; ++i) {
+        
+        n[i] = malloc(sizeof(cm_rb_tree_node));
+        n[i]->key = malloc(sizeof(d));
+        n[i]->data = malloc(sizeof(d));
+    
+        *((int *) n[i]->key)  = values[i];
+        *((int *) n[i]->data) = values[i];
+    }
+
+    //link n together 
+    t.root = n[0];
+
+    //link n together
+    _setup_stub_node(n[0], n[1], n[2], NULL, ROOT, BLACK);
+    _setup_stub_node(n[1], n[3], n[4], n[0], LESS, BLACK);
+    _setup_stub_node(n[2], n[5], n[6], n[0], MORE, RED);
+    _setup_stub_node(n[3], NULL, NULL, n[1], LESS, RED);
+    _setup_stub_node(n[4], NULL, NULL, n[1], MORE, RED);
+    _setup_stub_node(n[5], n[7], NULL, n[2], LESS, BLACK);
+    _setup_stub_node(n[6], n[8], n[9], n[2], MORE, BLACK);
+    _setup_stub_node(n[7], NULL, NULL, n[5], LESS, RED);
+    _setup_stub_node(n[8], NULL, NULL, n[6], LESS, RED);
+    _setup_stub_node(n[9], NULL, NULL, n[6], MORE, RED);
+
+    /*
+     *  Sorted stub tree (sorted by value):
+     *
+     *        _ 20b _
+     *       /       \
+     *    10r         40r
+     *   /   \       /  \
+     *  5b   15b   30b  50b
+     *      /     /    /  \
+     *    12r     25r  45r   55r
      */
 
     return;
@@ -177,47 +230,51 @@ static void _assert_node(cm_rb_tree_node * n, int n_data,
     ck_assert_int_eq(temp_data->x, n_data);
 
     //check left
-    if (left_data != DATA_NULL) {
-        ck_assert_ptr_nonnull(n->left);
-        ck_assert(n->left->parent_eval == LESS);
-        temp_data = GET_NODE_DATA(n->left);
-        ck_assert_int_eq(temp_data->x, left_data);
+    if (left_data != DATA_NOCHECK) {
+        
+        if (left_data != DATA_NULL) {
+            ck_assert_ptr_nonnull(n->left);
+            ck_assert(n->left->parent_eval == LESS);
+            temp_data = GET_NODE_DATA(n->left);
+            ck_assert_int_eq(temp_data->x, left_data);
     
-    } else {
-
-        if (left_data != DATA_NOCHECK) ck_assert_ptr_null(n->left);
+        } else {
+            ck_assert_ptr_null(n->left);
+        }
     }
 
     //check right
-    if (right_data != DATA_NULL) {
-        ck_assert_ptr_nonnull(n->right);
-        ck_assert(n->right->parent_eval == MORE);
-        temp_data = GET_NODE_DATA(n->right);
-        ck_assert_int_eq(temp_data->x, right_data);
+    if (right_data != DATA_NOCHECK) {
     
-    } else {
+        if (right_data != DATA_NULL) {
+            ck_assert_ptr_nonnull(n->right);
+            ck_assert(n->right->parent_eval == MORE);
+            temp_data = GET_NODE_DATA(n->right);
+            ck_assert_int_eq(temp_data->x, right_data);
     
-        if (right_data != DATA_NOCHECK) ck_assert_ptr_null(n->right);
+        } else {
+            ck_assert_ptr_null(n->right);
+        }
     }
 
     //check parent
-    if (parent_data != DATA_NULL) {
-        ck_assert_ptr_nonnull(n->parent);
-        
-        if (n->parent_eval == LESS) {
-            ck_assert_ptr_eq(n->parent->left, n);
-        }
-
-        if (n->parent_eval == MORE) {
-            ck_assert_ptr_eq(n->parent->right, n);
-        }
-
-        temp_data = GET_NODE_DATA(n->parent);
-        ck_assert_int_eq(temp_data->x, parent_data);
+    if (parent_data != DATA_NOCHECK) {
     
-    } else {
+        if (parent_data != DATA_NULL) {
+            ck_assert_ptr_nonnull(n->parent);
+        
+            if (n->parent_eval == LESS) {
+                ck_assert_ptr_eq(n->parent->left, n);
+            }
 
-        if (parent_data != DATA_NOCHECK) {
+            if (n->parent_eval == MORE) {
+                ck_assert_ptr_eq(n->parent->right, n);
+            }
+
+            temp_data = GET_NODE_DATA(n->parent);
+            ck_assert_int_eq(temp_data->x, parent_data);
+    
+        } else {
             ck_assert_ptr_null(n->parent);
             ck_assert_ptr_eq(t.root, n);
         }
@@ -556,22 +613,22 @@ START_TEST(test__transplant) {
 
 
 
-//_rb_tree_right_min() [stub fixture]
-START_TEST(test__right_min) {
+//_rb_tree_left_max() [stub fixture]
+START_TEST(test__left_max) {
 
     cm_rb_tree_node * n;
 
     //typical case
-    n = _rb_tree_right_min(t.root->right);
-    _assert_node_fast(n, 5);
+    n = _rb_tree_left_max(t.root->right);
+    _assert_node_fast(n, 6);
 
     //root
-    n = _rb_tree_right_min(t.root);
-    _assert_node_fast(n, 4);
+    n = _rb_tree_left_max(t.root);
+    _assert_node_fast(n, 1);
 
     //no right node
-    n = _rb_tree_right_min(t.root->left);
-    _assert_node_fast(n, 1);
+    n = _rb_tree_left_max(t.root->right->left);
+    _assert_node_fast(n, 4);
 
     return;
 
@@ -662,10 +719,9 @@ START_TEST(test__determine_ins_case) {
 
     //case 2:
     _setup_stub_node(&node, NULL, NULL, &parent, LESS, RED);
-    _setup_stub_node(&parent, &node, NULL, &grandparent, LESS, RED);
-    _setup_stub_node(&grandparent, &parent, NULL, NULL, ROOT, RED);
+    _setup_stub_node(&parent, &node, NULL, NULL, ROOT, RED);
     
-    _set_fix_data(&f_data, &parent, &grandparent, NULL, NULL);
+    _set_fix_data(&f_data, &parent, NULL, NULL, NULL);
     ret = _rb_tree_determine_ins_case(&node, &f_data);
     ck_assert_int_eq(ret, 2);
 
@@ -710,11 +766,10 @@ START_TEST(test__determine_rem_case) {
 
 
     //case 0:
-    _setup_stub_node(&node, NULL, NULL, &parent, LESS, RED);
-    _setup_stub_node(&parent, &node, NULL, NULL, ROOT, BLACK);
+    _setup_stub_node(&node, NULL, NULL, NULL, ROOT, BLACK);
     
-    _set_fix_data(&f_data, &parent, NULL, NULL, NULL);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    _set_fix_data(&f_data, NULL, NULL, NULL, NULL);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 0);
 
 
@@ -726,7 +781,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 1);
 
     //case 1.1 - right side
@@ -737,7 +792,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 1);
 
 
@@ -749,7 +804,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 2);
 
 
@@ -761,7 +816,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 2);
 
 
@@ -773,7 +828,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 3);
 
 
@@ -785,7 +840,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 3);
     
     
@@ -796,7 +851,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, RED);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 4);
 
 
@@ -807,7 +862,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, RED);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&f_data);
+    ret = _rb_tree_determine_rem_case(&node, &f_data);
     ck_assert_int_eq(ret, 4);
     
     return;
@@ -823,19 +878,22 @@ START_TEST(test__ins_case_1) {
     cm_rb_tree_node * node;
 
     //setup
-    node = t.root->right->right;
-    t.root->parent_eval = LESS;
-    _set_fix_data(&f_data, t.root->right, t.root, 
-                  t.root->left, t.root->right->right);
+    node = t.root->right->left->right;
+    t.root->right->colour = BLACK;
+    t.root->right->left->colour = RED;
+    t.root->right->right->colour = RED;
+    _set_fix_data(&f_data, t.root->right->left, t.root->right, 
+                  t.root->right->right, NULL);
     
     //run test
     _rb_tree_ins_case_1(&t, &node, &f_data);
     
     //assert result
-    ck_assert(f_data.parent->colour == BLACK);
-    ck_assert(f_data.grandparent->colour == RED);
-    ck_assert(f_data.uncle->colour == BLACK);
-    ck_assert_ptr_eq(node, t.root);
+    ck_assert(t.root->right->colour == RED);
+    ck_assert(t.root->right->left->colour == BLACK);
+    ck_assert(t.root->right->right->colour == BLACK);
+    
+    ck_assert_ptr_eq(node, t.root->right);
 
     return;
 
@@ -850,14 +908,15 @@ START_TEST(test__ins_case_2) {
     cm_rb_tree_node * node;
 
     //setup
-    node = t.root->left->left;
-    _set_fix_data(&f_data, t.root->left, t.root, t.root->right, NULL);
+    node = t.root->left;
+    t.root->colour = RED;
+    _set_fix_data(&f_data, t.root, NULL, NULL, NULL);
 
     //run test
     _rb_tree_ins_case_2(&f_data);
 
     //assert result
-    ck_assert(f_data.parent->colour == BLACK);
+    ck_assert(t.root->colour == BLACK);
 
     return;
 
@@ -884,9 +943,11 @@ START_TEST(test__ins_case_3) {
 
     //assert result
     _assert_node(t.root->right, 2, 6, 5, 0);
-    _assert_node(t.root->right->right, 5, DATA_NULL, DATA_NULL, 0);
+    _assert_node(t.root->right->right, 5, DATA_NULL, DATA_NULL, 2);
     _assert_node(t.root->right->left, 6, 4, DATA_NULL, 2);
-    _assert_node(t.root->right->left->left, 4, DATA_NULL, DATA_NULL, 2);
+    _assert_node(t.root->right->left->left, 4, DATA_NULL, DATA_NULL, 6);
+    
+    ck_assert_ptr_eq(node, t.root->right->left->left);
 
     return;
 
@@ -898,29 +959,32 @@ START_TEST(test__ins_case_3) {
 START_TEST(test__ins_case_4) {
 
     struct _rb_tree_fix_data f_data;
-    cm_rb_tree_node * node, addon;
+    cm_rb_tree_node * node;
 
     //setup
-    _setup_stub_node(&addon, NULL, NULL, t.root->left->left, LESS, RED);
-    node = t.root->left->left->left;
-    t.root->left->left->colour = RED;
-    t.root->left->colour = BLACK;
-    _set_fix_data(&f_data, t.root->left->left, t.root->left, NULL, NULL);
+    t.root->right->left->left = t.root->right->left->right;
+    t.root->right->left->right = NULL;
+    t.root->right->left->left->parent_eval = LESS;
+    node = t.root->right->left->left;
+    t.root->right->colour = BLACK;
+    t.root->right->left->colour = BLACK;
+    _set_fix_data(&f_data, t.root->right->left, t.root->right,
+                  t.root->right->right, NULL);
 
     //run test
     _rb_tree_ins_case_4(&t, &node, &f_data);
 
     //assert result
-    _assert_node(t.root, 0, 3, 2, DATA_NULL);
-    _assert_node(t.root->left, 3, DATA_NOCHECK, 1, 0);
-    _assert_node(t.root->left->right, 1, DATA_NULL, DATA_NULL, 3);
+    _assert_node(t.root, 0, 1, 4, DATA_NULL);
+    _assert_node(t.root->right, 4, 6, 2, 0);
+    _assert_node(t.root->right->left, 6, DATA_NULL, DATA_NULL, 4);
+    _assert_node(t.root->right->right, 2, DATA_NULL, 5, 4);
     
-    ck_assert_ptr_null(t.root->left->right->left);
+    ck_assert_ptr_null(t.root->right->right->left);
     
-    ck_assert(t.root->left->colour == RED);
-    ck_assert(t.root->left->right->colour == BLACK);
+    ck_assert(t.root->right->colour == BLACK);
+    ck_assert(t.root->right->right->colour == RED);
 
-    t.root->left->left = t.root->left->left->right;
     return;
 
 } END_TEST
@@ -931,10 +995,8 @@ START_TEST(test__ins_case_4) {
 START_TEST(test__rem_case_1) {
 
     struct _rb_tree_fix_data f_data;
-    cm_rb_tree_node addon;
 
     //setup
-    _setup_stub_node(&addon, NULL, NULL, t.root->right->left, LESS, BLACK);
     t.root->right->left->right->colour = BLACK;
     t.root->right->left->colour = RED;
     t.root->right->colour = BLACK;
@@ -946,16 +1008,14 @@ START_TEST(test__rem_case_1) {
 
     //assert result
     _assert_node(t.root, 0, 1, 4, DATA_NULL);
-    _assert_node(t.root->right, 4, DATA_NOCHECK, 2, 0);
+    _assert_node(t.root->right, 4, DATA_NULL, 2, 0);
     _assert_node(t.root->right->right, 2, 6, 5, 4);
     _assert_node(t.root->right->right->left, 6, DATA_NULL, DATA_NULL, 2);
     _assert_node(t.root->right->right->right, 5, DATA_NULL, DATA_NULL, 2);
     
-    ck_assert_ptr_nonnull(t.root->right->left);
     ck_assert(t.root->right->colour == BLACK);
     ck_assert(t.root->right->right->colour == RED);
 
-    t.root->right->left = NULL;
     return;
 }
 
@@ -965,11 +1025,12 @@ START_TEST(test__rem_case_1) {
 START_TEST(test__rem_case_2) {
 
     struct _rb_tree_fix_data f_data;
-    cm_rb_tree_node * node, addon;
+    cm_rb_tree_node * node;//, addon;
 
     //setup
     node = t.root->right->right;
-    _setup_stub_node(&addon, NULL, NULL, t.root->right->left, LESS, BLACK);
+    //_setup_stub_node(&addon, NULL, NULL, t.root->right->left, LESS, BLACK);
+    //t.root->right->left->left = &addon;
     t.root->right->left->right->colour = BLACK;
     _set_fix_data(&f_data, t.root->right, t.root,
                   t.root->left, t.root->right->left);    
@@ -981,9 +1042,10 @@ START_TEST(test__rem_case_2) {
     ck_assert(t.root->right->left->colour == RED);
     ck_assert_ptr_eq(node, t.root->right);
 
-    t.root->right->left->left = NULL;
+    //t.root->right->left->left = NULL;
     return;
-}
+
+} END_TEST
 
 
 
@@ -991,10 +1053,8 @@ START_TEST(test__rem_case_2) {
 START_TEST(test__rem_case_3) {
 
     struct _rb_tree_fix_data f_data;
-    cm_rb_tree_node addon;    
 
     //setup
-    _setup_stub_node(&addon, NULL, NULL, t.root->right->left, LESS, BLACK);
     _set_fix_data(&f_data, t.root->right, t.root, 
                   t.root->left, t.root->right->left);
 
@@ -1005,21 +1065,17 @@ START_TEST(test__rem_case_3) {
     _assert_node(t.root->right, 2, 6, 5, 0);
     _assert_node(t.root->right->right, 5, DATA_NULL, DATA_NULL, 2);
     _assert_node(t.root->right->left, 6, 4, DATA_NULL, 2);
-    _assert_node(t.root->right->left->left, 4, DATA_NOCHECK, DATA_NULL, 6);
+    _assert_node(t.root->right->left->left, 4, DATA_NULL, DATA_NULL, 6);
 
-    ck_assert_ptr_nonnull(t.root->right->left->left->left);
+    ck_assert_ptr_null(t.root->right->left->left->right);
     
-    ck_assert(t.root->right->colour == RED);
-    ck_assert(t.root->right->right->colour == BLACK);
     ck_assert(t.root->right->left->colour == BLACK);
     ck_assert(t.root->right->left->left->colour == RED);
-    ck_assert(t.root->right->left->left->left->colour == BLACK);
 
-    t.root->right->left->left->left = NULL;
     return;
-}
 
-// TODO TODO TODO TODO CONVERT TO USING _assert_node
+} END_TEST
+
 
 
 //_rb_tree_rem_case_4 [stub fixture]
@@ -1051,8 +1107,176 @@ START_TEST(test__rem_case_4) {
     ck_assert(t.root->right->right->colour = BLACK);
 
     return;
-}
+
+} END_TEST
+
+
+
+/*
+ * The remaining internal functions are tested indirectly through the 
+ * exported cm_rb_tree_set() and cm_rb_tree_remove() functions.
+ *
+ */
+
 #endif
+
+
+
+//cm_rb_tree_set [empty fixture]
+START_TEST(test_rb_tree_set) {
+
+    cm_rb_tree_node * ret;
+
+    //root insert, case 0
+    d.x = 20;
+    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    _assert_node_fast(ret, 20);
+    
+    _assert_node(t.root, 20, DATA_NULL, DATA_NULL, DATA_NULL);
+    ck_assert(t.root->colour == RED);
+
+
+    //case 2
+    d.x = 25;
+    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    _assert_node_fast(ret, 25);
+    
+    _assert_node(t.root, 20, DATA_NULL, 25, DATA_NULL);
+    ck_assert(t.root->colour == BLACK);
+    _assert_node(t.root->right, 25, DATA_NULL, DATA_NULL, 20);
+    ck_assert(t.root->right->colour == RED);
+
+    
+    //case 4
+    d.x = 30;
+    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    _assert_node_fast(ret, 30);
+    
+    _assert_node(t.root, 25, 20, 30, DATA_NULL);
+    ck_assert(t.root->colour == BLACK);
+    _assert_node(t.root->left, 20, DATA_NULL, DATA_NULL, 25);
+    ck_assert(t.root->left->colour == RED);
+    _assert_node(t.root->right, 30, DATA_NULL, DATA_NULL, 25);
+    ck_assert(t.root->right->colour == RED);
+
+
+    //case 1
+    d.x = 22;
+    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    _assert_node_fast(ret, 22);
+
+    _assert_node(t.root->left, 20, DATA_NULL, 22, 25);
+    ck_assert(t.root->left->colour == BLACK);
+    ck_assert(t.root->right->colour == BLACK);
+    _assert_node(t.root->left->right, 22, DATA_NULL, DATA_NULL, 20);
+    ck_assert(t.root->left->right->colour == RED);
+
+
+    //case 3, case 4
+    d.x = 21;
+    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    _assert_node_fast(ret, 21);
+    
+    _assert_node(t.root->left, 21, 20, 22, 25);
+    ck_assert(t.root->left->colour == BLACK);
+    _assert_node(t.root->left->left, 20, DATA_NULL, DATA_NULL, 21);
+    ck_assert(t.root->left->left->colour == RED);
+    _assert_node(t.root->left->right, 22, DATA_NULL, DATA_NULL, 21);
+    ck_assert(t.root->left->right->colour == RED);
+
+    return;
+    
+} END_TEST
+
+
+
+//cm_rb_tree_remove [sorted stub fixture]
+START_TEST(test_rb_tree_remove) {
+
+    int ret;
+
+    //case 0
+    d.x = 25;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    _assert_node(t.root->right->left, 30, DATA_NULL, DATA_NULL, 40);
+
+
+    //case 3
+    d.x = 30;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    _assert_node(t.root->right, 50, 40, 55, 20);
+    ck_assert(t.root->right->colour == RED);
+    _assert_node(t.root->right->left, 40, DATA_NULL, 45, 50);
+    ck_assert(t.root->right->left->colour == BLACK);
+    _assert_node(t.root->right->right, 55, DATA_NULL, DATA_NULL, 50);
+    ck_assert(t.root->right->right->colour == BLACK);
+    _assert_node(t.root->right->left->right, 45, DATA_NULL, DATA_NULL, 40);
+
+
+    //case 4
+    t.root->right->left->left = t.root->right->left->right;
+    t.root->right->left->right = NULL;
+    t.root->right->left->left->parent_eval = LESS;
+    ((data *) t.root->right->left->left->data)->x = 35; 
+
+    d.x = 55;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    _assert_node(t.root, 20, 10, 40, DATA_NULL);
+    ck_assert(t.root->colour == BLACK);
+    _assert_node(t.root->right, 40, 35, 50, 20);
+    ck_assert(t.root->right->colour == RED);
+    _assert_node(t.root->right->left, 35, DATA_NULL, DATA_NULL, 40);
+    ck_assert(t.root->right->left->colour == BLACK);
+    _assert_node(t.root->right->right, 50, DATA_NULL, DATA_NULL, 40);
+    ck_assert(t.root->right->right->colour == BLACK);
+
+
+    //case 1
+    d.x = 5;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    d.x = 15;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+    
+    d.x = 10;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    _assert_node(t.root, 40, 20, 50, DATA_NULL);
+    ck_assert(t.root->colour == BLACK);
+    _assert_node(t.root->left, 20, DATA_NULL, 35, 40);
+    ck_assert(t.root->left->colour == BLACK);
+    _assert_node(t.root->right, 50, DATA_NULL, DATA_NULL, 40);
+    ck_assert(t.root->right->colour == BLACK);
+    _assert_node(t.root->left->right, 35, DATA_NULL, DATA_NULL, 20);
+    ck_assert(t.root->left->right->colour == RED);
+
+
+    //case 2
+    d.x = 15;
+    cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    t.root->colour = RED;
+    t.root->left->left->colour = BLACK;
+    t.root->left->right->colour = BLACK;
+
+    d.x = 50;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+    ck_assert(t.root->right->colour == RED);
+    
+    return;
+    
+} END_TEST
+
+
 
 
 /*
@@ -1085,7 +1309,7 @@ Suite * rb_tree_suite() {
     TCase * tc__left_rotate;
     TCase * tc__right_rotate;
     TCase * tc__transplant;
-    TCase * tc__right_min;
+    TCase * tc__left_max;
     TCase * tc__get_colour;
     TCase * tc__populate_fix_data;
     TCase * tc__determine_ins_case;
@@ -1099,6 +1323,10 @@ Suite * rb_tree_suite() {
     TCase * tc__rem_case_3;
     TCase * tc__rem_case_4;
     #endif
+
+    //test cases (cont.)
+    TCase * tc_rb_tree_set;
+    TCase * tc_rb_tree_remove;
 
     Suite * s = suite_create("rb_tree");
 
@@ -1136,10 +1364,10 @@ Suite * rb_tree_suite() {
     tcase_add_checked_fixture(tc__transplant, _setup_stub, teardown);
     tcase_add_test(tc__transplant, test__transplant);
     
-    //tc__right_min()
-    tc__right_min = tcase_create("_right_min");
-    tcase_add_checked_fixture(tc__right_min, _setup_stub, teardown);
-    tcase_add_test(tc__right_min, test__right_min);
+    //tc__left_max()
+    tc__left_max = tcase_create("_left_max");
+    tcase_add_checked_fixture(tc__left_max, _setup_stub, teardown);
+    tcase_add_test(tc__left_max, test__left_max);
 
     //tc__get_colour()
     tc__get_colour = tcase_create("_get_colour");
@@ -1178,7 +1406,7 @@ Suite * rb_tree_suite() {
     tc__ins_case_4 = tcase_create("_ins_case_4");
     tcase_add_checked_fixture(tc__ins_case_4, _setup_stub, teardown);
     tcase_add_test(tc__ins_case_4, test__ins_case_4);
-/*
+
     //tc__rem_case_1
     tc__rem_case_1 = tcase_create("_rem_case_1");
     tcase_add_checked_fixture(tc__rem_case_1, _setup_stub, teardown);
@@ -1198,8 +1426,17 @@ Suite * rb_tree_suite() {
     tc__rem_case_4 = tcase_create("_rem_case_4");
     tcase_add_checked_fixture(tc__rem_case_4, _setup_stub, teardown);
     tcase_add_test(tc__rem_case_4, test__rem_case_4);
- */
     #endif
+
+    //tc_set()
+    tc_rb_tree_set = tcase_create("rb_tree_set");
+    tcase_add_checked_fixture(tc_rb_tree_set, _setup_empty, teardown);
+    tcase_add_test(tc_del_cm_rb_tree, test_del_cm_rb_tree);
+
+    //tc_remove()
+    tc_rb_tree_remove = tcase_create("del_cm_rb_tree");
+    tcase_add_checked_fixture(tc_rb_tree_remove, _setup_sorted_stub, teardown);
+    tcase_add_test(tc_rb_tree_remove, test_rb_tree_remove);
 
 
     //add test cases to red-black tree suite
@@ -1212,7 +1449,7 @@ Suite * rb_tree_suite() {
     suite_add_tcase(s, tc__left_rotate);
     suite_add_tcase(s, tc__right_rotate);
     suite_add_tcase(s, tc__transplant);
-    suite_add_tcase(s, tc__right_min);
+    suite_add_tcase(s, tc__left_max);
     suite_add_tcase(s, tc__get_colour);
     suite_add_tcase(s, tc__populate_fix_data);
     suite_add_tcase(s, tc__determine_ins_case);
@@ -1221,10 +1458,10 @@ Suite * rb_tree_suite() {
     suite_add_tcase(s, tc__ins_case_2);
     suite_add_tcase(s, tc__ins_case_3);
     suite_add_tcase(s, tc__ins_case_4);
-    /*suite_add_tcase(s, tc__rem_case_1);
+    suite_add_tcase(s, tc__rem_case_1);
     suite_add_tcase(s, tc__rem_case_2);
     suite_add_tcase(s, tc__rem_case_3);
-    suite_add_tcase(s, tc__rem_case_4);*/
+    suite_add_tcase(s, tc__rem_case_4);
     #endif
 
     return s;

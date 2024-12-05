@@ -25,10 +25,10 @@ endif
 
 #[process targets]
 test: shared
-> $(MAKE) -C ${TEST_DIR} test CC='${CC}' _CFLAGS='${CFLAGS_DBG}' \
-		                                 _WARN_OPTS='${WARN_OPTS}' \
-										 BUILD_DIR='${BUILD_DIR}/test' \
-                                         LIB_BIN_DIR='${BUILD_DIR}/lib'
+> $(MAKE) -C ${TEST_DIR} tests CC='${CC}' _CFLAGS='${CFLAGS_DBG}' \
+		                                  _WARN_OPTS='${WARN_OPTS}' \
+										  BUILD_DIR='${BUILD_DIR}/test' \
+                                          LIB_BIN_DIR='${BUILD_DIR}/lib'
 
 all: shared static
 
