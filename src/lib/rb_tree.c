@@ -93,8 +93,10 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_new_node(const cm_rb_tree * tree,
     //copy the data into the node
     memcpy(new_node->data, data, tree->data_size);
 
-    //null out parent until node is attached to tree
-    new_node->parent      = NULL;
+    //null out pointers
+    new_node->parent = NULL;
+    new_node->left   = NULL;
+    new_node->right  = NULL;
 
     //set colour to red
     new_node->colour = RED;
@@ -608,8 +610,7 @@ DBG_STATIC int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node) {
 
             case 3:
                 _rb_tree_ins_case_3(tree, &node, &f_data);
-                _rb_tree_ins_case_4(tree, &node, &f_data);
-                return 0;
+                break;
 
             case 4:
                 _rb_tree_ins_case_4(tree, &node, &f_data);
@@ -656,7 +657,6 @@ DBG_STATIC int _rb_tree_fix_remove(cm_rb_tree * tree, cm_rb_tree_node * node,
             case 4:
                 _rb_tree_rem_case_4(tree, &node, f_data);
                 return 0;
-
         }
 
         //update fix_data struct for next iteration
@@ -686,8 +686,14 @@ DBG_STATIC_INLINE cm_rb_tree_node * _rb_tree_add_node(cm_rb_tree * tree,
 
     //else connect node
     } else {
-        if (eval == LESS) parent->left = node;
-        if (eval == MORE) parent->right = node;
+        node->parent = parent;
+        if (eval == LESS) {
+            node->parent_eval = LESS;
+            parent->left = node;
+        } else {
+            node->parent_eval = MORE;
+            parent->right = node;
+        }
     }
 
     //increment tree size
@@ -710,9 +716,9 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree,
     int ret;
 
     struct _rb_tree_fix_data f_data;
-    enum cm_rb_tree_eval eval;
-    
+    enum cm_rb_tree_eval eval;    
     cm_rb_tree_node * node, * min_node;
+
     
     //get relevant node
     node = _rb_tree_traverse(tree, key, &eval);
@@ -722,12 +728,20 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree,
         cm_errno = CM_ERR_USER_KEY;
         return NULL;
     }
+
  
     //node has no children
     if (node->left == NULL && node->right == NULL) {
 
         //bootstrap fix_data if node removal will require fixes
         if (node->colour == BLACK) _rb_tree_populate_fix_data(node, &f_data);
+
+        //remove node from parent
+        if (node->parent_eval == LESS) {
+            node->parent->left = NULL;
+        } else {
+            node->parent->right = NULL;
+        }
 
     //node only has a right child
     } else if (node->left == NULL) {
@@ -769,8 +783,10 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree,
     tree->size -= 1;
 
     //if a black node was removed, must correct tree
-    if (node->colour == BLACK) ret = _rb_tree_fix_remove(tree, node, &f_data);
-    if (ret == -1) return NULL;
+    if (node->colour == BLACK) {
+        ret = _rb_tree_fix_remove(tree, node, &f_data);
+        if (ret == -1) return NULL;
+    }
     
     return node;
 }
@@ -880,13 +896,10 @@ int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key) {
 
 
 
-int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key) {
+cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key) {
 
     //get relevant node
-    cm_rb_tree_node * node = _rb_tree_unlink_node(tree, key);
-    if (node == NULL) return -1;
-
-    return 0;
+    return _rb_tree_unlink_node(tree, key);
 }
 
 

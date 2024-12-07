@@ -68,7 +68,7 @@ cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, const cm_byte * k
 cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
                                  const cm_byte * key, const cm_byte * data);
 int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key);
-int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
+cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
 void cm_rb_tree_empty(cm_rb_tree * tree);
 
 void cm_new_rb_tree(cm_rb_tree * tree, const size_t key_size, const size_t data_size,

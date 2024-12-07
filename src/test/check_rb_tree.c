@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 //system headers
+#include <time.h>
 #include <unistd.h>
 #include <limits.h>
 
@@ -141,7 +142,7 @@ static void _setup_sorted_stub() {
     int values[10] = {20, 10, 40, 5, 15, 30, 50, 25, 45, 55};
 
     //allocate each node
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 10; ++i) {
         
         n[i] = malloc(sizeof(cm_rb_tree_node));
         n[i]->key = malloc(sizeof(d));
@@ -156,10 +157,10 @@ static void _setup_sorted_stub() {
 
     //link n together
     _setup_stub_node(n[0], n[1], n[2], NULL, ROOT, BLACK);
-    _setup_stub_node(n[1], n[3], n[4], n[0], LESS, BLACK);
+    _setup_stub_node(n[1], n[3], n[4], n[0], LESS, RED);
     _setup_stub_node(n[2], n[5], n[6], n[0], MORE, RED);
-    _setup_stub_node(n[3], NULL, NULL, n[1], LESS, RED);
-    _setup_stub_node(n[4], NULL, NULL, n[1], MORE, RED);
+    _setup_stub_node(n[3], NULL, NULL, n[1], LESS, BLACK);
+    _setup_stub_node(n[4], NULL, NULL, n[1], MORE, BLACK);
     _setup_stub_node(n[5], n[7], NULL, n[2], LESS, BLACK);
     _setup_stub_node(n[6], n[8], n[9], n[2], MORE, BLACK);
     _setup_stub_node(n[7], NULL, NULL, n[5], LESS, RED);
@@ -174,8 +175,8 @@ static void _setup_sorted_stub() {
      *    10r         40r
      *   /   \       /  \
      *  5b   15b   30b  50b
-     *      /     /    /  \
-     *    12r     25r  45r   55r
+     *            /    /  \
+     *          25r  45r   55r
      */
 
     return;
@@ -183,24 +184,7 @@ static void _setup_sorted_stub() {
 
 
 
-//populated red-black tree setup
-#define TEST_LEN_FULL 10
-static void _setup_full() {
-
-    cm_new_rb_tree(&t, sizeof(d), sizeof(d), compare);
-    d.x = 0;
-
-    for (int i = 0; i < TEST_LEN_FULL; ++i) {
-        cm_rb_tree_set(&t, (cm_byte *) &d, (cm_byte *) &d);
-        d.x++;
-    }
-
-    return;
-}
-
-
-
-static void teardown() {
+static void _teardown() {
 
     cm_del_rb_tree(&t); 
     d.x = -1;
@@ -1133,7 +1117,7 @@ START_TEST(test_rb_tree_set) {
     _assert_node_fast(ret, 20);
     
     _assert_node(t.root, 20, DATA_NULL, DATA_NULL, DATA_NULL);
-    ck_assert(t.root->colour == RED);
+    ck_assert(t.root->colour == BLACK);
 
 
     //case 2
@@ -1203,7 +1187,7 @@ START_TEST(test_rb_tree_remove) {
     _assert_node(t.root->right->left, 30, DATA_NULL, DATA_NULL, 40);
 
 
-    //case 3
+    //case 4
     d.x = 30;
     ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
     ck_assert_int_eq(ret, 0);
@@ -1217,23 +1201,18 @@ START_TEST(test_rb_tree_remove) {
     _assert_node(t.root->right->left->right, 45, DATA_NULL, DATA_NULL, 40);
 
 
-    //case 4
-    t.root->right->left->left = t.root->right->left->right;
-    t.root->right->left->right = NULL;
-    t.root->right->left->left->parent_eval = LESS;
-    ((data *) t.root->right->left->left->data)->x = 35; 
-
+    //case 3
     d.x = 55;
     ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
     ck_assert_int_eq(ret, 0);
 
-    _assert_node(t.root, 20, 10, 40, DATA_NULL);
+    _assert_node(t.root, 20, 10, 45, DATA_NULL);
     ck_assert(t.root->colour == BLACK);
-    _assert_node(t.root->right, 40, 35, 50, 20);
+    _assert_node(t.root->right, 45, 40, 50, 20);
     ck_assert(t.root->right->colour == RED);
-    _assert_node(t.root->right->left, 35, DATA_NULL, DATA_NULL, 40);
+    _assert_node(t.root->right->left, 40, DATA_NULL, DATA_NULL, 45);
     ck_assert(t.root->right->left->colour == BLACK);
-    _assert_node(t.root->right->right, 50, DATA_NULL, DATA_NULL, 40);
+    _assert_node(t.root->right->right, 50, DATA_NULL, DATA_NULL, 45);
     ck_assert(t.root->right->right->colour == BLACK);
 
 
@@ -1351,32 +1330,32 @@ Suite * rb_tree_suite() {
 
     //tc__left_rotate()
     tc__left_rotate = tcase_create("_left_rotate");
-    tcase_add_checked_fixture(tc__left_rotate, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__left_rotate, _setup_stub, _teardown);
     tcase_add_test(tc__left_rotate, test__left_rotate);
 
     //tc__right_rotate()
     tc__right_rotate = tcase_create("_right_rotate");
-    tcase_add_checked_fixture(tc__right_rotate, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__right_rotate, _setup_stub, _teardown);
     tcase_add_test(tc__right_rotate, test__right_rotate);
     
     //tc__transplant()
     tc__transplant = tcase_create("_transplant");
-    tcase_add_checked_fixture(tc__transplant, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__transplant, _setup_stub, _teardown);
     tcase_add_test(tc__transplant, test__transplant);
     
     //tc__left_max()
     tc__left_max = tcase_create("_left_max");
-    tcase_add_checked_fixture(tc__left_max, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__left_max, _setup_stub, _teardown);
     tcase_add_test(tc__left_max, test__left_max);
 
     //tc__get_colour()
     tc__get_colour = tcase_create("_get_colour");
-    tcase_add_checked_fixture(tc__get_colour, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__get_colour, _setup_stub, _teardown);
     tcase_add_test(tc__get_colour, test__get_colour);
 
     //tc__populate_fix_data()
     tc__populate_fix_data = tcase_create("_populate_fix_data");
-    tcase_add_checked_fixture(tc__populate_fix_data, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__populate_fix_data, _setup_stub, _teardown);
     tcase_add_test(tc__populate_fix_data, test__populate_fix_data);
 
     //tc__determine_ins_case()
@@ -1389,53 +1368,53 @@ Suite * rb_tree_suite() {
 
     //tc__ins_case_1
     tc__ins_case_1 = tcase_create("_ins_case_1");
-    tcase_add_checked_fixture(tc__ins_case_1, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__ins_case_1, _setup_stub, _teardown);
     tcase_add_test(tc__ins_case_1, test__ins_case_1);
 
     //tc__ins_case_2
     tc__ins_case_2 = tcase_create("_ins_case_2");
-    tcase_add_checked_fixture(tc__ins_case_2, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__ins_case_2, _setup_stub, _teardown);
     tcase_add_test(tc__ins_case_2, test__ins_case_2);
     
     //tc__ins_case_3
     tc__ins_case_3 = tcase_create("_ins_case_3");
-    tcase_add_checked_fixture(tc__ins_case_3, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__ins_case_3, _setup_stub, _teardown);
     tcase_add_test(tc__ins_case_3, test__ins_case_3);
     
     //tc__ins_case_4
     tc__ins_case_4 = tcase_create("_ins_case_4");
-    tcase_add_checked_fixture(tc__ins_case_4, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__ins_case_4, _setup_stub, _teardown);
     tcase_add_test(tc__ins_case_4, test__ins_case_4);
 
     //tc__rem_case_1
     tc__rem_case_1 = tcase_create("_rem_case_1");
-    tcase_add_checked_fixture(tc__rem_case_1, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__rem_case_1, _setup_stub, _teardown);
     tcase_add_test(tc__rem_case_1, test__rem_case_1);
     
     //tc__rem_case_2
     tc__rem_case_2 = tcase_create("_rem_case_2");
-    tcase_add_checked_fixture(tc__rem_case_2, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__rem_case_2, _setup_stub, _teardown);
     tcase_add_test(tc__rem_case_2, test__rem_case_2);
     
     //tc__rem_case_3
     tc__rem_case_3 = tcase_create("_rem_case_3");
-    tcase_add_checked_fixture(tc__rem_case_3, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__rem_case_3, _setup_stub, _teardown);
     tcase_add_test(tc__rem_case_3, test__rem_case_3);
     
     //tc__rem_case_4
     tc__rem_case_4 = tcase_create("_rem_case_4");
-    tcase_add_checked_fixture(tc__rem_case_4, _setup_stub, teardown);
+    tcase_add_checked_fixture(tc__rem_case_4, _setup_stub, _teardown);
     tcase_add_test(tc__rem_case_4, test__rem_case_4);
     #endif
 
     //tc_set()
     tc_rb_tree_set = tcase_create("rb_tree_set");
-    tcase_add_checked_fixture(tc_rb_tree_set, _setup_empty, teardown);
-    tcase_add_test(tc_del_cm_rb_tree, test_del_cm_rb_tree);
+    tcase_add_checked_fixture(tc_rb_tree_set, _setup_empty, _teardown);
+    tcase_add_test(tc_rb_tree_set, test_rb_tree_set);
 
     //tc_remove()
-    tc_rb_tree_remove = tcase_create("del_cm_rb_tree");
-    tcase_add_checked_fixture(tc_rb_tree_remove, _setup_sorted_stub, teardown);
+    tc_rb_tree_remove = tcase_create("rb_tree_remove");
+    tcase_add_checked_fixture(tc_rb_tree_remove, _setup_sorted_stub, _teardown);
     tcase_add_test(tc_rb_tree_remove, test_rb_tree_remove);
 
 
@@ -1463,6 +1442,9 @@ Suite * rb_tree_suite() {
     suite_add_tcase(s, tc__rem_case_3);
     suite_add_tcase(s, tc__rem_case_4);
     #endif
+
+    suite_add_tcase(s, tc_rb_tree_set);
+    suite_add_tcase(s, tc_rb_tree_remove);
 
     return s;
 }

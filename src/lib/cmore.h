@@ -169,7 +169,8 @@ extern cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key);
-extern int cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
+//pointer = success, NULL = error, see cm_errno
+extern cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
 //void return
 extern void cm_rb_tree_empty(cm_rb_tree * tree);
 
