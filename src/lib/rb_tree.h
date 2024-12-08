@@ -32,20 +32,32 @@ void _rb_tree_transplant(cm_rb_tree * tree,
                          cm_rb_tree_node * subj_node, cm_rb_tree_node * tgt_node);
 cm_rb_tree_node * _rb_tree_left_max(cm_rb_tree_node * node);
 enum cm_rb_tree_colour _rb_tree_get_colour(const cm_rb_tree_node * node);
-void _rb_tree_ins_case_1(const cm_rb_tree * tree, cm_rb_tree_node ** node,
-                         struct _rb_tree_fix_data * f_data);
-void _rb_tree_ins_case_2(struct _rb_tree_fix_data * f_data);
-void _rb_tree_ins_case_3(cm_rb_tree * tree, cm_rb_tree_node ** node,
-                         struct _rb_tree_fix_data * f_data);
-void _rb_tree_ins_case_4(cm_rb_tree * tree, cm_rb_tree_node ** node,
-                         struct _rb_tree_fix_data * f_data);
-void _rb_tree_rem_case_1(cm_rb_tree * tree, struct _rb_tree_fix_data * f_data);
-void _rb_tree_rem_case_2(cm_rb_tree_node ** node, struct _rb_tree_fix_data * f_data);
-void _rb_tree_rem_case_3(cm_rb_tree * tree, struct _rb_tree_fix_data * f_data);
-void _rb_tree_rem_case_4(cm_rb_tree * tree, cm_rb_tree_node ** node, 
-                         struct _rb_tree_fix_data * f_data);
 void _rb_tree_populate_fix_data(const cm_rb_tree_node * node,
                                 struct _rb_tree_fix_data * f_data);
+void _rb_tree_ins_case_1(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node,
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_ins_case_2(cm_rb_tree * tree,
+                         cm_rb_tree_node ** node,
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_ins_case_3(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node,
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_ins_case_4(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node,
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_rem_case_1(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node, 
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_rem_case_2(cm_rb_tree * tree,
+                         cm_rb_tree_node ** node, 
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_rem_case_3(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node, 
+                         struct _rb_tree_fix_data * f_data);
+void _rb_tree_rem_case_4(cm_rb_tree * tree, 
+                         cm_rb_tree_node ** node, 
+                         struct _rb_tree_fix_data * f_data);
 int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
                                 const struct _rb_tree_fix_data * f_data);
 int _rb_tree_determine_rem_case(const cm_rb_tree_node * node,

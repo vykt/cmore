@@ -11,7 +11,7 @@
 
 
 CFLAGS=${_CFLAGS}
-WARN_OPTS=${_WARN_OPTS}
+WARN_OPTS=${_WARN_OPTS} -Wno-unused-parameter
 LDFLAGS=${_LDFLAGS}
 
 SOURCES_LIB=list.c vector.c error.c rb_tree.c
