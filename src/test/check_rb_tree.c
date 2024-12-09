@@ -584,12 +584,16 @@ START_TEST(test__transplant) {
     _assert_node(t.root->right->left, 6, DATA_NULL, DATA_NULL, 2);
     _rb_tree_del_node(del_node);
 
+    /*
+     *  TODO can't transplant in a vacuum like this when target has 2 children
+     */
+
     //transplant 6 into 0
-    del_node = t.root;
+    /*del_node = t.root;
     _rb_tree_transplant(&t, t.root, t.root->right->left);
     _assert_node(t.root, 6, DATA_NULL, 2, DATA_NULL);
     _rb_tree_del_node(del_node->left);
-    _rb_tree_del_node(del_node);
+    _rb_tree_del_node(del_node);*/
 
     return;
 
@@ -751,9 +755,10 @@ START_TEST(test__determine_rem_case) {
 
     //case 0:
     _setup_stub_node(&node, NULL, NULL, NULL, ROOT, BLACK);
+    t.root = &node;
     
     _set_fix_data(&f_data, NULL, NULL, NULL, NULL);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 0);
 
 
@@ -763,9 +768,10 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&sibling, &c_nephew, &f_nephew, &parent, MORE, RED);
     _setup_stub_node(&c_nephew, NULL, NULL, &sibling, LESS, BLACK);
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
+    t.root = NULL;
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 1);
 
     //case 1.1 - right side
@@ -776,7 +782,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 1);
 
 
@@ -788,7 +794,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 2);
 
 
@@ -800,7 +806,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 2);
 
 
@@ -812,7 +818,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 3);
 
 
@@ -824,7 +830,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, BLACK);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 3);
     
     
@@ -835,7 +841,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, MORE, RED);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 4);
 
 
@@ -846,7 +852,7 @@ START_TEST(test__determine_rem_case) {
     _setup_stub_node(&f_nephew, NULL, NULL, &sibling, LESS, RED);
 
     _set_fix_data(&f_data, &parent, NULL, NULL, &sibling);
-    ret = _rb_tree_determine_rem_case(&node, &f_data);
+    ret = _rb_tree_determine_rem_case(&t, &node, &f_data);
     ck_assert_int_eq(ret, 4);
     
     return;
@@ -1242,27 +1248,47 @@ START_TEST(test_rb_tree_remove) {
     ck_assert(t.root->left->right->colour == RED);
 
 
-    //2 children
+    //2 children (root, no fixes)
     d.x = 15;
     cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
 
+    d.x = 30;
+    cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+
+    d.x = 45;
+    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ck_assert_int_eq(ret, 0);
+
+    _assert_node(t.root, 40, 20, 50, DATA_NULL);
+    ck_assert(t.root->colour == BLACK);
+    _assert_node(t.root->left, 20, 15, 30, 40);
+    ck_assert(t.root->left->colour == RED);
+    _assert_node(t.root->right, 50, DATA_NULL, DATA_NULL, 40);
+    ck_assert(t.root->right->colour == BLACK);
+    _assert_node(t.root->left->left, 15, DATA_NULL, DATA_NULL, 20);
+    ck_assert(t.root->left->left->colour == BLACK);
+    _assert_node(t.root->left->right, 30, DATA_NULL, DATA_NULL, 20);
+    ck_assert(t.root->left->right->colour == BLACK);
+
+    //2 children (non-root, fixes)
     d.x = 20;
     ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
     ck_assert_int_eq(ret, 0);
 
-    _assert_node(t.root, 45, 15, 50, DATA_NULL);
-    _assert_node(t.root->left, 15, DATA_NULL, 40, 45);
-    _assert_node(t.root->left->right, 40, DATA_NULL, DATA_NULL, 15);
-
+    _assert_node(t.root, 40, 15, 50, DATA_NULL);
+    _assert_node(t.root->left, 15, DATA_NULL, 30, 40);
+    ck_assert(t.root->left->colour == BLACK);
+    _assert_node(t.root->left->right, 30, DATA_NULL, DATA_NULL, 15);
+    ck_assert(t.root->left->right->colour == RED);
 
     //1 child
     d.x = 15;
     ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
     ck_assert_int_eq(ret, 0);
 
-    _assert_node(t.root, 45, 40, 50, DATA_NULL);
-    _assert_node(t.root->left, 40, DATA_NULL, DATA_NULL, 45);
-    _assert_node(t.root->right, 50, DATA_NULL, DATA_NULL, 45);
+    _assert_node(t.root, 40, 30, 50, DATA_NULL);
+    _assert_node(t.root->left, 30, DATA_NULL, DATA_NULL, 40);
+    ck_assert(t.root->left->colour == BLACK);
     
     return;
     

@@ -60,10 +60,12 @@ void _rb_tree_rem_case_4(cm_rb_tree * tree,
                          struct _rb_tree_fix_data * f_data);
 int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
                                 const struct _rb_tree_fix_data * f_data);
-int _rb_tree_determine_rem_case(const cm_rb_tree_node * node,
+int _rb_tree_determine_rem_case(const cm_rb_tree * tree,
+                                const cm_rb_tree_node * node,
                                 const struct _rb_tree_fix_data * f_data);
 int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node);
 int _rb_tree_fix_remove(cm_rb_tree * tree, cm_rb_tree_node * node, 
+                        enum cm_rb_tree_colour node_colour,
                         struct _rb_tree_fix_data * f_data);
 cm_rb_tree_node * _rb_tree_add_node(cm_rb_tree * tree, const cm_byte * key, 
                                     const cm_byte * data, cm_rb_tree_node * parent, 

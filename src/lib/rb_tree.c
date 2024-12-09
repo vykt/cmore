@@ -201,35 +201,45 @@ DBG_STATIC void _rb_tree_right_rotate(cm_rb_tree * tree, cm_rb_tree_node * node)
 
 
 
+/*
+ *  transplant() can only be called on subject nodes with a single child.
+ */
+
 DBG_STATIC void _rb_tree_transplant(cm_rb_tree * tree, 
                                     cm_rb_tree_node * subj_node, 
                                     cm_rb_tree_node * tgt_node) {
 
-    //if deleting root, disconnect subject and target nodes and set target node as root
+    //if deleting root, disconnect subject and 
+    //target nodes and set target node as root
     if (tree->root == subj_node) {
-
-        //detach tgt_node from current parent
-        if (tgt_node->parent_eval == MORE) tgt_node->parent->right = NULL;
-        if (tgt_node->parent_eval == LESS) tgt_node->parent->left  = NULL;
 
         //set root
         tree->root            = tgt_node;
         tgt_node->parent      = NULL;
-        tgt_node->parent_eval = ROOT;
+        _rb_tree_set_root(tree, tgt_node);
 
         //re-attach right branch
         tgt_node->right         = subj_node->right;
         tgt_node->right->parent = tgt_node;
    
     } else {
-        
+
+        //update subject node's parent
         if (subj_node->parent_eval == MORE) subj_node->parent->right = tgt_node;
         if (subj_node->parent_eval == LESS) subj_node->parent->left  = tgt_node;
-        
+
+        //if target node is not NULL
         if (tgt_node != NULL) {
+
+            //update target node
             tgt_node->parent      = subj_node->parent;
             tgt_node->parent_eval = subj_node->parent_eval;
+        
+            //set target node to the colour of subject node
+            tgt_node->colour = subj_node->colour;
         }
+
+        
     }
 
     return;
@@ -399,6 +409,9 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_1(cm_rb_tree * tree,
                                            cm_rb_tree_node ** node,
                                            struct _rb_tree_fix_data * f_data) {
 
+    //get eval of sibling
+    enum cm_rb_tree_eval sibling_eval = f_data->sibling->parent_eval;
+
     //recolour sibling and parent
     f_data->sibling->colour = BLACK;
     f_data->parent->colour  = RED;
@@ -413,13 +426,12 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_1(cm_rb_tree * tree,
 
     //update fix data
     f_data->grandparent = f_data->parent->parent;
-    if ((*node)->parent_eval == LESS) {
+    if (sibling_eval == MORE) {
         f_data->sibling = f_data->parent->right;
     } else {
         f_data->sibling = f_data->parent->left;
     }
     
-
     return;
 }
 
@@ -448,7 +460,7 @@ DBG_STATIC_INLINE void _rb_tree_rem_case_2(cm_rb_tree * tree,
     } else {
 
         //apply fix
-        *node = (*node)->parent;
+        *node = f_data->parent;
         
         //update fix data
         _rb_tree_populate_fix_data(*node, f_data);
@@ -578,7 +590,8 @@ DBG_STATIC_INLINE int _rb_tree_determine_ins_case(const cm_rb_tree_node * node,
 
 
 //determines which case applies for removing nodes
-DBG_STATIC_INLINE int _rb_tree_determine_rem_case(const cm_rb_tree_node * node,
+DBG_STATIC_INLINE int _rb_tree_determine_rem_case(const cm_rb_tree * tree,
+                                                  const cm_rb_tree_node * node,
                                                   const struct 
                                                   _rb_tree_fix_data * f_data) {
     
@@ -590,10 +603,10 @@ DBG_STATIC_INLINE int _rb_tree_determine_rem_case(const cm_rb_tree_node * node,
 
 
     //if node is root, no fix necessary
-    if (node->parent_eval == ROOT) return 0;
+    if (tree->root == node) return 0;
 
     //if sibling is red, case 1
-    if (f_data->sibling->colour == RED) return 1;
+    if (_rb_tree_get_colour(f_data->sibling) == RED) return 1;
 
     //get sibling's child colours
     left_colour = _rb_tree_get_colour(f_data->sibling->left);
@@ -668,15 +681,16 @@ DBG_STATIC int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node) {
 
 
 DBG_STATIC int _rb_tree_fix_remove(cm_rb_tree * tree, cm_rb_tree_node * node, 
+                                   enum cm_rb_tree_colour node_colour,
                                    struct _rb_tree_fix_data * f_data) {
 
     int fix_case;
 
     //move up tree and correct violations until fixed or root is reached
-    while (node != tree->root && node->colour == BLACK) {
+    while (node != tree->root && node_colour == BLACK) {
 
         //determine remove case
-        fix_case = _rb_tree_determine_rem_case(node, f_data);
+        fix_case = _rb_tree_determine_rem_case(tree, node, f_data);
         if (fix_case <= 0) return fix_case; //-1 or 0
 
         //dispatch remove case
@@ -753,9 +767,14 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree,
     int ret;
 
     struct _rb_tree_fix_data f_data;
-    enum cm_rb_tree_eval eval;    
-    cm_rb_tree_node * node, * min_node;
+    cm_rb_tree_node * node, * max_node, * fix_node;
+    
+    enum cm_rb_tree_eval eval;
+    enum cm_rb_tree_colour unlink_colour;
+    
 
+    //do not apply fixes by default
+    unlink_colour = RED;
     
     //get relevant node
     node = _rb_tree_traverse(tree, key, &eval);
@@ -766,62 +785,96 @@ DBG_STATIC cm_rb_tree_node * _rb_tree_unlink_node(cm_rb_tree * tree,
         return NULL;
     }
 
- 
-    //node has no children
-    if (node->left == NULL && node->right == NULL) {
 
-        //bootstrap fix_data if node removal will require fixes
-        if (node->colour == BLACK) _rb_tree_populate_fix_data(node, &f_data);
+    //both children present
+    if (node->left != NULL && node->right != NULL) {
 
-        //remove node from parent
-        if (node->parent_eval == LESS) {
-            node->parent->left = NULL;
+        //get maximum node in left subtree
+        max_node = _rb_tree_left_max(node);
+        fix_node = max_node->left;
+
+        
+        if (max_node->colour == BLACK && 
+            _rb_tree_get_colour(fix_node) == RED) {
+
+            //can replace min node with its child and 
+            //colour it black, no fix necessary
+            fix_node->colour = BLACK;
+
         } else {
-            node->parent->right = NULL;
+
+            //save state prior to removal for use during fixing
+            unlink_colour = max_node->colour;
+            if (unlink_colour == BLACK) 
+                _rb_tree_populate_fix_data(max_node, &f_data);
         }
 
-    //node only has a right child
-    } else if (node->left == NULL) {
-
-        _rb_tree_populate_fix_data(node, &f_data);
-        _rb_tree_transplant(tree, node, node->right);
-
-    //node only has a left child
-    } else if (node->right == NULL) {
-
-        _rb_tree_populate_fix_data(node, &f_data);
-        _rb_tree_transplant(tree, node, node->left);
-
-    //node has both a left and a right child
-    } else {
-       
-        //get minimum node in right subtree
-        min_node = _rb_tree_left_max(node);
-        _rb_tree_populate_fix_data(min_node, &f_data);
-
-        //cut minimum node from right subtree
-        _rb_tree_transplant(tree, min_node, min_node->right);
+        //cut maximum node from left subtree
+        _rb_tree_transplant(tree, max_node, max_node->left);
         
-        //re-attach minimum node as root of right subtree
-        min_node->right              = node->right;
-        min_node->right->parent      = min_node;
-        min_node->right->parent_eval = MORE;
+        //re-attach maximum node as root of left subtree
+        max_node->left = node->left;
+        if (max_node->left != NULL) max_node->left->parent = max_node;
 
         //set minimum node as new root of whole tree
-        _rb_tree_transplant(tree, node, min_node);
+        _rb_tree_transplant(tree, node, max_node);
 
-        //re-attach minimum node to left subtree
-        min_node->left              = node->left;
-        min_node->left->parent      = min_node;
-        min_node->left->parent_eval = LESS;
+        //re-attach maxumum node as root of right subtree
+        max_node->right = node->right;
+        if (max_node->right != NULL) max_node->right->parent = max_node;  
+
+        //update fix data if transplant caused parent to change
+        if (f_data.parent == node) f_data.parent = max_node;
+
+    //only a left child
+    } else if (node->right == NULL && node->left != NULL) {
+
+        //replace node with child
+        _rb_tree_transplant(tree, node, node->left);
+        
+        //convert node to BLACK, this is guaranteed to maintain balance
+        node->left->colour = BLACK;
+
+    //only a right child
+    } else if (node->left == NULL && node->right != NULL) {
+
+        //replace node with child
+        _rb_tree_transplant(tree, node, node->right);
+        
+        //convert node to BLACK, this is guaranteed to maintain balance
+        node->right->colour = BLACK;
+    
+    //no children present
+    } else {
+
+        fix_node = NULL;
+
+        //save state prior to removal for use during fixing
+        unlink_colour = node->colour;
+        if (unlink_colour == BLACK) 
+            _rb_tree_populate_fix_data(node, &f_data);
+
+        if (node->parent_eval == ROOT) {
+
+            //set tree root to NULL
+            tree->root = NULL;
+            
+        } else {
+
+            //remove node from parent
+            if (node->parent_eval == LESS) {
+                node->parent->left = NULL;
+            } else {
+                node->parent->right = NULL;
+            }
+        }
     }
 
-    //remove node from tree
     tree->size -= 1;
 
     //if a black node was removed, must correct tree
-    if (node->colour == BLACK) {
-        ret = _rb_tree_fix_remove(tree, node, &f_data);
+    if (unlink_colour == BLACK) {
+        ret = _rb_tree_fix_remove(tree, fix_node, unlink_colour, &f_data);
         if (ret == -1) return NULL;
     }
     
