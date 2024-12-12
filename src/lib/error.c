@@ -9,39 +9,39 @@
 __thread int cm_errno;
 
 
-void cm_perror() {
+void cm_perror(const char * prefix) {
 
     switch (cm_errno) {
 
         // 1XX - user errors
         case CM_ERR_USER_INDEX:
-            fprintf(stderr, CM_ERR_USER_INDEX_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_USER_INDEX_MSG);
             break;
 
         case CM_ERR_USER_KEY:
-            fprintf(stderr, CM_ERR_USER_KEY_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_USER_KEY_MSG);
             break;
 
         // 2XX - internal errors
         case CM_ERR_INTERNAL_INDEX:
-            fprintf(stderr, CM_ERR_INTERNAL_INDEX_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_INTERNAL_INDEX_MSG);
             break;
 
         case CM_ERR_RB_INVALID_STATE:
-            fprintf(stderr, CM_ERR_RB_INVALID_STATE_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_RB_INVALID_STATE_MSG);
             break;
 
         // 3XX - environmental errors
         case CM_ERR_MALLOC:
-            fprintf(stderr, CM_ERR_MALLOC_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_MALLOC_MSG);
             break;
 
         case CM_ERR_REALLOC:
-            fprintf(stderr, CM_ERR_REALLOC_MSG);
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_REALLOC_MSG);
             break;
 
         default:
-            fprintf(stderr, "Undefined error code.\n");
+            fprintf(stderr, "%s: %s", prefix, "Undefined error code.\n");
             break;
     }
 

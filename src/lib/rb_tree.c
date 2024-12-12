@@ -12,6 +12,14 @@
 
 
 /*
+ *  TODO: Future refactor should consider creating indexable function tables
+ *        for both insert and remove cases, and call these functions using
+ *        an index returned by `determine_{ins,rem}_case()`.
+ */
+
+
+
+/*
  *  --- [INTERNAL] ---
  */
 
@@ -636,6 +644,11 @@ DBG_STATIC_INLINE int _rb_tree_determine_rem_case(const cm_rb_tree * tree,
 
 DBG_STATIC int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node) {
 
+    /*
+     *  TODO: Refactor to not call _rb_tree_determine_ins_case() each 
+     *        iteration. Also make case 4 follow case 3 immediately.
+     */
+
     int fix_case;
     struct _rb_tree_fix_data f_data;
 
@@ -647,10 +660,6 @@ DBG_STATIC int _rb_tree_fix_insert(cm_rb_tree * tree, cm_rb_tree_node * node) {
         //if fix case is 0, no further corrections necessary
         fix_case = _rb_tree_determine_ins_case(node, &f_data);
         if (fix_case <= 0) return fix_case; //-1 or 0
-        
-        /*
-         *  indexable call table doesn't make sense here
-         */
 
         //dispatch fix cases
         switch (fix_case) {
@@ -988,8 +997,15 @@ int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key) {
 
 cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key) {
 
+    cm_rb_tree_node * node;
+
     //get relevant node
-    return _rb_tree_unlink_node(tree, key);
+    node = _rb_tree_unlink_node(tree, key);
+
+    //null out pointers
+    node->parent = node->left = node->right = NULL;
+
+    return node;
 }
 
 
@@ -997,6 +1013,8 @@ cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key) {
 void cm_rb_tree_empty(cm_rb_tree * tree) {
 
     _rb_tree_empty_recurse(tree->root);
+    tree->root = NULL;
+    tree->size = 0;
 
     return;
 }
@@ -1021,6 +1039,8 @@ void cm_new_rb_tree(cm_rb_tree * tree, const size_t key_size,
 void cm_del_rb_tree(cm_rb_tree * tree) {
 
     _rb_tree_empty_recurse(tree->root);
+    tree->root = NULL;
+    tree->size = 0;
 
     return;
 }
@@ -1029,9 +1049,7 @@ void cm_del_rb_tree(cm_rb_tree * tree) {
 
 void cm_del_rb_tree_node(cm_rb_tree_node * node) {
 
-    free(node->data);
-    free(node->key);
-    free(node);
+    _rb_tree_del_node(node);
 
     return;
 }

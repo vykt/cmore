@@ -202,7 +202,7 @@ int cm_vector_remove(cm_vector * vector, const int index) {
 
 
 
-int cm_vector_shrink_to_fit(cm_vector * vector) {
+int cm_vector_fit(cm_vector * vector) {
 
     //half allocation size down to VECTOR_DEFAULT_SIZE
     while (((size_t) vector->len < vector->size) 

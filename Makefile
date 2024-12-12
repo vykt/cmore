@@ -1,9 +1,9 @@
 .RECIPEPREFIX:=>
 
-#TODO [set as required] TODO
+#[set as required]
 CC=gcc
 CFLAGS=
-CFLAGS_DBG=-ggdb -O0
+CFLAGS_DBG=-ggdb -O0 -fanalyzer
 WARN_OPTS=-Wall -Wextra
 LDFLAGS=
 
@@ -11,7 +11,7 @@ LIB_DIR="./src/lib"
 TEST_DIR="./src/test"
 
 BUILD_DIR=$(shell pwd)/build
-
+DOC_DIR=$(shell pwd)/doc
 
 #[set build options]
 ifeq ($(build),debug)
@@ -20,6 +20,11 @@ ifeq ($(build),debug)
 	LDFLAGS    += -static-libasan
 else
 	CFLAGS += -O3
+endif
+
+#[set static analysis options]
+ifeq ($(fanalyzer),true)
+	CFLAGS += -fanalyzer
 endif
 
 

@@ -144,7 +144,7 @@ extern int cm_vector_set(cm_vector * vector, const int index, const cm_byte * da
 extern int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data);
 extern int cm_vector_append(cm_vector * vector, const cm_byte * data);
 extern int cm_vector_remove(cm_vector * vector, const int index);
-extern int cm_vector_shrink_to_fit(cm_vector * vector);
+extern int cm_vector_fit(cm_vector * vector);
 //void return
 extern void cm_vector_empty(cm_vector * vector);
 
@@ -159,7 +159,6 @@ extern void cm_del_vector(cm_vector * vector);
 //0 = success, -1 = error, see cm_errno
 extern int cm_rb_tree_get_val(const cm_rb_tree * tree, 
                               const cm_byte * key, cm_byte * buf);
-
 //pointer = success, NULL = error, see cm_errno
 extern cm_byte * cm_rb_tree_get_ref(const cm_rb_tree * tree, const cm_byte * key);
 extern cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, 
@@ -184,7 +183,7 @@ extern void cm_del_rb_tree_node(cm_rb_tree_node * node);
 
 // [error handling]
 //void return
-extern void cm_perror();
+extern void cm_perror(const char * prefix);
 extern const char * cm_strerror(const int cm_errnum);
 
 

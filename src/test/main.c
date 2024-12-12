@@ -61,15 +61,14 @@ static void _run_unit_tests() {
     SRunner * sr;
 
     //initialise test suites
-    //s_vector  = vector_suite();
-    //s_list    = list_suite();
+    s_vector  = vector_suite();
+    s_list    = list_suite();
     s_rb_tree = rb_tree_suite(); 
 
     //create suite runner
-    //sr = srunner_create(s_vector);
-    //srunner_add_suite(sr, s_list);
-    //srunner_add_suite(sr, s_rb_tree);
-    sr = srunner_create(s_rb_tree); //TODO remove
+    sr = srunner_create(s_vector);
+    srunner_add_suite(sr, s_list);
+    srunner_add_suite(sr, s_rb_tree);
 
     //run tests
     srunner_run_all(sr, CK_VERBOSE);
@@ -94,6 +93,7 @@ int main(int argc, char ** argv) {
             break;
 
         case RB_TREE_EXPL:
+            rb_tree_explore();
             break;
         
     }

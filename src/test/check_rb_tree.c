@@ -137,6 +137,9 @@ static void _setup_stub() {
 static void _setup_sorted_stub() {
 
     t.size = 10;
+    t.compare = compare;
+    t.key_size = sizeof(d.x);
+    t.data_size = sizeof(d);
 
     cm_rb_tree_node * n[10];
     int values[10] = {20, 10, 40, 5, 15, 30, 50, 25, 45, 55};
@@ -1009,7 +1012,7 @@ START_TEST(test__rem_case_1) {
     ck_assert(t.root->right->right->colour == RED);
 
     return;
-}
+} END_TEST
 
 
 
@@ -1296,22 +1299,66 @@ START_TEST(test_rb_tree_remove) {
 
 
 
-
 /*
- *  TODO
- *
- *  - Test fix insert
- *
- *  - Test fix remove
- *
- *  - Test add node
- *
- *  - Test remove node
- *
- *  - Test empty tree
- *
- *  - Test unlink node
+ *  Both the remove() and unlink() operations call the same internal function.
+ *  As such, the unlink() test is dependent on the remove() test, and the tests
+ *  test implementation rather than behaviour. While this is not ideal, my
+ *  time is also finite.
  */
+
+//cm_rb_tree_unlink [sorted stub fixture]
+START_TEST(test_rb_tree_unlink) {
+
+    cm_rb_tree_node * ret;
+
+    d.x = 5;
+    ret = cm_rb_tree_unlink(&t, (cm_byte *) &d.x);
+    ck_assert_ptr_nonnull(ret);
+
+    ck_assert_ptr_null(ret->parent);
+    ck_assert_ptr_null(ret->left);
+    ck_assert_ptr_null(ret->right);
+
+    free(ret->key);
+    free(ret->data);
+    free(ret);
+
+    return;
+    
+} END_TEST
+
+
+
+//cm_rb_tree_empty() [stub fixture]
+START_TEST(test_rb_tree_empty) {
+
+    cm_rb_tree_empty(&t);
+    ck_assert_ptr_null(t.root);
+    ck_assert_int_eq(t.size, 0);
+
+    return;
+    
+} END_TEST
+
+
+
+//cm_del_rb_tree_node [no fixture]
+START_TEST(test_del_rb_tree_node) {
+
+    /*
+     *  Using ASAN to check for leaks here.
+     */
+        
+    //setup test
+    cm_rb_tree_node * n = malloc(sizeof(cm_rb_tree_node));
+    n->key = malloc(sizeof(d));
+    n->data = malloc(sizeof(d));
+    
+    //run test
+    cm_del_rb_tree_node(n);
+    
+} END_TEST
+
 
 
 Suite * rb_tree_suite() {
@@ -1345,6 +1392,9 @@ Suite * rb_tree_suite() {
     //test cases (cont.)
     TCase * tc_rb_tree_set;
     TCase * tc_rb_tree_remove;
+    //TCase * tc_rb_tree_unlink;
+    //TCase * tc_rb_tree_empty;
+    //TCase * tc_del_rb_tree_node;
 
     Suite * s = suite_create("rb_tree");
 
@@ -1446,15 +1496,29 @@ Suite * rb_tree_suite() {
     tcase_add_test(tc__rem_case_4, test__rem_case_4);
     #endif
 
-    //tc_set()
+    //tc_rb_tree_set
     tc_rb_tree_set = tcase_create("rb_tree_set");
     tcase_add_checked_fixture(tc_rb_tree_set, _setup_empty, _teardown);
     tcase_add_test(tc_rb_tree_set, test_rb_tree_set);
 
-    //tc_remove()
+    //tc_rb_tree_remove
     tc_rb_tree_remove = tcase_create("rb_tree_remove");
     tcase_add_checked_fixture(tc_rb_tree_remove, _setup_sorted_stub, _teardown);
     tcase_add_test(tc_rb_tree_remove, test_rb_tree_remove);
+
+    //tc_rb_tree_unlink
+    //tc_rb_tree_unlink = tcase_create("rb_tree_unlink");
+    //tcase_add_checked_fixture(tc_rb_tree_unlink, _setup_sorted_stub, _teardown);
+    //tcase_add_test(tc_rb_tree_unlink, test_rb_tree_unlink);
+
+    //tc_rb_tree_empty
+    //tc_rb_tree_empty = tcase_create("rb_tree_empty");
+    //tcase_add_checked_fixture(tc_rb_tree_empty, _setup_stub, _teardown);
+    //tcase_add_test(tc_rb_tree_empty, test_rb_tree_empty);
+
+    //tc_del_rb_tree_node
+    //tc_del_rb_tree_node = tcase_create("del_rb_tree_node");
+    //tcase_add_test(tc_del_rb_tree_node, test_del_rb_tree_node);
 
 
     //add test cases to red-black tree suite
@@ -1482,8 +1546,56 @@ Suite * rb_tree_suite() {
     suite_add_tcase(s, tc__rem_case_4);
     #endif
 
+    //add test cases to red-black tree suite (cont.)
     suite_add_tcase(s, tc_rb_tree_set);
     suite_add_tcase(s, tc_rb_tree_remove);
+    //suite_add_tcase(s, tc_rb_tree_unlink);
+    //suite_add_tcase(s, tc_rb_tree_empty);
+    //suite_add_tcase(s, tc_del_rb_tree_node);
 
     return s;
+}
+
+
+/*
+ *  --- [EXPERIMENTAL TESTS] ---
+ */
+
+/*
+ *  To perform experimental tests, run the following loop inside a debugger.
+ *
+ *  Manipulate the run, op, and d.x values to modify the behaviour of the loop.
+ *
+ *  Inspect the state of the tree with `pnode`, `pcolour`, and `pall` macros.
+ */
+
+#define SET    0
+#define REMOVE 1
+void rb_tree_explore() {
+
+    bool run = true;
+    char op = SET;
+    d.x = 64;
+
+    int ret;
+    cm_rb_tree_node * node;
+
+    //create tree
+    cm_new_rb_tree(&t, sizeof(d.x), sizeof(d), compare);
+
+    //perform operations
+    while (run) {
+
+        if (op == SET) {
+            node = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+            
+        } else {
+            ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+        }
+    }
+
+    //destroy tree
+    cm_del_rb_tree(&t);
+
+    return;
 }

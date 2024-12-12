@@ -574,8 +574,8 @@ START_TEST(test_vector_remove) {
 
 
 
-//cm_vector_shrink_to_fit()
-START_TEST(test_vector_shrink_to_fit) {
+//cm_vector_fit()
+START_TEST(test_vector_fit) {
 
     int ret;
     int min_len = VECTOR_DEFAULT_SIZE;
@@ -602,7 +602,7 @@ START_TEST(test_vector_shrink_to_fit) {
     } //end for
 
     //shrink to size
-    ret = cm_vector_shrink_to_fit(&v);
+    ret = cm_vector_fit(&v);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(v.size, min_len);
 
@@ -644,7 +644,7 @@ Suite * vector_suite() {
     TCase * tc_vector_set;
     TCase * tc_vector_insert;
     TCase * tc_vector_remove;
-    TCase * tc_vector_shrink_to_fit;
+    TCase * tc_vector_fit;
     TCase * tc_vector_empty;
 
     Suite * s = suite_create("vector");
@@ -694,10 +694,10 @@ Suite * vector_suite() {
     tcase_add_checked_fixture(tc_vector_remove, _setup_full, _teardown);
     tcase_add_test(tc_vector_remove, test_vector_remove);
 
-    //cm_vector_shrink_to_fit()
-    tc_vector_shrink_to_fit = tcase_create("vector_shrink_to_fit");
-    tcase_add_checked_fixture(tc_vector_shrink_to_fit, _setup_empty, _teardown);
-    tcase_add_test(tc_vector_shrink_to_fit, test_vector_shrink_to_fit);
+    //cm_vector_fit()
+    tc_vector_fit = tcase_create("vector_fit");
+    tcase_add_checked_fixture(tc_vector_fit, _setup_empty, _teardown);
+    tcase_add_test(tc_vector_fit, test_vector_fit);
 
     //cm_vector_empty()
     tc_vector_empty = tcase_create("vector_empty");
@@ -715,7 +715,7 @@ Suite * vector_suite() {
     suite_add_tcase(s, tc_vector_set);
     suite_add_tcase(s, tc_vector_insert);
     suite_add_tcase(s, tc_vector_remove);
-    suite_add_tcase(s, tc_vector_shrink_to_fit);
+    suite_add_tcase(s, tc_vector_fit);
     suite_add_tcase(s, tc_vector_empty);
 
     return s;
