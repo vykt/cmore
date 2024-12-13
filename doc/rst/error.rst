@@ -1,5 +1,15 @@
-CMore error handling
-====================
+============
+CMORE ERRORS
+============
+
+:date: Dec 2024
+
+LIBRARY
+=======
+The C More Library (*libcmore*, *-lcmore*)
+
+DESCRIPTION
+===========
 
 **CMore** implements its own version of libc's *errno*. If you are familiar \
 with it, **CMore**'s implementation should be very intuitive.

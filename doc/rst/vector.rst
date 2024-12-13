@@ -1,5 +1,15 @@
-CMore vector
 ============
+CMORE VECTOR
+============
+
+:date: Dec 2024
+
+LIBRARY
+=======
+The C More Library (*libcmore*, *-lcmore*)
+
+DESCRIPTION
+===========
 
 The **CMore** *vector* is a typical vector. It is represented by a 
 ``cm_vector`` structure. It holds the size of one data element (in bytes), the \
@@ -22,7 +32,8 @@ be emptied with ``cm_vector_empty()``.
 
 ``cm_vector_get_val()`` gets the data at an index and copies it to a buffer \
 ``buf``. ``cm_vector_get_ref()`` returns a pointer to the data at an index. \
-Both positive and negative indeces can be used:
+Both positive and negative indeces can be used. If an index is not in range, \
+a *CM_ERR_USER_INDEX* error will be stored in *cm_errno*::
 
 	cm_vector vector;
 	int ret, data, * data_ptr;
@@ -30,9 +41,7 @@ Both positive and negative indeces can be used:
 	//initialise the vector
 	ret = cm_new_vector(&vector, sizeof(int));
 
-	/*
-     *  Populate the vector.
-	 */
+    //[populate the vector]
 
 	//get the second index by value
 	ret = cm_vector_get_val(&vector, 2, &data);
@@ -51,7 +60,9 @@ When the length of a *vector* exceeds the allocated size, the allocation \
 doubles in size. This means the size of the *vector* allocation grows \
 exponentially. Removing elements from the *vector* or emptying it does not \
 reduce the size of the allocation. The allocation of a *vector* can be set to \
-its length by calling ``cm_vector_fit()``.
+its length by calling ``cm_vector_fit()``. Requesting to insert, set, or \
+remove at an index that is out of range will result in a *CM_ERR_USER_INDEX* \
+error::
 
 	cm_vector vector;
 	int ret, data;
@@ -78,4 +89,4 @@ its length by calling ``cm_vector_fit()``.
 	cm_del_vector(&vector);
 
 On error, *NULL* or *-1* is returned depending on the function. See **CMore** \
-*error* documentation to determine the precise cause of an error.
+**error** documentation to determine the precise cause of an error.

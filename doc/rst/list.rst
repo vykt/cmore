@@ -1,5 +1,15 @@
-CMore list
 ==========
+CMORE LIST
+==========
+
+:date: Dec 2024
+
+LIBRARY
+=======
+The C More Library (*libcmore*, *-lcmore*)
+
+DESCRIPTION
+===========
 
 The **CMore** *list* is a doubly linked list. A *list* is represented by a \
 ``cm_list`` structure. It holds the length of a *list*, the size (in bytes) \
@@ -24,7 +34,7 @@ may be emptied with ``cm_list_empty()``. For example::
 
 ``cm_list_get_val()`` gets the data at an index and copies it to a buffer \
 ``buf``. ``cm_list_get_ref()`` returns a pointer to the data at an index. 
-``cm_list_get_node`` returns the node at an index, allowing for further \
+``cm_list_get_node()`` returns the node at an index, allowing for further \
 traversal using the ``next`` and ``prev`` pointers.
 
 Both positive and negative indeces can be used. Specifying a negative index \
@@ -38,10 +48,8 @@ in a *CM_ERR_USER_INDEX* error::
 
 	//initialise the list
 	cm_new_list(&list, sizeof(int));
-
-	/*
-     *  Populate the list.
-	 */
+	
+    //[populate the list]
 
 	//get the second index by value
 	ret = cm_list_get_val(&list, 2, &data);
@@ -65,7 +73,9 @@ at the end of the *list*. ``cm_list_remove()`` removes a value from the list. \
 return a pointer to the node the operation was performed on for convenience, \
 with the exception of ``cm_list_remove()``. In the case of \
 ``cm_list_unlink()``, the returned node must later be freed with \
-``cm_del_list_node()`` to prevent a memory leak::
+``cm_del_list_node()`` to prevent a memory leak. Requesting to insert, set, \
+remove, or unlink at an index that is out of range will result in a \
+*CM_ERR_USER_KEY* error::
 	
 	cm_list list;
 	cm_list_node * node;
@@ -97,4 +107,4 @@ with the exception of ``cm_list_remove()``. In the case of \
 	cm_del_list(&list);
 
 On error, *NULL* or *-1* is returned depending on the function. See **CMore** \
-*error* documentation to determine the precise cause of an error.
+**error** documentation to determine the precise cause of an error.

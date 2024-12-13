@@ -1,17 +1,31 @@
 .RECIPEPREFIX:=>
 
 #[set as required]
+INSTALL_DIR=/usr/local/lib
+INCLUDE_INSTALL_DIR=/usr/local/include
+MAN_INSTALL_DIR=/usr/local/share/man
+MD_INSTALL_DIR=/usr/local/share/doc/cmore
+LD_DIR=/etc/ld.so.conf.d
+
 CC=gcc
 CFLAGS=
-CFLAGS_DBG=-ggdb -O0 -fanalyzer
+CFLAGS_DBG=-ggdb -O0
 WARN_OPTS=-Wall -Wextra
 LDFLAGS=
 
-LIB_DIR="./src/lib"
-TEST_DIR="./src/test"
-
+LIB_DIR=./src/lib
+TEST_DIR=./src/test
+DOC_DIR=./doc
 BUILD_DIR=$(shell pwd)/build
-DOC_DIR=$(shell pwd)/doc
+
+
+#[installation constants]
+SHARED=libcmore.so
+STATIC=libcmore.a
+HEADER=cmore.h
+
+
+
 
 #[set build options]
 ifeq ($(build),debug)
@@ -31,23 +45,26 @@ endif
 #[process targets]
 test: shared
 > $(MAKE) -C ${TEST_DIR} tests CC='${CC}' _CFLAGS='${CFLAGS_DBG}' \
-		                                  _WARN_OPTS='${WARN_OPTS}' \
-										  BUILD_DIR='${BUILD_DIR}/test' \
-                                          LIB_BIN_DIR='${BUILD_DIR}/lib'
+		                       _WARN_OPTS='${WARN_OPTS}' \
+							   BUILD_DIR='${BUILD_DIR}/test' \
+                               LIB_BIN_DIR='${BUILD_DIR}/lib'
 
 all: shared static
 
 shared:
 > $(MAKE) -C ${LIB_DIR} shared CC='${CC}' _CFLAGS='${CFLAGS} -fPIC' \
-	                                      _WARN_OPTS='${WARN_OPTS}' \
-										  _LDFLAGS='${LDFLAGS}' \
-	                                      BUILD_DIR='${BUILD_DIR}/lib'
+	                           _WARN_OPTS='${WARN_OPTS}' \
+							   _LDFLAGS='${LDFLAGS}' \
+	                           BUILD_DIR='${BUILD_DIR}/lib'
 
 static:
 > $(MAKE) -C ${LIB_DIR} static CC='${CC}' _CFLAGS='${CFLAGS}' \
-	                                      _WARN_OPTS='${WARN_OPTS}' \
-	                                      _LDFLAGS='${LDFLAGS}' \
-	                                      BUILD_DIR='${BUILD_DIR}/lib'
+	                           _WARN_OPTS='${WARN_OPTS}' \
+	                           _LDFLAGS='${LDFLAGS}' \
+	                           BUILD_DIR='${BUILD_DIR}/lib'
+
+docs:
+> $(MAKE) -C ${DOC_DIR} all
 
 clean:
 > $(MAKE) -C ${TEST_DIR} clean CC='${CC}' BUILD_DIR='${BUILD_DIR}/test'
