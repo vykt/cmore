@@ -23,7 +23,8 @@
 /*
  *  [BASIC TEST]
  *
- *      Lists are simple; internal functions are tested through exported functions.
+ *      Lists are simple; internal functions 
+ *      are tested through exported functions.
  */
 
 
@@ -87,7 +88,7 @@ static void _setup_full() {
     d.x = 0;
 
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
-        cm_list_append(&l, (cm_byte *) &d);
+        cm_list_append(&l, &d);
         d.x++;
     }
 
@@ -117,7 +118,7 @@ static void _print_list() {
     //for each entry
     for (int i = 0; i < l.len; ++i) {
 
-        cm_list_get_val(&l, i, (cm_byte *) &e);
+        cm_list_get_val(&l, i, &e);
         printf("%d ", e.x);
         
     } //end for
@@ -190,14 +191,14 @@ START_TEST(test_list_append) {
     cm_list_node * n;
 
     //append to empty list
-    n = cm_list_append(&l, (cm_byte *) &d);
+    n = cm_list_append(&l, &d);
     ck_assert_ptr_nonnull(n);
     _assert_state(1, 0, 0);
     
     d.x++;
 
     //append to non-empty list
-    n = cm_list_append(&l, (cm_byte *) &d);
+    n = cm_list_append(&l, &d);
     ck_assert_ptr_nonnull(n);
     _assert_state(2, 1, 1); 
 
@@ -215,7 +216,7 @@ START_TEST(test_list_get_val) {
     //get every list entry by value (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
-        ret = cm_list_get_val(&l, i, (cm_byte *) &d);
+        ret = cm_list_get_val(&l, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, i);
 
@@ -224,7 +225,7 @@ START_TEST(test_list_get_val) {
     //get every list entry by value (negative index)
     for (int i = -1; i > TEST_LEN_FULL * -1; --i) {
 
-        ret = cm_list_get_val(&l, i, (cm_byte *) &d);
+        ret = cm_list_get_val(&l, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, TEST_LEN_FULL + i);
 
@@ -232,13 +233,13 @@ START_TEST(test_list_get_val) {
 
     //get invalid index (+ve index)
     cm_errno = 0;
-    ret = cm_list_get_val(&l, TEST_LEN_FULL, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
     //get invalid index (-ve index)
     cm_errno = 0;
-    ret = cm_list_get_val(&l, -TEST_LEN_FULL, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, -TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
@@ -347,11 +348,11 @@ START_TEST(test_list_set) {
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         e.x = i * -1;
-        n = cm_list_set(&l, i, (cm_byte *) &e);
+        n = cm_list_set(&l, i, &e);
         ck_assert_ptr_nonnull(n);
         
         ck_assert_int_eq(GET_NODE_DATA(n)->x, i * -1);
-        ret = cm_list_get_val(&l, i, (cm_byte *) &d);
+        ret = cm_list_get_val(&l, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, i * -1);
 
@@ -370,11 +371,12 @@ START_TEST(test_list_set) {
 
         //value of e.x will range from -11 to -19 (skip index 0)
         e.x = -TEST_LEN_FULL - (TEST_LEN_FULL + i);
-        n = cm_list_set(&l, i, (cm_byte *) &e);
+        n = cm_list_set(&l, i, &e);
         ck_assert_ptr_nonnull(n);
 
-        ck_assert_int_eq(GET_NODE_DATA(n)->x, -TEST_LEN_FULL - (TEST_LEN_FULL + i));
-        ret = cm_list_get_val(&l, i, (cm_byte *) &d);
+        ck_assert_int_eq(GET_NODE_DATA(n)->x, 
+                         -TEST_LEN_FULL - (TEST_LEN_FULL + i));
+        ret = cm_list_get_val(&l, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, -TEST_LEN_FULL - (TEST_LEN_FULL + i));
 
@@ -390,13 +392,13 @@ START_TEST(test_list_set) {
 
     //set invalid index (+ve index)
     cm_errno = 0;
-    n = cm_list_set(&l, TEST_LEN_FULL, (cm_byte *) &d);
+    n = cm_list_set(&l, TEST_LEN_FULL, &d);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
     //set invalid index (-ve index)
     cm_errno = 0;
-    n = cm_list_set(&l, -TEST_LEN_FULL, (cm_byte *) &d);
+    n = cm_list_set(&l, -TEST_LEN_FULL, &d);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
@@ -422,66 +424,66 @@ START_TEST(test_list_insert) {
 
     //insert in the third index (positive index)
     e.x = -1;
-    n = cm_list_insert(&l, 3, (cm_byte *) &e);
+    n = cm_list_insert(&l, 3, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -1);
-    ret = cm_list_get_val(&l, 3, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, 3, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -1);
     len++;
 
     //insert in the third from last index (negative index)
     e.x = -2;
-    n = cm_list_insert(&l, -3, (cm_byte *) &e);
+    n = cm_list_insert(&l, -3, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -2);
-    ret = cm_list_get_val(&l, -3, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, -3, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -2);
     len++;
 
     //insert at the end (positive index)
     e.x = -3;
-    n = cm_list_insert(&l, len, (cm_byte *) &e);
+    n = cm_list_insert(&l, len, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -3);
-    ret = cm_list_get_val(&l, len, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, len, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -3);
     len++;
 
     //insert at the end (negative index)
     e.x = -4;
-    n = cm_list_insert(&l, -1, (cm_byte *) &e);
+    n = cm_list_insert(&l, -1, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -4);
-    ret = cm_list_get_val(&l, len, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, len, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -4);
     len++;
 
     //insert at the beginning (zero index)
     e.x = -5;
-    n = cm_list_insert(&l, 0, (cm_byte *) &e);
+    n = cm_list_insert(&l, 0, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -5);
-    ret = cm_list_get_val(&l, 0, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, 0, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -5);
     len++;
 
     //insert at max negative index
     e.x = -6;
-    n = cm_list_insert(&l, len * -1, (cm_byte *) &e);
+    n = cm_list_insert(&l, len * -1, &e);
     ck_assert_ptr_nonnull(n);
 
     ck_assert_int_eq(GET_NODE_DATA(n)->x, -6);
-    ret = cm_list_get_val(&l, 1, (cm_byte *) &d);
+    ret = cm_list_get_val(&l, 1, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -6);
     len++;
@@ -495,13 +497,13 @@ START_TEST(test_list_insert) {
 
     //insert invalid index (+ve index)
     cm_errno = 0;
-    n = cm_list_insert(&l, len+1, (cm_byte *) &e);
+    n = cm_list_insert(&l, len+1, &e);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
     //insert invalid index (-ve index)
     cm_errno = 0;
-    n = cm_list_insert(&l, (len+1) * -1, (cm_byte *) &e);
+    n = cm_list_insert(&l, (len+1) * -1, &e);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
@@ -540,7 +542,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 3);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, 3, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
@@ -553,7 +555,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 7);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, -3, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, -3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -566,7 +568,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 9);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
@@ -579,7 +581,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 8);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -592,7 +594,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 0);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 0, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
@@ -605,7 +607,7 @@ START_TEST(test_list_unlink) {
     ck_assert_int_eq(GET_NODE_DATA(n)->x, 2);
     cm_del_list_node(n);
 
-    ret = cm_list_get_val(&l, 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
@@ -660,7 +662,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, 3, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
@@ -670,7 +672,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, -3, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, -3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -680,7 +682,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
@@ -690,7 +692,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, len - 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -700,7 +702,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, 0, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 0, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
@@ -710,7 +712,7 @@ START_TEST(test_list_remove) {
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
-    ret = cm_list_get_val(&l, 1, (cm_byte *) &e);
+    ret = cm_list_get_val(&l, 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 

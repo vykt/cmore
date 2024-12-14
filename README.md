@@ -1,73 +1,89 @@
-# libcmore
+# CMore
 
 <p align="center">
-    <img src="libcmore.png" width="150" height="150">
+    <img src="cmore.png" width="150" height="150">
 </p>
 
 
 ### ABOUT:
 
-The C More library (**libcmore**) provides a robust, minimal, and highly efficient implementation of the list and vector data structures for the C language. The goal of the library is to alleviate two major pain points of C programming:
+The C More Library (**CMore**) aims to provide essential data structures \
+and algorithms for the C language. Presently it implements *lists*, *vectors*, \
+and *red-black trees*.
 
-- Inflexibility of fixed size built-in arrays.
-- A lack of an indexable data structure that can be mutated without pointer invalidation.
+This library is a cornerstone of my major projects, namely:
+
+- [lain](https://github.com/vykt/lain) - A memory manipulation library.
+- [ptrscan](https://github.com/vykt/ptrscan) - A pointer scanner for linux.
+
+On a more personal note, this library is also where I test out new approaches \
+to development, new tooling, and practice implementing data structures for \
+interviews.
 
 
-### INSTALLATION:
 
-Building the C More library requires `make`. Your Linux distribution will likely package `make` as part of its `build-essential` or `base-devel` meta-packages. Once make is installed, proceed through the following steps:
+### BUILDING:
+
+Building **CMore** requires `make`. Your Linux distribution will \
+likely package `make` as part of its `build-essential` or `base-devel` \
+meta-packages. Once `make` is installed, proceed through the following steps:
 
 
-Clone this repository:
+The main branch is used for development and is not guaranteed to be \
+functional. Clone the latest release instead:
+
 ```
-$ git clone https://github.com/vykt/libcmore
-```
-The main branch will always contain the latest tested release. Alternatively, you may also download a release directly from the releases page.
-
-
-Build the release target:
-```
-$ cd libcmore
-$ make lib
-```
-Debug symbols are included with the release build.
-
-
-Run the installation script:
-```
-$ vim install.sh
-# ./install.sh
-```
-Before running the installation script, open the script in an editor and confirm the installation paths for the library, the C header, and the manpages.
-
-To optionally install markdown documenation:
-```
-# ./install.sh install_doc
+$ git clone --branch 1.0.0 https://github.com/vykt/cmore
 ```
 
-To uninstall:
+You have the option of building a dynamic and/or static version of the \
+library. By default, **CMore** will build with the **-O3** flag. If you are \
+interested in debugging you can include debug symbols and turn off \
+optimisations by passing the `build=debug` variable to make.
+
 ```
-# ./install.sh uninstall
+$ cd cmore
+$ make shared            #builds a shared object
+$ make static            #builds a static object archive
+$ make all build=debug   #builds a debug version of both
 ```
 
+To remove build artifacts:
 
-### LINKING:
-
-To use the C More library as part of your project, you must include its header and pass the appropriate linking flags to your C compiler.
-
-Include the `libcmore.h` C header:**
-```c
-#include <libcmore.h>
+```
+$ make clean
 ```
 
 
-When compiling the executable, pass the `-lcmore` flag to the compiler:
-```bash
-gcc -o your_executable main.c -lcmore
-```
-If you encounter difficulties at this stage, ensure the installation directory of **libcmore** is searched by the runtime linker (`man 8 ldconfig`).
+Before installing, make sure to check the `Makefile` installation directories. \
 
+```
+$ ${EDITOR} Makefile
+# make install
+```
+
+The `install` target will install manpage documentation. To install additional \
+markdown documentation, run the `install_docs` target:
+
+```
+# make install_docs
+```
+
+To uninstall **CMore** run the `uninstall` target:
+
+```
+# make uninstall
+```
 
 ### DOCUMENTATION:
 
-Documentation is available in the markdown format inside the `./doc/md` directory. Manpages are installed on the system as part of the base installation and are available under `./doc/roff/man.3`. If you are unable to view the manpages, ensure your manpage path includes the path specified in the installation script (`man 1 manpath`).
+Documentation is available in the `./doc` directory. Section 7 manpages are \
+installed system-wide as part of a default installation. **CMore** \
+documentation describes the functionality of individual components and \
+provides examples. Individual functions are not documented however; users are \
+encouraged to take a look at the `cmore.h` header installed in \
+`/usr/local/include` by default. For further examples, consider reviewing unit \
+tests in `./src/test`.
+
+The contents of the manpages are available in alternatives formats found in \
+the `./docs` directory. They can optionally be installed system-wide.

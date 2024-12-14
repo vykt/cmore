@@ -16,7 +16,8 @@
  *  --- [INTERNAL] ---
  */
 
-DBG_STATIC int _vector_alloc(cm_vector * vector) {
+DBG_STATIC
+int _vector_alloc(cm_vector * vector) {
 
     vector->data = malloc(vector->data_size * vector->size);
     if (!vector->data) {
@@ -29,7 +30,8 @@ DBG_STATIC int _vector_alloc(cm_vector * vector) {
 
 
 
-DBG_STATIC int _vector_grow(cm_vector * vector) {
+DBG_STATIC 
+int _vector_grow(cm_vector * vector) {
 
     vector->size = vector->size * 2;
 
@@ -44,8 +46,9 @@ DBG_STATIC int _vector_grow(cm_vector * vector) {
 
 
 
-DBG_STATIC_INLINE int _vector_normalise_index(const cm_vector * vector, int index, 
-                                              const enum _vector_index_mode mode) {
+DBG_STATIC DBG_INLINE 
+int _vector_normalise_index(const cm_vector * vector, 
+                            int index, const enum _vector_index_mode mode) {
 
     //if negative index supplied
     if (index < 0) {
@@ -59,15 +62,17 @@ DBG_STATIC_INLINE int _vector_normalise_index(const cm_vector * vector, int inde
 
 
 
-DBG_STATIC cm_byte * _vector_traverse(const cm_vector * vector, const int index) {
+DBG_STATIC 
+void * _vector_traverse(const cm_vector * vector, const int index) {
 
     return vector->data + (vector->data_size * index);
 }
 
 
 
-DBG_STATIC void _vector_shift(cm_vector * vector, const int index, 
-                              const enum _vector_shift_mode mode) {
+DBG_STATIC 
+void _vector_shift(cm_vector * vector,
+                   const int index, const enum _vector_shift_mode mode) {
 
     int diff;
 
@@ -78,7 +83,7 @@ DBG_STATIC void _vector_shift(cm_vector * vector, const int index,
     //calculate how many bytes the remaining indeces constitute
     int move_size = diff * vector->data_size;
 
-    cm_byte * data = _vector_traverse(vector, index);
+    void * data = _vector_traverse(vector, index);
     memmove(data + (ssize_t) (vector->data_size * mode), data, move_size);
 
     return;
@@ -86,10 +91,10 @@ DBG_STATIC void _vector_shift(cm_vector * vector, const int index,
 
 
 
-DBG_STATIC_INLINE void _vector_set(cm_vector * vector, 
-                                   const int index, const cm_byte * data) {
+DBG_STATIC DBG_INLINE 
+void _vector_set(cm_vector * vector, const int index, const void * data) {
 
-    cm_byte * index_data = _vector_traverse(vector, index);
+    void * index_data = _vector_traverse(vector, index);
     memcpy(index_data, data, vector->data_size);
 
     return;
@@ -97,9 +102,9 @@ DBG_STATIC_INLINE void _vector_set(cm_vector * vector,
 
 
 
-DBG_STATIC_INLINE int _vector_assert_index_range(const cm_vector * vector, 
-                                                 const int index, 
-                                                 const enum _vector_index_mode mode) {
+DBG_STATIC DBG_INLINE 
+int _vector_assert_index_range(const cm_vector * vector, const int index, 
+                               const enum _vector_index_mode mode) {
 
     /*
      *  If inserting, maximum index needs to be +1 higher than for other operations.
@@ -120,12 +125,12 @@ DBG_STATIC_INLINE int _vector_assert_index_range(const cm_vector * vector,
  *  --- [EXTERNAL] ---
  */
 
-int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf) {
+int cm_vector_get_val(const cm_vector * vector, const int index, void * buf) {
 
     int norm_index = _vector_normalise_index(vector, index, INDEX);
     if (_vector_assert_index_range(vector, norm_index, INDEX)) return -1;
     
-    cm_byte * data = _vector_traverse(vector, norm_index); 
+    void * data = _vector_traverse(vector, norm_index); 
     memcpy(buf, data, vector->data_size);
 
     return 0;
@@ -133,18 +138,18 @@ int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf) 
 
 
 
-cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index) {
+void * cm_vector_get_ref(const cm_vector * vector, const int index) {
 
     int norm_index = _vector_normalise_index(vector, index, INDEX);
     if (_vector_assert_index_range(vector, norm_index, INDEX)) return NULL;
     
-    cm_byte * data = _vector_traverse(vector, norm_index); 
+    void * data = _vector_traverse(vector, norm_index); 
     return data;
 }
 
 
 
-int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data) {
+int cm_vector_set(cm_vector * vector, const int index, const void * data) {
 
     int norm_index = _vector_normalise_index(vector, index, INDEX);
     if (_vector_assert_index_range(vector, norm_index, INDEX)) return -1;
@@ -156,7 +161,7 @@ int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data) {
 
 
 
-int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data) {
+int cm_vector_insert(cm_vector * vector, const int index, const void * data) {
 
     int norm_index = _vector_normalise_index(vector, index, ADD_INDEX);
     if (_vector_assert_index_range(vector, norm_index, ADD_INDEX)) return -1;
@@ -175,7 +180,7 @@ int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data) 
 
 
 
-int cm_vector_append(cm_vector * vector, const cm_byte * data) {
+int cm_vector_append(cm_vector * vector, const void * data) {
  
     //grow the vector if there is no space left to insert new elements
     if ((size_t) vector->len == vector->size) {

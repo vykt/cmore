@@ -8,10 +8,10 @@
 
 #ifdef DEBUG 
 #define DBG_STATIC
-#define DBG_STATIC_INLINE
+#define DBG_INLINE
 #else
 #define DBG_STATIC static
-#define DBG_STATIC_INLINE static inline
+#define DBG_INLINE inline
 #endif
 
 

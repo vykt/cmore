@@ -25,7 +25,7 @@ typedef unsigned char cm_byte;
 // [list]
 struct _cm_list_node {
 
-    cm_byte * data;
+    void * data;
     struct _cm_list_node * next;
     struct _cm_list_node * prev;
 
@@ -49,7 +49,7 @@ typedef struct {
     int len;     //number of elements used
     size_t size; //number of elements allocated
     size_t data_size;
-    cm_byte * data;
+    void * data;
 
 } cm_vector;
 
@@ -62,8 +62,8 @@ enum cm_rb_tree_eval {LESS, EQUAL, MORE, ROOT};
 
 struct _cm_rb_tree_node {
 
-    cm_byte * key;
-    cm_byte * data;
+    void * key;
+    void * data;
 
     struct _cm_rb_tree_node * left;
     struct _cm_rb_tree_node * right;
@@ -83,7 +83,7 @@ typedef struct {
     size_t data_size;
     cm_rb_tree_node * root;
 
-    enum cm_rb_tree_eval (*compare)(const cm_byte *, const cm_byte *);
+    enum cm_rb_tree_eval (*compare)(const void *, const void *);
 
 } cm_rb_tree;
 
@@ -106,17 +106,18 @@ typedef struct {
 
 // [list]
 //0 = success, -1 = error, see cm_errno
-extern int cm_list_get_val(const cm_list * list, const int index, cm_byte * buf);
+extern int cm_list_get_val(const cm_list * list, const int index, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_list_get_ref(const cm_list * list, const int index);
+extern void * cm_list_get_ref(const cm_list * list, const int index);
 //pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_get_node(const cm_list * list, const int index);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_set(cm_list * list, const int index, const cm_byte * data);
+extern cm_list_node * cm_list_set(cm_list * list, 
+                                  const int index, const void * data);
 extern cm_list_node * cm_list_insert(cm_list * list, 
-                                     const int index, const cm_byte * data);
-extern cm_list_node * cm_list_append(cm_list * list, const cm_byte * data);
+                                     const int index, const void * data);
+extern cm_list_node * cm_list_append(cm_list * list, const void * data);
 extern cm_list_node * cm_list_unlink(cm_list * list, const int index);
 
 //0 = success, -1 = error, see cm_errno
@@ -134,14 +135,18 @@ void cm_del_list_node(cm_list_node * node);
 
 // [vector]
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_get_val(const cm_vector * vector, const int index, cm_byte * buf);
+extern int cm_vector_get_val(const cm_vector * vector, 
+                             const int index, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_vector_get_ref(const cm_vector * vector, const int index);
+extern void * cm_vector_get_ref(const cm_vector * vector, 
+                                const int index);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_set(cm_vector * vector, const int index, const cm_byte * data);
-extern int cm_vector_insert(cm_vector * vector, const int index, const cm_byte * data);
-extern int cm_vector_append(cm_vector * vector, const cm_byte * data);
+extern int cm_vector_set(cm_vector * vector, 
+                         const int index, const void * data);
+extern int cm_vector_insert(cm_vector * vector, 
+                            const int index, const void * data);
+extern int cm_vector_append(cm_vector * vector, const void * data);
 extern int cm_vector_remove(cm_vector * vector, const int index);
 extern int cm_vector_fit(cm_vector * vector);
 //void return
@@ -157,26 +162,26 @@ extern void cm_del_vector(cm_vector * vector);
 // [red-black tree]
 //0 = success, -1 = error, see cm_errno
 extern int cm_rb_tree_get_val(const cm_rb_tree * tree, 
-                              const cm_byte * key, cm_byte * buf);
+                              const void * key, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern cm_byte * cm_rb_tree_get_ref(const cm_rb_tree * tree, const cm_byte * key);
+extern void * cm_rb_tree_get_ref(const cm_rb_tree * tree, const void * key);
 extern cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, 
-                                             const cm_byte * key);
+                                             const void * key);
 
 //pointer = success, NULL = error, see cm_errno
 extern cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
-                                        const cm_byte * key, const cm_byte * data);
+                                        const void * key, const void * data);
 //0 = success, -1 = error, see cm_errno
-extern int cm_rb_tree_remove(cm_rb_tree * tree, const cm_byte * key);
+extern int cm_rb_tree_remove(cm_rb_tree * tree, const void * key);
 //pointer = success, NULL = error, see cm_errno
-extern cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const cm_byte * key);
+extern cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const void * key);
 //void return
 extern void cm_rb_tree_empty(cm_rb_tree * tree);
 
 //void return
 extern void cm_new_rb_tree(cm_rb_tree * tree, const size_t key_size, 
-                           const size_t data_size, enum cm_rb_tree_eval (*compare)
-                           (const cm_byte *, const cm_byte *));
+                           const size_t data_size, enum cm_rb_tree_eval 
+                           (*compare)(const void *, const void *));
 extern void cm_del_rb_tree(cm_rb_tree * tree);
 extern void cm_del_rb_tree_node(cm_rb_tree_node * node);
 

@@ -23,7 +23,8 @@
 /*
  *  [BASIC TEST]
  *
- *     Vectors are simple; internal functions are tested through exported functions.
+ *     Vectors are simple; internal functions 
+ *     are tested through exported functions.
  */
 
 
@@ -69,7 +70,7 @@ static void _setup_full() {
     d.x = 0;
 
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
-        cm_vector_append(&v, (cm_byte *) &d);
+        cm_vector_append(&v, &d);
         d.x++;
     }
 
@@ -99,7 +100,7 @@ static void _print_vector() {
     //for each entry
     for (int i = 0; i < v.len; ++i) {
 
-        cm_vector_get_val(&v, i, (cm_byte *) &e);
+        cm_vector_get_val(&v, i, &e);
         printf("%d ", e.x);
         
     } //end for
@@ -176,14 +177,14 @@ START_TEST(test_vector_append) {
     int ret;
 
     //append to empty vector
-    ret = cm_vector_append(&v, (cm_byte *) &d);
+    ret = cm_vector_append(&v, &d);
     ck_assert_int_eq(ret, 0);
     _assert_state(1, VECTOR_DEFAULT_SIZE, 0, 0);
     
     d.x++;
 
     //append to non-empty vector
-    ret = cm_vector_append(&v, (cm_byte *) &d);
+    ret = cm_vector_append(&v, &d);
     ck_assert_int_eq(ret, 0);
     _assert_state(2, VECTOR_DEFAULT_SIZE, 1, 1); 
 
@@ -199,7 +200,7 @@ START_TEST(test__grow) {
     //append repeatedly to grow allocated area
     for (int i = 0; i < (VECTOR_DEFAULT_SIZE * 2) + 1; ++i) {
 
-        ret = cm_vector_append(&v, (cm_byte *) &d);
+        ret = cm_vector_append(&v, &d);
         d.x++;
 
         //assert state
@@ -224,7 +225,7 @@ START_TEST(test_vector_get_val) {
     //get every vector entry by value (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
-        ret = cm_vector_get_val(&v, i, (cm_byte *) &d);
+        ret = cm_vector_get_val(&v, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, i);
 
@@ -233,7 +234,7 @@ START_TEST(test_vector_get_val) {
     //get every vector entry by value (negative index)
     for (int i = -1; i > TEST_LEN_FULL * -1; --i) {
 
-        ret = cm_vector_get_val(&v, i, (cm_byte *) &d);
+        ret = cm_vector_get_val(&v, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, TEST_LEN_FULL + i);
 
@@ -241,13 +242,13 @@ START_TEST(test_vector_get_val) {
 
     //get invalid index (+ve index)
     cm_errno = 0;
-    ret = cm_vector_get_val(&v, TEST_LEN_FULL, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
     //get invalid index (-ve index)
     cm_errno = 0;
-    ret = cm_vector_get_val(&v, -TEST_LEN_FULL - 1, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, -TEST_LEN_FULL - 1, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
@@ -314,10 +315,10 @@ START_TEST(test_vector_set) {
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         e.x = i * -1;
-        ret = cm_vector_set(&v, i, (cm_byte *) &e);
+        ret = cm_vector_set(&v, i, &e);
         ck_assert_int_eq(ret, 0);
         
-        ret = cm_vector_get_val(&v, i, (cm_byte *) &d);
+        ret = cm_vector_get_val(&v, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, i * -1);
 
@@ -336,10 +337,10 @@ START_TEST(test_vector_set) {
 
         //value of e.x will range from -11 to -19 (skip index 0)
         e.x = -TEST_LEN_FULL - (TEST_LEN_FULL + i);
-        ret = cm_vector_set(&v, i, (cm_byte *) &e);
+        ret = cm_vector_set(&v, i, &e);
         ck_assert_int_eq(ret, 0);
 
-        ret = cm_vector_get_val(&v, i, (cm_byte *) &d);
+        ret = cm_vector_get_val(&v, i, &d);
         ck_assert_int_eq(ret, 0);
         ck_assert_int_eq(d.x, -TEST_LEN_FULL - (TEST_LEN_FULL + i));
 
@@ -355,13 +356,13 @@ START_TEST(test_vector_set) {
 
     //set invalid index (+ve index)
     cm_errno = 0;
-    ret = cm_vector_set(&v, TEST_LEN_FULL, (cm_byte *) &d);
+    ret = cm_vector_set(&v, TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
     //set invalid index (-ve index)
     cm_errno = 0;
-    ret = cm_vector_set(&v, -TEST_LEN_FULL - 1, (cm_byte *) &d);
+    ret = cm_vector_set(&v, -TEST_LEN_FULL - 1, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
@@ -386,60 +387,60 @@ START_TEST(test_vector_insert) {
 
     //insert in the third index (positive index)
     e.x = -1;
-    ret = cm_vector_insert(&v, 3, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, 3, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, 3, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, 3, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -1);
     len++;
 
     //insert in the third from last index (negative index)
     e.x = -2;
-    ret = cm_vector_insert(&v, -3, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, -3, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, -3, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, -3, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -2);
     len++;
 
     //insert at the end (positive index)
     e.x = -3;
-    ret = cm_vector_insert(&v, len, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, len, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, len, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, len, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -3);
     len++;
 
     //insert at the end (negative index)
     e.x = -4;
-    ret = cm_vector_insert(&v, -1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, -1, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, len, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, len, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -4);
     len++;
 
     //insert at the beginning (zero index)
     e.x = -5;
-    ret = cm_vector_insert(&v, 0, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, 0, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, 0, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, 0, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -5);
     len++;
 
     //insert at the beginning (max negative index)
     e.x = -6;
-    ret = cm_vector_insert(&v, (len * -1) - 1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, (len * -1) - 1, &e);
     ck_assert_int_eq(ret, 0);
 
-    ret = cm_vector_get_val(&v, 0, (cm_byte *) &d);
+    ret = cm_vector_get_val(&v, 0, &d);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -6);
     len++;
@@ -453,13 +454,13 @@ START_TEST(test_vector_insert) {
 
     //insert invalid index (+ve index)
     cm_errno = 0;
-    ret = cm_vector_insert(&v, len+1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, len+1, &e);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
     //insert invalid index (-ve index)
     cm_errno = 0;
-    ret = cm_vector_insert(&v, (len+2) * -1, (cm_byte *) &e);
+    ret = cm_vector_insert(&v, (len+2) * -1, &e);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
@@ -494,7 +495,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, 3, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, 3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
@@ -504,7 +505,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, -3, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, -3, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -514,7 +515,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, len - 1, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
@@ -524,7 +525,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, len - 1, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, len - 1, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
@@ -534,7 +535,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, 0, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, 0, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
@@ -544,7 +545,7 @@ START_TEST(test_vector_remove) {
     ck_assert_int_eq(v.len, len - 1);
     len--;
 
-    ret = cm_vector_get_val(&v, 0, (cm_byte *) &e);
+    ret = cm_vector_get_val(&v, 0, &e);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 2);
 
@@ -585,7 +586,7 @@ START_TEST(test_vector_fit) {
     for (int i = 0; i < expand_len; ++i) {
 
         d.x = i;
-        ret = cm_vector_append(&v, (cm_byte *) &d);
+        ret = cm_vector_append(&v, &d);
         ck_assert_int_eq(ret, 0);
 
     } //end for

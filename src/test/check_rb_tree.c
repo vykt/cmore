@@ -41,7 +41,7 @@ static data d;
 
 
 
-enum cm_rb_tree_eval compare(const cm_byte * b_1, const cm_byte * b_2) {
+enum cm_rb_tree_eval compare(const void * b_1, const void * b_2) {
 
     data * d_1, * d_2;
 
@@ -284,8 +284,9 @@ static void _assert_node_fast(cm_rb_tree_node * n, int n_data) {
 
 
 static void _assert_fix_data(struct _rb_tree_fix_data * fix_data, 
-                             cm_rb_tree_node * n, int n_data, int grandparent_data, 
-                             int parent_data, int uncle_data, int sibling_data) {
+                             cm_rb_tree_node * n, int n_data, 
+                             int grandparent_data, int parent_data, 
+                             int uncle_data, int sibling_data) {
 
     /*
      *  Likely some redundancy in the checks; rather be safe.
@@ -416,7 +417,8 @@ static void _assert_fix_data(struct _rb_tree_fix_data * fix_data,
 
 
 static void _set_fix_data(struct _rb_tree_fix_data * f_data,
-                          cm_rb_tree_node * parent, cm_rb_tree_node * grandparent,
+                          cm_rb_tree_node * parent, 
+                          cm_rb_tree_node * grandparent, 
                           cm_rb_tree_node * uncle, cm_rb_tree_node * sibling) {
 
     f_data->parent      = parent;
@@ -480,7 +482,7 @@ START_TEST(test__new_node) {
     d.x = 0;
 
     //run test
-    n = _rb_tree_new_node(&t, (cm_byte *) &d, (cm_byte *) &d);
+    n = _rb_tree_new_node(&t, &d, &d);
 
     //assert results
     ck_assert_ptr_nonnull(n);
@@ -663,7 +665,8 @@ START_TEST(test__populate_fix_data) {
     //parent, grandparent, uncle present
     memset(&f_data, 0, sizeof(f_data));
     _rb_tree_populate_fix_data(t.root->right->left->right, &f_data);
-    _assert_fix_data(&f_data, t.root->right->left->right, 6, 2, 4, 5, DATA_NULL);
+    _assert_fix_data(&f_data, 
+                     t.root->right->left->right, 6, 2, 4, 5, DATA_NULL);
 
     //parent, sibling present
     memset(&f_data, 0, sizeof(f_data));
@@ -1125,7 +1128,7 @@ START_TEST(test_rb_tree_set) {
 
     //root insert, case 0
     d.x = 20;
-    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    ret = cm_rb_tree_set(&t, &d.x, &d);
     _assert_node_fast(ret, 20);
     
     _assert_node(t.root, 20, DATA_NULL, DATA_NULL, DATA_NULL);
@@ -1134,7 +1137,7 @@ START_TEST(test_rb_tree_set) {
 
     //case 2
     d.x = 25;
-    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    ret = cm_rb_tree_set(&t, &d.x, &d);
     _assert_node_fast(ret, 25);
     
     _assert_node(t.root, 20, DATA_NULL, 25, DATA_NULL);
@@ -1145,7 +1148,7 @@ START_TEST(test_rb_tree_set) {
     
     //case 4
     d.x = 30;
-    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    ret = cm_rb_tree_set(&t, &d.x, &d);
     _assert_node_fast(ret, 30);
     
     _assert_node(t.root, 25, 20, 30, DATA_NULL);
@@ -1158,7 +1161,7 @@ START_TEST(test_rb_tree_set) {
 
     //case 1
     d.x = 22;
-    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    ret = cm_rb_tree_set(&t, &d.x, &d);
     _assert_node_fast(ret, 22);
 
     _assert_node(t.root->left, 20, DATA_NULL, 22, 25);
@@ -1170,7 +1173,7 @@ START_TEST(test_rb_tree_set) {
 
     //case 3, case 4
     d.x = 21;
-    ret = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    ret = cm_rb_tree_set(&t, &d.x, &d);
     _assert_node_fast(ret, 21);
     
     _assert_node(t.root->left, 21, 20, 22, 25);
@@ -1193,7 +1196,7 @@ START_TEST(test_rb_tree_remove) {
 
     //case 0
     d.x = 25;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root->right->left, 30, DATA_NULL, DATA_NULL, 40);
@@ -1201,7 +1204,7 @@ START_TEST(test_rb_tree_remove) {
 
     //case 4
     d.x = 30;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root->right, 50, 40, 55, 20);
@@ -1215,7 +1218,7 @@ START_TEST(test_rb_tree_remove) {
 
     //case 3
     d.x = 55;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root, 20, 10, 45, DATA_NULL);
@@ -1230,15 +1233,15 @@ START_TEST(test_rb_tree_remove) {
 
     //case 1 & 2 (red parent)
     d.x = 5;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     d.x = 15;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
     
     d.x = 10;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root, 45, 20, 50, DATA_NULL);
@@ -1253,13 +1256,13 @@ START_TEST(test_rb_tree_remove) {
 
     //2 children (root, no fixes)
     d.x = 15;
-    cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    cm_rb_tree_set(&t, &d.x, &d);
 
     d.x = 30;
-    cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+    cm_rb_tree_set(&t, &d.x, &d);
 
     d.x = 45;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root, 40, 20, 50, DATA_NULL);
@@ -1275,7 +1278,7 @@ START_TEST(test_rb_tree_remove) {
 
     //2 children (non-root, fixes)
     d.x = 20;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root, 40, 15, 50, DATA_NULL);
@@ -1286,7 +1289,7 @@ START_TEST(test_rb_tree_remove) {
 
     //1 child
     d.x = 15;
-    ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_remove(&t, &d.x);
     ck_assert_int_eq(ret, 0);
 
     _assert_node(t.root, 40, 30, 50, DATA_NULL);
@@ -1312,7 +1315,7 @@ START_TEST(test_rb_tree_unlink) {
     cm_rb_tree_node * ret;
 
     d.x = 5;
-    ret = cm_rb_tree_unlink(&t, (cm_byte *) &d.x);
+    ret = cm_rb_tree_unlink(&t, &d.x);
     ck_assert_ptr_nonnull(ret);
 
     ck_assert_ptr_null(ret->parent);
@@ -1392,9 +1395,9 @@ Suite * rb_tree_suite() {
     //test cases (cont.)
     TCase * tc_rb_tree_set;
     TCase * tc_rb_tree_remove;
-    //TCase * tc_rb_tree_unlink;
-    //TCase * tc_rb_tree_empty;
-    //TCase * tc_del_rb_tree_node;
+    TCase * tc_rb_tree_unlink;
+    TCase * tc_rb_tree_empty;
+    TCase * tc_del_rb_tree_node;
 
     Suite * s = suite_create("rb_tree");
 
@@ -1507,18 +1510,18 @@ Suite * rb_tree_suite() {
     tcase_add_test(tc_rb_tree_remove, test_rb_tree_remove);
 
     //tc_rb_tree_unlink
-    //tc_rb_tree_unlink = tcase_create("rb_tree_unlink");
-    //tcase_add_checked_fixture(tc_rb_tree_unlink, _setup_sorted_stub, _teardown);
-    //tcase_add_test(tc_rb_tree_unlink, test_rb_tree_unlink);
+    tc_rb_tree_unlink = tcase_create("rb_tree_unlink");
+    tcase_add_checked_fixture(tc_rb_tree_unlink, _setup_sorted_stub, _teardown);
+    tcase_add_test(tc_rb_tree_unlink, test_rb_tree_unlink);
 
     //tc_rb_tree_empty
-    //tc_rb_tree_empty = tcase_create("rb_tree_empty");
-    //tcase_add_checked_fixture(tc_rb_tree_empty, _setup_stub, _teardown);
-    //tcase_add_test(tc_rb_tree_empty, test_rb_tree_empty);
+    tc_rb_tree_empty = tcase_create("rb_tree_empty");
+    tcase_add_checked_fixture(tc_rb_tree_empty, _setup_stub, _teardown);
+    tcase_add_test(tc_rb_tree_empty, test_rb_tree_empty);
 
     //tc_del_rb_tree_node
-    //tc_del_rb_tree_node = tcase_create("del_rb_tree_node");
-    //tcase_add_test(tc_del_rb_tree_node, test_del_rb_tree_node);
+    tc_del_rb_tree_node = tcase_create("del_rb_tree_node");
+    tcase_add_test(tc_del_rb_tree_node, test_del_rb_tree_node);
 
 
     //add test cases to red-black tree suite
@@ -1549,9 +1552,9 @@ Suite * rb_tree_suite() {
     //add test cases to red-black tree suite (cont.)
     suite_add_tcase(s, tc_rb_tree_set);
     suite_add_tcase(s, tc_rb_tree_remove);
-    //suite_add_tcase(s, tc_rb_tree_unlink);
-    //suite_add_tcase(s, tc_rb_tree_empty);
-    //suite_add_tcase(s, tc_del_rb_tree_node);
+    suite_add_tcase(s, tc_rb_tree_unlink);
+    suite_add_tcase(s, tc_rb_tree_empty);
+    suite_add_tcase(s, tc_del_rb_tree_node);
 
     return s;
 }
@@ -1587,10 +1590,10 @@ void rb_tree_explore() {
     while (run) {
 
         if (op == SET) {
-            node = cm_rb_tree_set(&t, (cm_byte *) &d.x, (cm_byte *) &d);
+            node = cm_rb_tree_set(&t, &d.x, &d);
             
         } else {
-            ret = cm_rb_tree_remove(&t, (cm_byte *) &d.x);
+            ret = cm_rb_tree_remove(&t, &d.x);
         }
     }
 
