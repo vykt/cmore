@@ -90,7 +90,7 @@ uninstall:
 > -rm -v ${INSTALL_DIR}/{${SHARED},${STATIC}}
 > -rm -v ${INCLUDE_INSTALL_DIR}/${HEADER}
 > -rm -v ${MAN_INSTALL_DIR}/man7/cmore_*.7
-> -rm -v ${MD_INSTALL_DIR}/cmore_*.md
+> -rm -v ${MD_INSTALL_DIR}/*.md
 > -rmdir ${MD_INSTALL_DIR}
 > -rm ${LD_DIR}/90cmore.conf
 > ldconfig
