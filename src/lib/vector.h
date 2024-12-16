@@ -56,5 +56,4 @@ void cm_vector_empty(cm_vector * vector);
 int cm_new_vector(cm_vector * vector, const size_t data_size);
 void cm_del_vector(cm_vector * vector);
 
-
 #endif

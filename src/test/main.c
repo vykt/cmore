@@ -94,8 +94,7 @@ int main(int argc, char ** argv) {
 
         case RB_TREE_EXPL:
             rb_tree_explore();
-            break;
-        
+            break;        
     }
     
     return 0;
