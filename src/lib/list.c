@@ -148,7 +148,35 @@ void _list_sub_node(cm_list * list, cm_list_node * prev_node,
 
 
 
-DBG_STATIC int _list_empty(cm_list * list) {
+DBG_STATIC
+cm_list_node * _list_insert_node(cm_list * list, cm_list_node * node, 
+                                 const void * data, int index) {
+
+    cm_list_node * prev_node, * next_node;
+
+    //create new node
+    cm_list_node * new_node = _list_new_node(list, data);
+
+    //assign prev_node and next_node depending on case
+    if (list->len == 1) {
+        
+        next_node = prev_node = node;
+    
+    } else {
+
+        next_node = node;
+        prev_node = node->prev;
+        index = list->head == node ? 0 : -1;
+    }
+
+    _list_add_node(list, new_node, prev_node, next_node, 0);
+    return new_node;
+}
+
+
+
+DBG_STATIC 
+int _list_empty(cm_list * list) {
  
     cm_list_node * node = list->head, * next_node;
     int index = list->len;
@@ -250,6 +278,16 @@ cm_list_node * cm_list_set(cm_list * list,
 
 
 
+cm_list_node * cm_list_set_node(cm_list * list,
+                                cm_list_node * node, const void * data) {
+
+    memcpy(node->data, data, list->data_size);
+
+    return node;
+}
+
+
+
 cm_list_node * cm_list_insert(cm_list * list, 
                               const int index, const void * data) {
 
@@ -261,30 +299,59 @@ cm_list_node * cm_list_insert(cm_list * list,
     cm_list_node * new_node = _list_new_node(list, data);
     if (!new_node) return NULL;
     
-    //get the _list_prev_ and _list_next_ of the new node as required
+    //assign prev_node and next_node depending on case
     if (list->len == 0) {
+
         _list_set_head_node(list, new_node);
         return new_node;
 
-    } else if (list->len == 1) { 
-        next_node = prev_node = list->head; 
-        _list_add_node(list, new_node, prev_node, next_node, index);
-
-    } else { 
+    } else {
         
-        //get appropriate next_node depending on index +/-
-        if (index >= 0) {
-            next_node = _list_traverse(list, index);
-        } else {
-            next_node = _list_traverse(list, index + 1);
+        if (list->len == 1) { 
+        
+            next_node = prev_node = list->head; 
+
+        } else { 
+        
+            //get appropriate next_node depending on index +/-
+            if (index >= 0) {
+                next_node = _list_traverse(list, index);
+            } else {
+                next_node = _list_traverse(list, index + 1);
+            }
+            if (!next_node) {
+                _list_del_node(new_node);
+                return NULL;
+            }
+            prev_node = next_node->prev;
         }
-        if (!next_node) {
-            _list_del_node(new_node);
-            return NULL;
-        }
-        prev_node = next_node->prev;
+        
         _list_add_node(list, new_node, prev_node, next_node, index);
-    }
+        return new_node;
+    
+    } //end else
+}
+
+
+
+cm_list_node * cm_list_insert_node_before(cm_list * list,
+                                          cm_list_node * node, 
+                                          const void * data) {
+
+    int index = 0;
+    cm_list_node * new_node = _list_insert_node(list, node, data, index);
+
+    return new_node;
+}
+
+
+
+cm_list_node * cm_list_insert_node_after(cm_list * list,
+                                         cm_list_node * node, 
+                                         const void * data) {
+
+    int index = -1;
+    cm_list_node * new_node = _list_insert_node(list, node, data, index);
 
     return new_node;
 }
@@ -329,6 +396,16 @@ cm_list_node * cm_list_unlink(cm_list * list, const int index) {
 
 
 
+cm_list_node * cm_list_unlink_node(cm_list * list, cm_list_node * node) {
+
+    int index = list->head == node ? 0 : -1;
+
+    //unlink the node from the list
+    _list_sub_node(list, node->prev, node->next, index);
+}
+
+
+
 int cm_list_remove(cm_list * list, const int index) {
  
     if (_list_assert_index_range(list, index, INDEX)) return -1;
@@ -339,6 +416,20 @@ int cm_list_remove(cm_list * list, const int index) {
 
     _list_sub_node(list, del_node->prev, del_node->next, index);
     _list_del_node(del_node);
+
+    --list->len;
+
+    return 0;
+}
+
+
+
+int cm_list_remove_node(cm_list * list, cm_list_node * node) {
+
+    int index = list->head == node ? 0 : -1;
+
+    _list_sub_node(list, node->prev, node->next, index);
+    _list_del_node(node);
 
     --list->len;
 

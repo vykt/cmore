@@ -115,13 +115,28 @@ extern cm_list_node * cm_list_get_node(const cm_list * list, const int index);
 //pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_set(cm_list * list, 
                                   const int index, const void * data);
+extern cm_list_node * cm_list_set_node(cm_list * list,
+                                       cm_list_node * node, const void * data);
+
+//pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_insert(cm_list * list, 
                                      const int index, const void * data);
+extern cm_list_node * cm_list_insert_before_node(cm_list * list,
+                                                 cm_list_node * node,
+                                                 const void * data);
+extern cm_list_node * cm_list_insert_after_node(cm_list * list,
+                                                cm_list_node * node,
+                                                const void * data);
+
+//pointer = success, NULL = error, see cm_errno
 extern cm_list_node * cm_list_append(cm_list * list, const void * data);
 extern cm_list_node * cm_list_unlink(cm_list * list, const int index);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_list_remove(cm_list * list, const int index);
+extern int cm_list_remove_node(cm_list * list, cm_list_node * node);
+
+//0 = success, -1 = error, see cm_errno
 extern int cm_list_empty(cm_list * list);
 
 //void return
