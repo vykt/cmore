@@ -1,29 +1,31 @@
 set environment CK_FORK=no
 
-define pnode
+define plst
 	if $argc != 1
 		printf "Use: pnode <*node>\n"
 	else
-		printf "Node data:   "
+		printf "Node data: "
 		p *((int *) $arg0->data)
 	end
 end
 
-define pcolour
-	if $argc != 1
-		printf "Use: pcolour <*node>\n"
+define pvct
+	if $argc != 2
+		printf "Use: pvct <*vct> <index>\n"
 	else
-		printf "Node colour: "
-		p $arg0->colour
+		printf "Index data: "
+		p *(((int *) ($arg0->data)) + $arg1)
 	end
 end
 
-define pall
+define prbt
 	if $argc != 1
-		printf "Use: pall <*node>\n"
+		printf "Use: prbt <*node>\n"
 	else
-		pnode $arg0
-		pcolour $arg0
+		printf "Node data:   "
+		p *((int *) $arg0->data)
+		printf "Node colour: "
+		p $arg0->colour
 	end
 end
 

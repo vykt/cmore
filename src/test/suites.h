@@ -6,11 +6,11 @@
 
 
 //unit test suites
-Suite * list_suite();
-Suite * vector_suite();
-Suite * rb_tree_suite();
+Suite * lst_suite();
+Suite * vct_suite();
+Suite * rbt_suite();
 
 //other tests
-void rb_tree_explore();
+void rbt_explore();
 
 #endif

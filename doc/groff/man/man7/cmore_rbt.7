@@ -21,30 +21,29 @@
 The C More Library (\f[I]libcmore\f[R], \f[I]-lcmore\f[R])
 .SH DESCRIPTION
 .PP
-The \f[B]CMore\f[R] \f[I]red-black tree\f[R] is a self balancing binary
-sorted tree that maintains a guarantee of \f[B]O(log n)\f[R] for
+The \f[B]CMore\f[R] \f[I]rbt\f[R] is a red-black tree - a self-balancing
+binary sorted tree that maintains a guarantee of \f[B]O(log n)\f[R]
 traversal, insertion, and deletion.
-The \f[I]red-black tree\f[R] is represented by a \f[V]cm_rb_tree\f[R]
-structure.
+The \f[I]rbt\f[R] is represented by a \f[V]cm_rbt\f[R] structure.
 It holds the size (in # of elements), the key size for each node (in
 bytes), the data size for each node (in bytes), a pointer to the root
 node, and a pointer to the \f[I]compare()\f[R] function that will be
 covered shortly.
 .PP
-Each node in the \f[I]red-black tree\f[R] is represented by a
-\f[V]cm_rb_tree_node\f[R] structure.
+Each node in the \f[I]rbt\f[R] is represented by a \f[V]cm_rbt_node\f[R]
+structure.
 It consists of a pointer to an allocation storing the key for this node,
 a pointer to an allocation storing the data for this node, a pointer to
 a left node, a pointer to a right node, a pointer to a parent node,
 whether this node is to the left or the right of its parent, represented
-by a \f[V]cm_rb_tree_eval\f[R] enum, and a a colour for this node
-represented by a \f[V]cm_r_tree_colour\f[R] enum.
+by a \f[V]cm_rbt_side\f[R] enum, and a a colour for this node
+represented by a \f[V]cm_rbt_colour\f[R] enum.
 .PP
-Because a \f[I]red-black tree\f[R] is a sorted generic container, it
-must call a user-specified \f[I]compare()\f[R] function.
+Because a \f[I]rbt\f[R] is a sorted generic container, it must call a
+user-specified \f[I]compare()\f[R] function.
 This function accepts two parameters.
 It must implement a comparison between these two parameters and return
-\f[V]cm_rb_tree_eval\f[R] \f[V]LESS\f[R] if parameter one is less than
+\f[V]cm_rbt_side\f[R] \f[V]LESS\f[R] if parameter one is less than
 parameter two, \f[V]MORE\f[R] if parameter one is greater than parameter
 two, and \f[V]EQUAL\f[R] if the parameters are equal, \f[V]EQUAL\f[R]
 should be returned.
@@ -53,7 +52,7 @@ Below is an example compare function:
 .IP
 .nf
 \f[C]
-enum cm_rb_tree_eval int_compare(void * arg1, void * arg2) {
+enum cm_rbt_side int_compare(void * arg1, void * arg2) {
 
     int num1 = *(int *) arg1;
     int num2 = *(int *) arg2;
@@ -66,109 +65,106 @@ enum cm_rb_tree_eval int_compare(void * arg1, void * arg2) {
 \f[R]
 .fi
 .PP
-A \f[I]red-black tree\f[R] is created with \f[V]cm_new_rb_tree()\f[R].
+A \f[I]rbt\f[R] is created with \f[V]cm_new_rbt()\f[R].
 This initialiser function does not allocate any memory.
-A \f[I]red-black tree\f[R] is destroyed with \f[V]cm_del_rb_tree()\f[R].
-A \f[I]red-black tree\f[R] can be emptied with
-\f[V]cm_rb_tree_empty()\f[R]:
+A \f[I]rbt\f[R] is destroyed with \f[V]cm_del_rbt()\f[R].
+A \f[I]rbt\f[R] can be emptied with \f[V]cm_rbt_emp()\f[R]:
 .IP
 .nf
 \f[C]
-cm_rb_tree rb_tree;
+cm_rbt rb_tree;
 
 //initialise the red-black tree
-cm_new_rb_tree(&rb_tree, sizeof(int), sizeof(int), int_compare);
+cm_new_rbt(&rb_tree, sizeof(int), sizeof(int), int_compare);
 
 //empty the red-black tree
-cm_rb_tree_empty(&tree);
+cm_rbt_emp(&tree);
 
 //destroy the red-black tree
-cm_del_rb_tree(&tree);
+cm_del_rbt(&tree);
 \f[R]
 .fi
 .PP
-\f[V]cm_rb_tree_get_val()\f[R] gets the data at a key and copies it to a
+\f[V]cm_rbt_get_val()\f[R] gets the data at a key and copies it to a
 buffer \f[V]buf\f[R].
-\f[V]cm_rb_tree_get_ref()\f[R] returns a pointer to the data at a key.
-\f[V]cm_rb_get_node()\f[R] returns the node at a key, allowing for
-further traversal using the \f[V]left\f[R], \f[V]right\f[R], and
+\f[V]cm_rbt_get_p()\f[R] returns a pointer to the data at a key.
+\f[V]cm_rb_get_n()\f[R] returns the node at a key, allowing for further
+traversal using the \f[V]left\f[R], \f[V]right\f[R], and
 \f[V]parent\f[R] pointers.
-If a key is not present in the \f[I]red-black tree\f[R], a
+If a key is not present in the \f[I]rbt\f[R], a
 \f[I]CM_ERR_USER_KEY\f[R] error is stored in \f[V]cm_errno\f[R]:
 .IP
 .nf
 \f[C]
-cm_rb_tree rb_tree;
-cm_rb_tree_node * node;
+cm_rbt rb_tree;
+cm_rbt_node * node;
 int ret, key, data, * data_ptr;
 
 //initialise the red-black tree
-cm_new_rb_tree(&rb_tree, sizeof(int), sizeof(int), int_compare);
+cm_new_rbt(&rb_tree, sizeof(int), sizeof(int), int_compare);
 
 //[populate the red-black tree]
 
 //get the \[aq]2\[aq] key by value
 key = 2;
-ret = cm_rb_tree_get_val(&rb_tree, &key, &data);
+ret = cm_rbt_get(&rb_tree, &key, &data);
 
 //get a pointer to the \[aq]5\[aq] key
 key = 5;
-data_ptr = cm_rb_tree_get_ref(&rb_tree, &key);
+data_ptr = cm_rbt_get_p(&rb_tree, &key);
 
 //get the node of key \[aq]8\[aq]
 key = 8;
-node = cm_rb_tree_get_node(&rb_tree, &key);
+node = cm_rbt_get_n(&rb_tree, &key);
 
 //get the parent node of key \[aq]8\[aq]
-if (node->parent_eval != ROOT) node = node->parent;
+if (node->parent_side != ROOT) node = node->parent;
 \f[R]
 .fi
 .PP
-\f[V]cm_rb_tree_set()\f[R] assigns a value to a key.
+\f[V]cm_rbt_set()\f[R] assigns a value to a key.
 If the key does not exist in the tree, a new node is created.
 If the key already exists, it is overwritten.
-\f[V]cm_rb_tree_remove()\f[R] removes a node with a matching key from
-the \f[I]red-black tree\f[R].
-\f[V]cm_rb_tree_unlink()\f[R] unlinks a node from the \f[I]red-black
-tree\f[R].
+\f[V]cm_rbt_rem()\f[R] removes a node with a matching key from the
+\f[I]rbt\f[R].
+\f[V]cm_rbt_uln()\f[R] unlinks a node from the \f[I]rbt\f[R].
 All of these functions return a pointer to the node the operation was
-performed on, with the exception of cm_rb_tree_remove().
-In the case of \f[V]cm_rb_tree_unlink\f[R], the returned node must later
-be freed with \f[V]cm_del_rb_tree_node()\f[R] to prevent a memory leak.
+performed on, with the exception of cm_rbt_rem().
+In the case of \f[V]cm_rbt_uln\f[R], the returned node must later be
+freed with \f[V]cm_del_rbt_node()\f[R] to prevent a memory leak.
 Requesting to remove or unlink a key that is not present in the
-\f[I]red-black tree\f[R] will result in a \f[I]CM_ERR_USER_KEY\f[R]
-error:
+\f[I]rbt\f[R] will result in a \f[I]CM_ERR_USER_KEY\f[R] error:
 .IP
 .nf
 \f[C]
-cm_rb_tree rb_tree;
-cm_rb_tree_node * node;
+cm_rbt rb_tree;
+cm_rbt_node * node;
 int ret, key, data;
 
 //initialise the red-black tree
-cm_new_rb_tree(&rb_tree, sizeof(int), sizeof(int), int_compare);
+cm_new_rbt(&rb_tree, sizeof(int), sizeof(int), int_compare);
 
 //set a key
 key = 2;
 data = 20;
-node = cm_rb_tree_set(&tree, &key, &data);
+node = cm_rbt_set(&tree, &key, &data);
 
 //set another key
 key = 4;
 data = 40;
-node = cm_rb_tree_set(&tree, &key, &data);
+node = cm_rbt_set(&tree, &key, &data);
 
 //remove a key
 key = 2;
-ret = cm_rb_tree_remove(&tree, &key);
+ret = cm_rbt_rem(&tree, &key);
 
 //unlink and free a node at key
 key = 4;
-node = cm_rb_tree_unlink(&tree, &key);
-cm_del_rb_tree_node(node);
+node = cm_rbt_uln(&tree, &key);
+cm_del_rbt_node(node);
 
 //destroy the red-black tree
-cm_del_rb_tree(&tree);
+cm_del_rbt(&tree);
 \f[R]
 .fi
 .PP

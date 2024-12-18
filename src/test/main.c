@@ -20,7 +20,7 @@ static enum _test_mode _get_test_mode(int argc, char ** argv) {
 
     const struct option long_opts[] = {
         {"unit-tests", no_argument, NULL, 'u'},
-        {"rb-tree-explore", no_argument, NULL, 'r'},
+        {"rbt-explore", no_argument, NULL, 'r'},
         {0,0,0,0}
     };
 
@@ -53,22 +53,22 @@ static enum _test_mode _get_test_mode(int argc, char ** argv) {
 //run unit tests
 static void _run_unit_tests() {
 
-    Suite * s_vector;
-    Suite * s_list;
-    Suite * s_rb_tree;
+    Suite * s_vct;
+    Suite * s_lst;
+    Suite * s_rbt;
     Suite * s_error;
 
     SRunner * sr;
 
     //initialise test suites
-    s_vector  = vector_suite();
-    s_list    = list_suite();
-    s_rb_tree = rb_tree_suite(); 
+    s_vct = vct_suite();
+    s_lst = lst_suite();
+    s_rbt = rbt_suite(); 
 
     //create suite runner
-    sr = srunner_create(s_vector);
-    srunner_add_suite(sr, s_list);
-    srunner_add_suite(sr, s_rb_tree);
+    sr = srunner_create(s_vct);
+    srunner_add_suite(sr, s_lst);
+    srunner_add_suite(sr, s_rbt);
 
     //run tests
     srunner_run_all(sr, CK_VERBOSE);
@@ -93,7 +93,7 @@ int main(int argc, char ** argv) {
             break;
 
         case RB_TREE_EXPL:
-            rb_tree_explore();
+            rbt_explore();
             break;        
     }
     

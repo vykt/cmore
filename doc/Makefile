@@ -4,7 +4,7 @@ RST_DIR=./rst
 MAN_DIR=./groff/man/man7
 MD_DIR=./md
 
-RST_DOC=error.rst list.rst vector.rst rb_tree.rst
+RST_DOC=error.rst lst.rst vct.rst rbt.rst
 MAN_DOC=${RST_DOC:%.rst=cmore_%.7}
 MD_DOC=${RST_DOC:%.rst=%.md}
 

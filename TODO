@@ -1,4 +1,2 @@
 - Refactor red-black tree insertion to improve performance (see comments in 
   source file).
-
-- For data structures that use nodes, add functions for operating on nodes.

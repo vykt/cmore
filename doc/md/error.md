@@ -10,7 +10,8 @@ The C More Library (*libcmore*, *-lcmore*)
 # DESCRIPTION
 
 **CMore** implements its own version of libc\'s *errno*. If you are
-familiar with it, **CMore**\'s implementation should be very intuitive.
+familiar with *errno*, **CMore**\'s implementation should be very
+intuitive.
 
 **CMore** functions return **NULL** or **-1** on fail. The cause of the
 last error to occur is stored as an *error code* in the thread-local

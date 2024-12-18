@@ -23,23 +23,23 @@ typedef unsigned char cm_byte;
 
 
 // [list]
-struct _cm_list_node {
+struct _cm_lst_node {
 
     void * data;
-    struct _cm_list_node * next;
-    struct _cm_list_node * prev;
+    struct _cm_lst_node * next;
+    struct _cm_lst_node * prev;
 
 };
-typedef struct _cm_list_node cm_list_node;
+typedef struct _cm_lst_node cm_lst_node;
 
 
 typedef struct {
 
     int len;
-    size_t data_size;
-    cm_list_node * head;
+    size_t data_sz;
+    cm_lst_node * head;
 
-} cm_list;
+} cm_lst;
 
 
 
@@ -47,52 +47,52 @@ typedef struct {
 typedef struct {
 
     int len;     //number of elements used
-    size_t size; //number of elements allocated
-    size_t data_size;
+    size_t sz;   //number of elements allocated
+    size_t data_sz;
     void * data;
 
-} cm_vector;
+} cm_vct;
 
 
 
 // [red-black tree]
-enum cm_rb_tree_colour {RED, BLACK};
-enum cm_rb_tree_eval {LESS, EQUAL, MORE, ROOT};
+enum cm_rbt_colour {RED, BLACK};
+enum cm_rbt_side {LESS, EQUAL, MORE, ROOT};
 
 
-struct _cm_rb_tree_node {
+struct _cm_rbt_node {
 
     void * key;
     void * data;
 
-    struct _cm_rb_tree_node * left;
-    struct _cm_rb_tree_node * right;
+    struct _cm_rbt_node * left;
+    struct _cm_rbt_node * right;
     
-    struct _cm_rb_tree_node * parent;
-    enum cm_rb_tree_eval parent_eval; //if this node is parent's left or right
+    struct _cm_rbt_node * parent;
+    enum cm_rbt_side parent_side; //if this node is parent's left or right
 
-    enum cm_rb_tree_colour colour; 
+    enum cm_rbt_colour colour; 
 };
-typedef struct _cm_rb_tree_node cm_rb_tree_node;
+typedef struct _cm_rbt_node cm_rbt_node;
 
 
 typedef struct {
 
     int size;
-    size_t key_size;
-    size_t data_size;
-    cm_rb_tree_node * root;
+    size_t key_sz;
+    size_t data_sz;
+    cm_rbt_node * root;
 
-    enum cm_rb_tree_eval (*compare)(const void *, const void *);
+    enum cm_rbt_side (*compare)(const void *, const void *);
 
-} cm_rb_tree;
+} cm_rbt;
 
 /*
  *  When using cmore's red-black trees, you must implement a 
  *  compare() function for use with the data held by the nodes of 
  *  the red-black tree. That compare function must return:
  *
- *      'enum cm_rb_tree_eval' that holds one of:
+ *      'enum cm_rbt_side' that holds one of:
  *
  *          LESS, EQUAL, MORE
  *
@@ -106,99 +106,94 @@ typedef struct {
 
 // [list]
 //0 = success, -1 = error, see cm_errno
-extern int cm_list_get_val(const cm_list * list, const int index, void * buf);
+extern int cm_lst_get(const cm_lst * list, const int index, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern void * cm_list_get_ref(const cm_list * list, const int index);
+extern void * cm_lst_get_p(const cm_lst * list, const int index);
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_get_node(const cm_list * list, const int index);
+extern cm_lst_node * cm_lst_get_n(const cm_lst * list, const int index);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_set(cm_list * list, 
-                                  const int index, const void * data);
-extern cm_list_node * cm_list_set_node(cm_list * list,
-                                       cm_list_node * node, const void * data);
+extern cm_lst_node * cm_lst_set(cm_lst * list, 
+                                const int index, const void * data);
+extern cm_lst_node * cm_lst_set_n(cm_lst * list,
+                                  cm_lst_node * node, const void * data);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_insert(cm_list * list, 
-                                     const int index, const void * data);
-extern cm_list_node * cm_list_insert_before_node(cm_list * list,
-                                                 cm_list_node * node,
-                                                 const void * data);
-extern cm_list_node * cm_list_insert_after_node(cm_list * list,
-                                                cm_list_node * node,
-                                                const void * data);
+extern cm_lst_node * cm_lst_ins(cm_lst * list, 
+                                const int index, const void * data);
+extern cm_lst_node * cm_lst_ins_nb(cm_lst * list,
+                                   cm_lst_node * node, const void * data);
+extern cm_lst_node * cm_lst_ins_na(cm_lst * list,
+                                   cm_lst_node * node, const void * data);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_list_node * cm_list_append(cm_list * list, const void * data);
-extern cm_list_node * cm_list_unlink(cm_list * list, const int index);
+extern cm_lst_node * cm_lst_apd(cm_lst * list, const void * data);
 
-//0 = success, -1 = error, see cm_errno
-extern int cm_list_remove(cm_list * list, const int index);
-extern int cm_list_remove_node(cm_list * list, cm_list_node * node);
+//pointer = success, NULL = error, see cm_errno
+extern cm_lst_node * cm_lst_uln(cm_lst * list, const int index);
+extern cm_lst_node * cm_lst_uln_n(cm_lst * list, cm_lst_node * node);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_list_empty(cm_list * list);
+extern int cm_lst_rem(cm_lst * list, const int index);
+extern int cm_lst_rem_n(cm_lst * list, cm_lst_node * node);
+
+//0 = success, -1 = error, see cm_errno
+extern int cm_lst_emp(cm_lst * list);
 
 //void return
-extern void cm_new_list(cm_list * list, const size_t data_size);
+extern void cm_new_lst(cm_lst * list, const size_t data_sz);
 //0 = success, -1 = error, see cm_errno
-extern void cm_del_list(cm_list * list);
+extern void cm_del_lst(cm_lst * list);
 //void return
-void cm_del_list_node(cm_list_node * node);
+void cm_del_lst_node(cm_lst_node * node);
 
 
 
 // [vector]
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_get_val(const cm_vector * vector, 
-                             const int index, void * buf);
+extern int cm_vct_get(const cm_vct * vector, const int index, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern void * cm_vector_get_ref(const cm_vector * vector, 
-                                const int index);
+extern void * cm_vct_get_p(const cm_vct * vector, const int index);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_vector_set(cm_vector * vector, 
-                         const int index, const void * data);
-extern int cm_vector_insert(cm_vector * vector, 
-                            const int index, const void * data);
-extern int cm_vector_append(cm_vector * vector, const void * data);
-extern int cm_vector_remove(cm_vector * vector, const int index);
-extern int cm_vector_fit(cm_vector * vector);
+extern int cm_vct_set(cm_vct * vector, const int index, const void * data);
+extern int cm_vct_ins(cm_vct * vector, const int index, const void * data);
+extern int cm_vct_apd(cm_vct * vector, const void * data);
+extern int cm_vct_rem(cm_vct * vector, const int index);
+extern int cm_vct_fit(cm_vct * vector);
 //void return
-extern void cm_vector_empty(cm_vector * vector);
+extern void cm_vct_emp(cm_vct * vector);
 
 //void return
-extern int cm_new_vector(cm_vector * vector, const size_t data_size);
+extern int cm_new_vct(cm_vct * vector, const size_t data_sz);
 //0 = success, -1 = error, see cm_errno
-extern void cm_del_vector(cm_vector * vector);
+extern void cm_del_vct(cm_vct * vector);
 
 
 
 // [red-black tree]
 //0 = success, -1 = error, see cm_errno
-extern int cm_rb_tree_get_val(const cm_rb_tree * tree, 
-                              const void * key, void * buf);
+extern int cm_rbt_get(const cm_rbt * tree, const void * key, void * buf);
 //pointer = success, NULL = error, see cm_errno
-extern void * cm_rb_tree_get_ref(const cm_rb_tree * tree, const void * key);
-extern cm_rb_tree_node * cm_rb_tree_get_node(const cm_rb_tree * tree, 
-                                             const void * key);
+extern void * cm_rbt_get_p(const cm_rbt * tree, const void * key);
+extern cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key);
 
 //pointer = success, NULL = error, see cm_errno
-extern cm_rb_tree_node * cm_rb_tree_set(cm_rb_tree * tree,
-                                        const void * key, const void * data);
+extern cm_rbt_node * cm_rbt_set(cm_rbt * tree, 
+                                const void * key, const void * data);
 //0 = success, -1 = error, see cm_errno
-extern int cm_rb_tree_remove(cm_rb_tree * tree, const void * key);
+extern int cm_rbt_rem(cm_rbt * tree, const void * key);
 //pointer = success, NULL = error, see cm_errno
-extern cm_rb_tree_node * cm_rb_tree_unlink(cm_rb_tree * tree, const void * key);
+extern cm_rbt_node * cm_rbt_uln(cm_rbt * tree, const void * key);
 //void return
-extern void cm_rb_tree_empty(cm_rb_tree * tree);
+extern void cm_rbt_emp(cm_rbt * tree);
 
 //void return
-extern void cm_new_rb_tree(cm_rb_tree * tree, const size_t key_size, 
-                           const size_t data_size, enum cm_rb_tree_eval 
-                           (*compare)(const void *, const void *));
-extern void cm_del_rb_tree(cm_rb_tree * tree);
-extern void cm_del_rb_tree_node(cm_rb_tree_node * node);
+extern void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz,
+                       enum cm_rbt_side (*compare)(const void *, const void *));
+extern void cm_del_rbt(cm_rbt * tree);
+extern void cm_del_rbt_node(cm_rbt_node * node);
+
 
 
 // [error handling]
