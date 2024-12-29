@@ -99,9 +99,9 @@ index or a pointer to a node.
 \f[V]cm_list_ins_na()\f[R] inserts a value after the provided
 node\f[V].\f[R]cm_list_apd()\[ga] inserts a value at the end of the
 \f[I]lst\f[R].
-\f[V]cm_list_rem()\f[R] removes a value at an index from the
+\f[V]cm_list_rmv()\f[R] removes a value at an index from the
 \f[I]lst\f[R].
-\f[V]cm_list_rem_n()\f[R] removes the provided node from the
+\f[V]cm_list_rmv_n()\f[R] removes the provided node from the
 \f[I]lst\f[R].
 \f[V]cm_list_uln()\f[R] unlinks a node at an index from the
 \f[I]lst\f[R].
@@ -109,7 +109,7 @@ node\f[V].\f[R]cm_list_apd()\[ga] inserts a value at the end of the
 \f[I]lst\f[R].
 All of these functions return a pointer to the node the operation was
 performed on for convenience, with the exceptions of
-\f[V]cm_list_rem()\f[R] and \f[V]cm_list_rem_n()\f[R].
+\f[V]cm_list_rmv()\f[R] and \f[V]cm_list_rmv_n()\f[R].
 In the case of \f[V]cm_list_uln()\f[R] and \f[V]cm_list_uln_n()\f[R],
 the returned node must later be freed with \f[V]cm_del_lst_node()\f[R]
 to prevent a memory leak.
@@ -150,10 +150,10 @@ data = -9;
 node = cm_list_set_n(&list, list.head->next, &data);
 
 //remove a value bu index: [7, 5, -3]
-ret = cm_list_rem(&list, 1);
+ret = cm_list_rmv(&list, 1);
 
 //remove a value by pointer: [5, -3]
-node = cm_list_rem_n(&list, list.head);
+node = cm_list_rmv_n(&list, list.head);
 
 //unlink a node by index and free it: [-3]
 node = cm_list_uln(&list, 0);

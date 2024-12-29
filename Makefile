@@ -74,7 +74,7 @@ clean:
 
 install:
 > mkdir -pv ${INSTALL_DIR}
-> cp -v ${BUILD_DIR}/lib/{${SHARED},${STATIC}} ${INSTALL_DIR}
+> -cp -v ${BUILD_DIR}/lib/{${SHARED},${STATIC}} ${INSTALL_DIR}
 > mkdir -pv ${INCLUDE_INSTALL_DIR}
 > cp -v ${LIB_DIR}/${HEADER} ${INCLUDE_INSTALL_DIR}
 > mkdir -pv ${MAN_INSTALL_DIR}

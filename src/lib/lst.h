@@ -56,8 +56,8 @@ cm_lst_node * cm_lst_apd(cm_lst * list, const void * data);
 cm_lst_node * cm_lst_uln(cm_lst * list, const int index);
 cm_lst_node * cm_lst_uln_n(cm_lst * list, cm_lst_node * node);
 
-int cm_lst_rem(cm_lst * list, const int index);
-int cm_lst_rem_n(cm_lst * list, cm_lst_node * node);
+int cm_lst_rmv(cm_lst * list, const int index);
+int cm_lst_rmv_n(cm_lst * list, cm_lst_node * node);
 
 int cm_lst_emp(cm_lst * list);
 

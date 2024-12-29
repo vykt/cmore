@@ -421,7 +421,7 @@ void _rbt_ins_case_4(cm_rbt * tree,
 
 //remove case 1
 DBG_STATIC DBG_INLINE 
-void _rbt_rem_case_1(cm_rbt * tree, 
+void _rbt_rmv_case_1(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     //get side of sibling
@@ -459,7 +459,7 @@ void _rbt_rem_case_1(cm_rbt * tree,
 
 //remove case 2
 DBG_STATIC DBG_INLINE 
-void _rbt_rem_case_2(cm_rbt * tree, 
+void _rbt_rmv_case_2(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     f_data->sibling->colour = RED;
@@ -494,7 +494,7 @@ void _rbt_rem_case_2(cm_rbt * tree,
 
 //remove case 3
 DBG_STATIC DBG_INLINE 
-void _rbt_rem_case_3(cm_rbt * tree, 
+void _rbt_rmv_case_3(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     //colour close nephew black, set sibling's colour to RED, rotate 
@@ -533,7 +533,7 @@ void _rbt_rem_case_3(cm_rbt * tree,
 
 //remove case 4
 DBG_STATIC DBG_INLINE 
-void _rbt_rem_case_4(cm_rbt * tree, 
+void _rbt_rmv_case_4(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     //recolour nodes
@@ -606,7 +606,7 @@ int _rbt_determine_ins_case(const cm_rbt_node * node,
 
 //determines which case applies for removing nodes
 DBG_STATIC DBG_INLINE 
-int _rbt_determine_rem_case(const cm_rbt * tree, const cm_rbt_node * node,
+int _rbt_determine_rmv_case(const cm_rbt * tree, const cm_rbt_node * node,
                             const struct _rbt_fix_data * f_data) {
     
     enum cm_rbt_colour left_colour;
@@ -697,7 +697,7 @@ int _rbt_fix_ins(cm_rbt * tree, cm_rbt_node * node) {
 
 
 DBG_STATIC 
-int _rbt_fix_rem(cm_rbt * tree, cm_rbt_node * node, 
+int _rbt_fix_rmv(cm_rbt * tree, cm_rbt_node * node, 
                  enum cm_rbt_colour node_colour,
                  struct _rbt_fix_data * f_data) {
 
@@ -707,26 +707,26 @@ int _rbt_fix_rem(cm_rbt * tree, cm_rbt_node * node,
     while (node != tree->root && node_colour == BLACK) {
 
         //determine remove case
-        fix_case = _rbt_determine_rem_case(tree, node, f_data);
+        fix_case = _rbt_determine_rmv_case(tree, node, f_data);
         if (fix_case <= 0) return fix_case; //-1 or 0
 
         //dispatch remove case
         switch(fix_case) {
 
             case 1:
-                _rbt_rem_case_1(tree, &node, f_data);
+                _rbt_rmv_case_1(tree, &node, f_data);
                 break;
 
             case 2:
-                _rbt_rem_case_2(tree, &node, f_data);
+                _rbt_rmv_case_2(tree, &node, f_data);
                 break;
 
             case 3:
-                _rbt_rem_case_3(tree, &node, f_data);
+                _rbt_rmv_case_3(tree, &node, f_data);
                 break;
             
             case 4:
-                _rbt_rem_case_4(tree, &node, f_data);
+                _rbt_rmv_case_4(tree, &node, f_data);
                 return 0;
         }
 
@@ -888,7 +888,7 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
 
     //if a black node was removed, must correct tree
     if (unlink_colour == BLACK) {
-        ret = _rbt_fix_rem(tree, fix_node, unlink_colour, &f_data);
+        ret = _rbt_fix_rmv(tree, fix_node, unlink_colour, &f_data);
         if (ret == -1) return NULL;
     }
     
@@ -988,7 +988,7 @@ cm_rbt_node * cm_rbt_set(cm_rbt * tree,
 
 
 
-int cm_rbt_rem(cm_rbt * tree, const void * key) {
+int cm_rbt_rmv(cm_rbt * tree, const void * key) {
 
     //get relevant node
     cm_rbt_node * node = _rbt_uln_node(tree, key);

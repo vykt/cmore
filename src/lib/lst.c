@@ -414,7 +414,7 @@ cm_lst_node * cm_lst_uln_n(cm_lst * list, cm_lst_node * node) {
 
 
 
-int cm_lst_rem(cm_lst * list, const int index) {
+int cm_lst_rmv(cm_lst * list, const int index) {
  
     if (_lst_assert_index_range(list, index, INDEX)) return -1;
 
@@ -432,7 +432,7 @@ int cm_lst_rem(cm_lst * list, const int index) {
 
 
 
-int cm_lst_rem_n(cm_lst * list, cm_lst_node * node) {
+int cm_lst_rmv_n(cm_lst * list, cm_lst_node * node) {
 
     int index = list->head == node ? 0 : -1;
 

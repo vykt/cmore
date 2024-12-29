@@ -17,7 +17,6 @@
 #include "../lib/lst.h"
 
 
-#define GET_NODE_DATA(node) ((data *) (node->data))
 
 
 /*
@@ -25,18 +24,71 @@
  *
  *      Lists are simple; internal functions 
  *      are tested through exported functions.
+ *
+ *      The following functions do not have unit tests:
+ *
+ *        cm_del_lst_node():
+ *
+ *            > Very simple, no unit test necessary.
+ *
  */
 
 
-/*
- *  --- [FIXTURES] ---
- */
 
 //globals
 static cm_lst l;
 static data d;
 
 
+
+/*
+ *  --- [HELPERS] ---
+ */
+
+#define GET_NODE_DATA(node) ((data *) (node->data))
+
+
+
+static void _print_lst() {
+
+    data e;
+
+    //for each entry
+    for (int i = 0; i < l.len; ++i) {
+
+        cm_lst_get(&l, i, &e);
+        printf("%d ", e.x);
+        
+    } //end for
+
+    putchar('\n');
+
+    return;
+}
+
+
+
+//assert the state of the list & a specific index into the list
+static void _assert_state(const int len, const int index, const int value) {
+
+    ck_assert_int_eq(l.len, len);
+    cm_lst_node * iter = l.head;
+
+    //traverse list
+    for (int i = 0; i < index; ++i) {
+        iter = iter->next;
+    }
+
+    ck_assert_int_eq(GET_NODE_DATA(iter)->x, value);
+
+    return;
+}
+
+
+
+/*
+ *  --- [FIXTURES] ---
+ */
 
 //empty list setup
 static void _setup_emp() {
@@ -49,8 +101,14 @@ static void _setup_emp() {
 
 
 
-//false populated list setup
+//pseudo populated list setup
 static void _setup_stub() {
+
+    /*
+     *  Stub list:
+     *
+     *  [v, v, v] where v is an undefined value
+     */
 
     l.len = 3;
     l.data_sz = sizeof(d);
@@ -84,6 +142,12 @@ static void _setup_stub() {
 #define TEST_LEN_FULL 10
 static void _setup_full() {
 
+    /*
+     *  Full list:
+     *
+     *  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+     */
+
     cm_new_lst(&l, sizeof(d));
     d.x = 0;
 
@@ -108,76 +172,18 @@ static void teardown() {
 
 
 /*
- *  --- [HELPERS] ---
- */
-
-static void _print_lst() {
-
-    data e;
-
-    //for each entry
-    for (int i = 0; i < l.len; ++i) {
-
-        cm_lst_get(&l, i, &e);
-        printf("%d ", e.x);
-        
-    } //end for
-
-    putchar('\n');
-
-    return;
-}
-
-
-
-static void _assert_state(const int len, const int index, const int value) {
-
-    ck_assert_int_eq(l.len, len);
-    cm_lst_node * iter = l.head;
-
-    //traverse list
-    for (int i = 0; i < index; ++i) {
-        iter = iter->next;
-    }
-
-    ck_assert_int_eq(GET_NODE_DATA(iter)->x, value);
-
-    return;
-}
-
-
-
-/*
  *  --- [UNIT TESTS] ---
  */
 
-//cm_new_lst() [no fixture]
-START_TEST(test_new_lst) {
+//cm_new_lst() & cm_del_lst() [no fixture]
+START_TEST(test_new_del_lst) {
 
-    //run test
+    //only test: create a new list & destroy it
     cm_new_lst(&l, sizeof(data));
     
-    //assert result
     ck_assert_int_eq(l.len, 0);
     ck_assert_int_eq(l.data_sz, sizeof(data));
 
-    //cleanup
-    cm_del_lst(&l);
-
-    return;
-
-} END_TEST
-
-
-
-//cm_del_lst() [stub fixture]
-START_TEST(test_del_lst) {
-
-    /*
-     *  Using ASAN to check for leaks here.
-     */
-
-    //run test
     cm_del_lst(&l);
 
     return;
@@ -191,14 +197,14 @@ START_TEST(test_lst_apd) {
 
     cm_lst_node * n;
 
-    //append to empty list
+    //first test: append to empty list
     n = cm_lst_apd(&l, &d);
     ck_assert_ptr_nonnull(n);
     _assert_state(1, 0, 0);
     
     d.x++;
 
-    //append to non-empty list
+    //second test: append to non-empty list
     n = cm_lst_apd(&l, &d);
     ck_assert_ptr_nonnull(n);
     _assert_state(2, 1, 1); 
@@ -211,10 +217,10 @@ START_TEST(test_lst_apd) {
 START_TEST(test_lst_get) {
 
     int ret;
-    
     data d;
 
-    //get every list entry by value (positive index)
+
+    //first test: get every list entry by value (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         ret = cm_lst_get(&l, i, &d);
@@ -223,7 +229,8 @@ START_TEST(test_lst_get) {
 
     } //end for
 
-    //get every list entry by value (negative index)
+
+    //second test: get every list entry by value (negative index)
     for (int i = -1; i > TEST_LEN_FULL * -1; --i) {
 
         ret = cm_lst_get(&l, i, &d);
@@ -232,13 +239,15 @@ START_TEST(test_lst_get) {
 
     } //end for
 
-    //get invalid index (+ve index)
+
+    //third test: get invalid index (+ve index)
     cm_errno = 0;
     ret = cm_lst_get(&l, TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
-    //get invalid index (-ve index)
+
+    //fourth test: get invalid index (-ve index)
     cm_errno = 0;
     ret = cm_lst_get(&l, -TEST_LEN_FULL, &d);
     ck_assert_int_eq(ret, -1);
@@ -255,7 +264,8 @@ START_TEST(test_lst_get_p) {
 
     data * p;
 
-    //get every list entry by address (positive index)
+
+    //first test: get every list entry by address (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         p = (data *) cm_lst_get_p(&l, i);
@@ -264,7 +274,8 @@ START_TEST(test_lst_get_p) {
     
     } //end for
 
-    //get every list entry by address (negative index)
+
+    //second test: get every list entry by address (negative index)
     for (int i = -1; i > TEST_LEN_FULL * -1; --i) {
 
         p = (data *) cm_lst_get_p(&l, i);
@@ -273,13 +284,15 @@ START_TEST(test_lst_get_p) {
 
     } //end for
 
-    //get ref to invalid index (+ve index)
+
+    //third test: get ref to invalid index (+ve index)
     cm_errno = 0;
     p = (data *) cm_lst_get_p(&l, TEST_LEN_FULL);
     ck_assert_ptr_null(p);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
-    //get ref to invalid index (-ve index)
+
+    //fourth test: get ref to invalid index (-ve index)
     cm_errno = 0;
     p = (data *) cm_lst_get_p(&l, -TEST_LEN_FULL);
     ck_assert_ptr_null(p);
@@ -296,7 +309,8 @@ START_TEST(test_lst_get_n) {
 
     cm_lst_node * n;
 
-    //get every list entry by address (positive index)
+
+    //first test: get every list entry by address (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         n = cm_lst_get_n(&l, i);
@@ -305,7 +319,7 @@ START_TEST(test_lst_get_n) {
     
     } //end for
 
-    //get every list entry by address (negative index)
+    //second test: get every list entry by address (negative index)
     for (int i = -1; i > TEST_LEN_FULL * -1; --i) {
 
         n = cm_lst_get_n(&l, i);
@@ -314,13 +328,15 @@ START_TEST(test_lst_get_n) {
 
     } //end for
 
-    //get ref to invalid index (+ve index)
+
+    //third test: get ref to invalid index (+ve index)
     cm_errno = 0;
     n = cm_lst_get_n(&l, TEST_LEN_FULL);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, CM_ERR_USER_INDEX);
 
-    //get ref to invalid index (-ve index)
+
+    //fourth test: get ref to invalid index (-ve index)
     cm_errno = 0;
     n = cm_lst_get_n(&l, -TEST_LEN_FULL);
     ck_assert_ptr_null(n);
@@ -341,11 +357,11 @@ START_TEST(test_lst_set) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_set] starting values:             ");
     _print_lst();
 
-    //set every list entry (positive index)
+    //first test: set every list entry (positive index)
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         e.x = i * -1;
@@ -360,14 +376,14 @@ START_TEST(test_lst_set) {
     } //end for
 
 
-    //state of the list after setting all values with a +ve index
+    //output the state of the list after setting all values with a +ve index
     printf("[test_lst_set] final values (+ve index):    ");
     _print_lst();
     printf("[test_lst_set] expected values (+ve index): \
 0 -1 -2 -3 -4 -5 -6 -7 -8 -9\n");
 
 
-    //set every list entry (negative index)
+    //second test: set every list entry (negative index)
     for (int i = (TEST_LEN_FULL * -1) + 1; i < 0; ++i) {
 
         //value of e.x will range from -11 to -19 (skip index 0)
@@ -384,20 +400,21 @@ START_TEST(test_lst_set) {
     } //end for
 
 
-    //state of the list after setting all values with a -ve index
+    //output the state of the list after setting all values with a -ve index
     printf("[test_lst_set] final values (-ve index):    ");
     _print_lst();
     printf("[test_lst_set] expected values (-ve index): \
 0 -11 -12 -13 -14 -15 -16 -17 -18 -19\n");
 
 
-    //set invalid index (+ve index)
+    //third test: set invalid index (+ve index)
     cm_errno = 0;
     n = cm_lst_set(&l, TEST_LEN_FULL, &d);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
-    //set invalid index (-ve index)
+
+    //fourth test: set invalid index (-ve index)
     cm_errno = 0;
     n = cm_lst_set(&l, -TEST_LEN_FULL, &d);
     ck_assert_ptr_null(n);
@@ -418,14 +435,14 @@ START_TEST(test_lst_set_n) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_set_n] starting values: ");
     _print_lst();
 
     //setup iteration
     n = l.head;
 
-    //set every list entry
+    //only test: set every list entry
     for (int i = 0; i < TEST_LEN_FULL; ++i) {
 
         e.x = i * -1;
@@ -442,7 +459,7 @@ START_TEST(test_lst_set_n) {
     } //end for
 
 
-    //state of the list after setting all values with a +ve index
+    //output the state of the list after setting all values with a +ve index
     printf("[test_lst_set_n] final values:    ");
     _print_lst();
     printf("[test_lst_set_n] expected values: \
@@ -464,11 +481,11 @@ START_TEST(test_lst_ins) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_ins] starting values: ");
     _print_lst();
 
-    //insert in the third index (positive index)
+    //first test: insert in the third index (positive index)
     e.x = -1;
     n = cm_lst_ins(&l, 3, &e);
     ck_assert_ptr_nonnull(n);
@@ -479,7 +496,8 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(d.x, -1);
     len++;
 
-    //insert in the third from last index (negative index)
+
+    //second test: insert in the third from last index (negative index)
     e.x = -2;
     n = cm_lst_ins(&l, -3, &e);
     ck_assert_ptr_nonnull(n);
@@ -490,7 +508,8 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(d.x, -2);
     len++;
 
-    //insert at the end (positive index)
+
+    //third test: insert at the end (positive index)
     e.x = -3;
     n = cm_lst_ins(&l, len, &e);
     ck_assert_ptr_nonnull(n);
@@ -501,7 +520,8 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(d.x, -3);
     len++;
 
-    //insert at the end (negative index)
+
+    //fourth test: insert at the end (negative index)
     e.x = -4;
     n = cm_lst_ins(&l, -1, &e);
     ck_assert_ptr_nonnull(n);
@@ -512,7 +532,8 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(d.x, -4);
     len++;
 
-    //insert at the beginning (zero index)
+
+    //fifth test: insert at the beginning (zero index)
     e.x = -5;
     n = cm_lst_ins(&l, 0, &e);
     ck_assert_ptr_nonnull(n);
@@ -523,7 +544,8 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(d.x, -5);
     len++;
 
-    //insert at max negative index
+
+    //sixth test: insert at max negative index
     e.x = -6;
     n = cm_lst_ins(&l, len * -1, &e);
     ck_assert_ptr_nonnull(n);
@@ -533,21 +555,23 @@ START_TEST(test_lst_ins) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -6);
     len++;
+
     
-    //state of the list after every type of insertion
+    //output the state of the list after every type of insertion
     printf("[test_lst_ins] final values:    ");
     _print_lst();
     printf("[test_lst_ins] expected values: \
 -5 -6 0 1 2 -1 3 4 5 6 7 -2 8 9 -3 -4\n");
 
 
-    //insert invalid index (+ve index)
+    //seventh test: insert invalid index (+ve index)
     cm_errno = 0;
     n = cm_lst_ins(&l, len+1, &e);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
-    //insert invalid index (-ve index)
+
+    //eighth test: insert invalid index (-ve index)
     cm_errno = 0;
     n = cm_lst_ins(&l, (len+1) * -1, &e);
     ck_assert_ptr_null(n);
@@ -569,11 +593,11 @@ START_TEST(test_lst_ins_nb) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_ins] starting values: ");
     _print_lst();
 
-    //insert in the third index (positive index)
+    //first test: insert in the third index (positive index)
     e.x = -1;
     n = cm_lst_ins_nb(&l, l.head->next->next->next, &e);
     ck_assert_ptr_nonnull(n);
@@ -584,7 +608,8 @@ START_TEST(test_lst_ins_nb) {
     ck_assert_int_eq(d.x, -1);
     len++;
 
-    //insert at the end (positive index)
+
+    //second test: insert at the end (positive index)
     e.x = -2;
     n = cm_lst_ins_nb(&l, l.head->prev, &e);
     ck_assert_ptr_nonnull(n);
@@ -595,7 +620,8 @@ START_TEST(test_lst_ins_nb) {
     ck_assert_int_eq(d.x, -2);
     len++;
 
-    //insert at the beginning (zero index)
+
+    //third test: insert at the beginning (zero index)
     e.x = -3;
     n = cm_lst_ins_nb(&l, l.head, &e);
     ck_assert_ptr_nonnull(n);
@@ -605,8 +631,8 @@ START_TEST(test_lst_ins_nb) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -3);
     len++;
-    
-    //state of the list after every type of insertion
+
+    //output the state of the list after every type of insertion
     printf("[test_lst_ins] final values:    ");
     _print_lst();
     printf("[test_lst_ins] expected values: \
@@ -628,11 +654,12 @@ START_TEST(test_lst_ins_na) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_ins] starting values: ");
     _print_lst();
 
-    //insert in the third index (positive index)
+
+    //first test: insert in the third index (positive index)
     e.x = -1;
     n = cm_lst_ins_na(&l, l.head->next->next, &e);
     ck_assert_ptr_nonnull(n);
@@ -643,7 +670,8 @@ START_TEST(test_lst_ins_na) {
     ck_assert_int_eq(d.x, -1);
     len++;
 
-    //insert at the end (positive index)
+
+    //second test: insert at the end (positive index)
     e.x = -2;
     n = cm_lst_ins_na(&l, l.head->prev, &e);
     ck_assert_ptr_nonnull(n);
@@ -654,7 +682,8 @@ START_TEST(test_lst_ins_na) {
     ck_assert_int_eq(d.x, -2);
     len++;
 
-    //insert at the beginning (zero index)
+
+    //third test: insert at the beginning (zero index)
     e.x = -3;
     n = cm_lst_ins_na(&l, l.head, &e);
     ck_assert_ptr_nonnull(n);
@@ -664,8 +693,8 @@ START_TEST(test_lst_ins_na) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(d.x, -3);
     len++;
-    
-    //state of the list after every type of insertion
+
+    //output the state of the list after every type of insertion
     printf("[test_lst_ins] final values:    ");
     _print_lst();
     printf("[test_lst_ins] expected values: \
@@ -687,11 +716,11 @@ START_TEST(test_lst_uln) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_uln] starting values: ");
     _print_lst();
 
-    //unlink the third index (positive index)
+    //first test: unlink the third index (positive index)
     n = cm_lst_uln(&l, 3);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -704,7 +733,8 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
-    //unlink the third from last index (negative index)
+
+    //second test: unlink the third from last index (negative index)
     n = cm_lst_uln(&l, -3);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -717,7 +747,8 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
-    //unlink at end (positive index)
+
+    //third test: unlink at end (positive index)
     n = cm_lst_uln(&l, len - 1);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -730,7 +761,8 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
-    //unlink at end (negative index)
+
+    //fourth test: unlink at end (negative index)
     n = cm_lst_uln(&l, -1);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -743,7 +775,8 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
-    //unlink at start (zero index)
+
+    //fifth test: unlink at start (zero index)
     n = cm_lst_uln(&l, 0);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -756,7 +789,8 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
-    //unlink at max negative index
+
+    //sixth test: unlink at max negative index
     n = cm_lst_uln(&l, (len - 1) * -1);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -770,20 +804,20 @@ START_TEST(test_lst_uln) {
     ck_assert_int_eq(e.x, 4);
 
 
-    //unlink invalid index (+ve index)
+    //seventh test: unlink invalid index (+ve index)
     cm_errno = 0;
     n = cm_lst_uln(&l, 99);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
-    //unlink invalid index (-ve index)
+
+    //eighth test: unlink invalid index (-ve index)
     cm_errno = 0;
     n = cm_lst_uln(&l, -99);
     ck_assert_ptr_null(n);
     ck_assert_int_eq(cm_errno, 1100);
 
-
-    //state of the list after every type of removal
+    //output the state of the list after every type of removal
     printf("[test_lst_uln] final values:    ");
     _print_lst();
     printf("[test_lst_uln] expected values: \
@@ -805,11 +839,11 @@ START_TEST(test_lst_uln_n) {
     cm_lst_node * n;
 
 
-    //starting state of the list
+    //output the starting state of the list
     printf("[test_lst_uln_n] starting values: ");
     _print_lst();
 
-    //unlink the third index
+    //first test: unlink the third index
     n = cm_lst_uln_n(&l, l.head->next->next->next);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -822,7 +856,8 @@ START_TEST(test_lst_uln_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
-    //unlink at end
+
+    //second test: unlink at end
     n = cm_lst_uln_n(&l, l.head->prev);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -835,7 +870,8 @@ START_TEST(test_lst_uln_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
-    //unlink at start
+
+    //third test: unlink at start
     n = cm_lst_uln_n(&l, l.head);
     ck_assert_ptr_nonnull(n);
     ck_assert_int_eq(l.len, len - 1);
@@ -848,8 +884,7 @@ START_TEST(test_lst_uln_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
-
-    //state of the list after every type of removal
+    //output the state of the list after every type of removal
     printf("[test_lst_uln_n] final values:    ");
     _print_lst();
     printf("[test_lst_uln_n] expected values: \
@@ -861,8 +896,8 @@ START_TEST(test_lst_uln_n) {
 
 
 
-//cm_lst_rem() [full fixture]
-START_TEST(test_lst_rem) {
+//cm_lst_rmv() [full fixture]
+START_TEST(test_lst_rmv) {
 
     int ret;
     int len = TEST_LEN_FULL;
@@ -870,12 +905,12 @@ START_TEST(test_lst_rem) {
     data e;
 
 
-    //starting state of the list
-    printf("[test_lst_rem] starting values: ");
+    //output the starting state of the list
+    printf("[test_lst_rmv] starting values: ");
     _print_lst();
 
-    //remove the third index (positive index)
-    ret = cm_lst_rem(&l, 3);
+    //first test: remove the third index (positive index)
+    ret = cm_lst_rmv(&l, 3);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -884,8 +919,9 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
-    //remove the third from last index (negative index)
-    ret = cm_lst_rem(&l, -3);
+
+    //second test: remove the third from last index (negative index)
+    ret = cm_lst_rmv(&l, -3);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -894,8 +930,9 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
-    //remove at end (positive index)
-    ret = cm_lst_rem(&l, len - 1);
+
+    //third test: remove at end (positive index)
+    ret = cm_lst_rmv(&l, len - 1);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -904,8 +941,9 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
-    //remove at end (negative index)
-    ret = cm_lst_rem(&l, -1);
+
+    //fourth test: remove at end (negative index)
+    ret = cm_lst_rmv(&l, -1);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -914,8 +952,9 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 6);
 
-    //remove at start (zero index)
-    ret = cm_lst_rem(&l, 0);
+
+    //fifth test: remove at start (zero index)
+    ret = cm_lst_rmv(&l, 0);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -924,8 +963,9 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
-    //remove at max negative index
-    ret = cm_lst_rem(&l, (len - 1) * -1);
+
+    //sixth test: remove at max negative index
+    ret = cm_lst_rmv(&l, (len - 1) * -1);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(l.len, len - 1);
     len--;
@@ -935,23 +975,23 @@ START_TEST(test_lst_rem) {
     ck_assert_int_eq(e.x, 4);
 
 
-    //remove invalid index (+ve index)
+    //seventh test: remove invalid index (+ve index)
     cm_errno = 0;
-    ret = cm_lst_rem(&l, 99);
-    ck_assert_int_eq(ret, -1);
-    ck_assert_int_eq(cm_errno, 1100);
-
-    //remove invalid index (-ve index)
-    cm_errno = 0;
-    ret = cm_lst_rem(&l, -99);
+    ret = cm_lst_rmv(&l, 99);
     ck_assert_int_eq(ret, -1);
     ck_assert_int_eq(cm_errno, 1100);
 
 
-    //state of the list after every type of removal
-    printf("[test_lst_rem] final values:    ");
+    //eighth test: remove invalid index (-ve index)
+    cm_errno = 0;
+    ret = cm_lst_rmv(&l, -99);
+    ck_assert_int_eq(ret, -1);
+    ck_assert_int_eq(cm_errno, 1100);
+
+    //output the state of the list after every type of removal
+    printf("[test_lst_rmv] final values:    ");
     _print_lst();
-    printf("[test_lst_rem] expected values: \
+    printf("[test_lst_rmv] expected values: \
 1 4 5 6\n");
 
     return;
@@ -960,8 +1000,8 @@ START_TEST(test_lst_rem) {
 
 
 
-//cm_lst_rem_n() [full fixture]
-START_TEST(test_lst_rem_n) {
+//cm_lst_rmv_n() [full fixture]
+START_TEST(test_lst_rmv_n) {
 
     int ret;
     int len = TEST_LEN_FULL;
@@ -969,12 +1009,12 @@ START_TEST(test_lst_rem_n) {
     data e;
 
 
-    //starting state of the list
-    printf("[test_lst_rem_n] starting values: ");
+    //output the starting state of the list
+    printf("[test_lst_rmv_n] starting values: ");
     _print_lst();
 
-    //remove the third index
-    ret = cm_lst_rem_n(&l, l.head->next->next->next);
+    //first test: remove the third index
+    ret = cm_lst_rmv_n(&l, l.head->next->next->next);
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
@@ -982,8 +1022,9 @@ START_TEST(test_lst_rem_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 4);
 
-    //remove at end
-    ret = cm_lst_rem_n(&l, l.head->prev);
+
+    //second test: remove at end
+    ret = cm_lst_rmv_n(&l, l.head->prev);
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
@@ -991,8 +1032,9 @@ START_TEST(test_lst_rem_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 8);
 
-    //remove at start
-    ret = cm_lst_rem_n(&l, l.head);
+
+    //third test: remove at start
+    ret = cm_lst_rmv_n(&l, l.head);
     ck_assert_int_eq(l.len, len - 1);
     len--;
 
@@ -1000,11 +1042,10 @@ START_TEST(test_lst_rem_n) {
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(e.x, 1);
 
-
-    //state of the list after every type of removal
-    printf("[test_lst_rem_n] final values:    ");
+    //output the state of the list after every type of removal
+    printf("[test_lst_rmv_n] final values:    ");
     _print_lst();
-    printf("[test_lst_rem_n] expected values: \
+    printf("[test_lst_rmv_n] expected values: \
 1 2 4 5 6 7 8\n");
 
     return;
@@ -1017,8 +1058,7 @@ START_TEST(test_lst_rem_n) {
 START_TEST(test_lst_emp) {
 
     /*
-     *  Debug builds of cmore build with -fsanitize=address, which should
-     *  catch memory leaks during emptying.
+     *  Using ASAN to check for leaks here.
      */
 
     cm_lst_emp(&l);
@@ -1036,13 +1076,8 @@ START_TEST(test_lst_emp) {
 
 Suite * lst_suite() {
 
-    /*
-     *  No test case for cm_del_lst_node; it is very simple.
-     */
-
     //test cases
-    TCase * tc_new_lst;
-    TCase * tc_del_lst;
+    TCase * tc_new_del_lst;
     TCase * tc_lst_apd;
     TCase * tc_lst_get;
     TCase * tc_lst_get_p;
@@ -1054,21 +1089,16 @@ Suite * lst_suite() {
     TCase * tc_lst_ins_na;
     TCase * tc_lst_uln;
     TCase * tc_lst_uln_n;
-    TCase * tc_lst_rem;
-    TCase * tc_lst_rem_n;
+    TCase * tc_lst_rmv;
+    TCase * tc_lst_rmv_n;
     TCase * tc_lst_emp;
 
     Suite * s = suite_create("list");
     
 
     //cm_new_lst()
-    tc_new_lst = tcase_create("new_lst");
-    tcase_add_test(tc_new_lst, test_new_lst);
-    
-    //cm_del_lst()
-    tc_del_lst = tcase_create("del_lst");
-    tcase_add_checked_fixture(tc_del_lst, _setup_stub, NULL);
-    tcase_add_test(tc_del_lst, test_del_lst);
+    tc_new_del_lst = tcase_create("new_del_lst");
+    tcase_add_test(tc_new_del_lst, test_new_del_lst);
 
     //cm_lst_apd()
     tc_lst_apd = tcase_create("list_apd");
@@ -1125,15 +1155,15 @@ Suite * lst_suite() {
     tcase_add_checked_fixture(tc_lst_uln_n, _setup_full, teardown);
     tcase_add_test(tc_lst_uln_n, test_lst_uln_n);
 
-    //cm_lst_rem()
-    tc_lst_rem = tcase_create("list_rem");
-    tcase_add_checked_fixture(tc_lst_rem, _setup_full, teardown);
-    tcase_add_test(tc_lst_rem, test_lst_rem);
+    //cm_lst_rmv()
+    tc_lst_rmv = tcase_create("list_rmv");
+    tcase_add_checked_fixture(tc_lst_rmv, _setup_full, teardown);
+    tcase_add_test(tc_lst_rmv, test_lst_rmv);
 
-    //cm_lst_rem_n()
-    tc_lst_rem_n = tcase_create("list_rem_n");
-    tcase_add_checked_fixture(tc_lst_rem_n, _setup_full, teardown);
-    tcase_add_test(tc_lst_rem_n, test_lst_rem_n);
+    //cm_lst_rmv_n()
+    tc_lst_rmv_n = tcase_create("list_rmv_n");
+    tcase_add_checked_fixture(tc_lst_rmv_n, _setup_full, teardown);
+    tcase_add_test(tc_lst_rmv_n, test_lst_rmv_n);
 
     //cm_lst_emp()
     tc_lst_emp = tcase_create("list_emp");
@@ -1142,8 +1172,7 @@ Suite * lst_suite() {
 
 
     //add test cases to list suite
-    suite_add_tcase(s, tc_new_lst);
-    suite_add_tcase(s, tc_del_lst);
+    suite_add_tcase(s, tc_new_del_lst);
     suite_add_tcase(s, tc_lst_apd);
     suite_add_tcase(s, tc_lst_get);
     suite_add_tcase(s, tc_lst_get_p);
@@ -1155,8 +1184,8 @@ Suite * lst_suite() {
     suite_add_tcase(s, tc_lst_ins_na);
     suite_add_tcase(s, tc_lst_uln);
     suite_add_tcase(s, tc_lst_uln_n);
-    suite_add_tcase(s, tc_lst_rem);
-    suite_add_tcase(s, tc_lst_rem_n);
+    suite_add_tcase(s, tc_lst_rmv);
+    suite_add_tcase(s, tc_lst_rmv_n);
     suite_add_tcase(s, tc_lst_emp);
 
     return s;

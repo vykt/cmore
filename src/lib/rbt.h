@@ -47,22 +47,22 @@ void _rbt_ins_case_3(cm_rbt * tree,
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
 void _rbt_ins_case_4(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
-void _rbt_rem_case_1(cm_rbt * tree, 
+void _rbt_rmv_case_1(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
-void _rbt_rem_case_2(cm_rbt * tree, 
+void _rbt_rmv_case_2(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
-void _rbt_rem_case_3(cm_rbt * tree, 
+void _rbt_rmv_case_3(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
-void _rbt_rem_case_4(cm_rbt * tree, 
+void _rbt_rmv_case_4(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data);
 
 int _rbt_determine_ins_case(const cm_rbt_node * node,
                             const struct _rbt_fix_data * f_data);
-int _rbt_determine_rem_case(const cm_rbt * tree, const cm_rbt_node * node,
+int _rbt_determine_rmv_case(const cm_rbt * tree, const cm_rbt_node * node,
                             const struct _rbt_fix_data * f_data);
 
 int _rbt_fix_ins(cm_rbt * tree, cm_rbt_node * node);
-int _rbt_fix_rem(cm_rbt * tree, cm_rbt_node * node, 
+int _rbt_fix_rmv(cm_rbt * tree, cm_rbt_node * node, 
                  enum cm_rbt_colour node_colour, 
                  struct _rbt_fix_data * f_data);
 
@@ -82,7 +82,7 @@ cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key);
 
 cm_rbt_node * cm_rbt_set(cm_rbt * tree, 
                          const void * key, const void * data);
-int cm_rbt_rem(cm_rbt * tree, const void * key);
+int cm_rbt_rmv(cm_rbt * tree, const void * key);
 cm_rbt_node * cm_rbt_uln(cm_rbt * tree, const void * key);
 void cm_rbt_emp(cm_rbt * tree);
 

@@ -78,7 +78,7 @@ remove at an index that is out of range will result in a
     int = cm_vct_set(&vector, -1, &data);
 
     //remove a value
-    ret = cm_vct_rem(&vector, 1);
+    ret = cm_vct_rmv(&vector, 1);
 
     //destroy the vector
     cm_del_vct(&vector);

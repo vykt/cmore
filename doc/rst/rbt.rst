@@ -91,10 +91,10 @@ a *CM_ERR_USER_KEY* error is stored in ``cm_errno``::
 
 ``cm_rbt_set()`` assigns a value to a key. If the key does not exist in the \
 tree, a new node is created. If the key already exists, it is overwritten. \
-``cm_rbt_rem()`` removes a node with a matching key from the *rbt*. \
+``cm_rbt_rmv()`` removes a node with a matching key from the *rbt*. \
 ``cm_rbt_uln()`` unlinks a node from the *rbt*. All of these functions return \
 a pointer to the node the operation was performed on, with the exception of \
-`cm_rbt_rem()`. In the case of ``cm_rbt_uln``, the returned node must later be \
+`cm_rbt_rmv()`. In the case of ``cm_rbt_uln``, the returned node must later be \
 freed with ``cm_del_rbt_node()`` to prevent a memory leak. Requesting to \
 remove or unlink a key that is not present in the *rbt* will result in a \ 
 *CM_ERR_USER_KEY* error::
@@ -118,7 +118,7 @@ remove or unlink a key that is not present in the *rbt* will result in a \
 
 	//remove a key
 	key = 2;
-	ret = cm_rbt_rem(&tree, &key);
+	ret = cm_rbt_rmv(&tree, &key);
 
 	//unlink and free a node at key
 	key = 4;

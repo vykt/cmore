@@ -195,7 +195,7 @@ int cm_vct_apd(cm_vct * vector, const void * data) {
 
 
 
-int cm_vct_rem(cm_vct * vector, const int index) {
+int cm_vct_rmv(cm_vct * vector, const int index) {
 
     int norm_index = _vct_normalise_index(vector, index, INDEX);
     if (_vct_assert_index_range(vector, norm_index, INDEX)) return -1;

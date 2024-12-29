@@ -134,8 +134,8 @@ extern cm_lst_node * cm_lst_uln(cm_lst * list, const int index);
 extern cm_lst_node * cm_lst_uln_n(cm_lst * list, cm_lst_node * node);
 
 //0 = success, -1 = error, see cm_errno
-extern int cm_lst_rem(cm_lst * list, const int index);
-extern int cm_lst_rem_n(cm_lst * list, cm_lst_node * node);
+extern int cm_lst_rmv(cm_lst * list, const int index);
+extern int cm_lst_rmv_n(cm_lst * list, cm_lst_node * node);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_lst_emp(cm_lst * list);
@@ -159,7 +159,7 @@ extern void * cm_vct_get_p(const cm_vct * vector, const int index);
 extern int cm_vct_set(cm_vct * vector, const int index, const void * data);
 extern int cm_vct_ins(cm_vct * vector, const int index, const void * data);
 extern int cm_vct_apd(cm_vct * vector, const void * data);
-extern int cm_vct_rem(cm_vct * vector, const int index);
+extern int cm_vct_rmv(cm_vct * vector, const int index);
 extern int cm_vct_fit(cm_vct * vector);
 //void return
 extern void cm_vct_emp(cm_vct * vector);
@@ -182,7 +182,7 @@ extern cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key);
 extern cm_rbt_node * cm_rbt_set(cm_rbt * tree, 
                                 const void * key, const void * data);
 //0 = success, -1 = error, see cm_errno
-extern int cm_rbt_rem(cm_rbt * tree, const void * key);
+extern int cm_rbt_rmv(cm_rbt * tree, const void * key);
 //pointer = success, NULL = error, see cm_errno
 extern cm_rbt_node * cm_rbt_uln(cm_rbt * tree, const void * key);
 //void return

@@ -125,11 +125,11 @@ if (node->parent_side != ROOT) node = node->parent;
 \f[V]cm_rbt_set()\f[R] assigns a value to a key.
 If the key does not exist in the tree, a new node is created.
 If the key already exists, it is overwritten.
-\f[V]cm_rbt_rem()\f[R] removes a node with a matching key from the
+\f[V]cm_rbt_rmv()\f[R] removes a node with a matching key from the
 \f[I]rbt\f[R].
 \f[V]cm_rbt_uln()\f[R] unlinks a node from the \f[I]rbt\f[R].
 All of these functions return a pointer to the node the operation was
-performed on, with the exception of cm_rbt_rem().
+performed on, with the exception of cm_rbt_rmv().
 In the case of \f[V]cm_rbt_uln\f[R], the returned node must later be
 freed with \f[V]cm_del_rbt_node()\f[R] to prevent a memory leak.
 Requesting to remove or unlink a key that is not present in the
@@ -156,7 +156,7 @@ node = cm_rbt_set(&tree, &key, &data);
 
 //remove a key
 key = 2;
-ret = cm_rbt_rem(&tree, &key);
+ret = cm_rbt_rmv(&tree, &key);
 
 //unlink and free a node at key
 key = 4;

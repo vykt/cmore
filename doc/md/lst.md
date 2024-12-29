@@ -72,13 +72,13 @@ pointer to a node. `cm_list_set()` overwrites the value at an index.
 `cm_list_ins_nb()` inserts a value before the provided node.
 `cm_list_ins_na()` inserts a value after the provided
 node`.`[cm_list_apd()]{.title-ref}\` inserts a value at the end of the
-*lst*. `cm_list_rem()` removes a value at an index from the *lst*.
-`cm_list_rem_n()` removes the provided node from the *lst*.
+*lst*. `cm_list_rmv()` removes a value at an index from the *lst*.
+`cm_list_rmv_n()` removes the provided node from the *lst*.
 `cm_list_uln()` unlinks a node at an index from the *lst*.
 `cm_list_uln_n()` unlinks the provided node from the *lst*. All of these
 functions return a pointer to the node the operation was performed on
-for convenience, with the exceptions of `cm_list_rem()` and
-`cm_list_rem_n()`. In the case of `cm_list_uln()` and `cm_list_uln_n()`,
+for convenience, with the exceptions of `cm_list_rmv()` and
+`cm_list_rmv_n()`. In the case of `cm_list_uln()` and `cm_list_uln_n()`,
 the returned node must later be freed with `cm_del_lst_node()` to
 prevent a memory leak. Requesting to insert, set, remove, or unlink at
 an index that is out of range will result in a *CM_ERR_USER_KEY* error:
@@ -115,10 +115,10 @@ an index that is out of range will result in a *CM_ERR_USER_KEY* error:
     node = cm_list_set_n(&list, list.head->next, &data);
 
     //remove a value bu index: [7, 5, -3]
-    ret = cm_list_rem(&list, 1);
+    ret = cm_list_rmv(&list, 1);
 
     //remove a value by pointer: [5, -3]
-    node = cm_list_rem_n(&list, list.head);
+    node = cm_list_rmv_n(&list, list.head);
 
     //unlink a node by index and free it: [-3]
     node = cm_list_uln(&list, 0);
