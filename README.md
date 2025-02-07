@@ -77,6 +77,9 @@ To uninstall **CMore** run the `uninstall` target:
 
 ### DOCUMENTATION:
 
+*NOTE*: Documenation is currently outdated and uses the old interface. I
+recommend that you look at `cmore.h` instead, it's fairly simple.
+
 Documentation is available in the `./doc` directory. Section 7 manpages are
 installed system-wide as part of a default installation. **CMore**
 documentation describes the functionality of individual components and

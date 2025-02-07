@@ -39,4 +39,6 @@ ${BUILD_DIR}/%.o: %.c
 > ${CC} ${CFLAGS} ${WARN_OPTS} -c $< -o $@
 
 clean:
-> -rm -v ${BUILD_DIR}/{*.o,${SHARED},${STATIC}}
+> -rm -v ${BUILD_DIR}/*.o
+> -rm -v ${BUILD_DIR}/${SHARED}
+> -rm -v ${BUILD_DIR}/${STATIC}
