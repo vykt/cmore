@@ -10,7 +10,7 @@ LD_DIR=/etc/ld.so.conf.d
 
 CC=gcc
 CFLAGS=
-CFLAGS_TEST=-ggdb -O0
+CFLAGS_TEST=-ggdb3 -O0
 WARN_OPTS=-Wall -Wextra
 LDFLAGS=
 
@@ -30,7 +30,7 @@ HEADER=cmore.h
 
 #[set build options]
 ifeq ($(build),debug)
-	CFLAGS      += -O0 -ggdb -fsanitize=address -DDEBUG
+	CFLAGS      += -O0 -ggdb3 -fsanitize=address -DDEBUG
 	CFLAGS_TEST += -DDEBUG
 	LDFLAGS     += -static-libasan
 else
