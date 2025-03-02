@@ -1,7 +1,7 @@
 # CMore
 
 <p align="center">
-    <img src="cmore.png" width="150" height="150">
+    <img src="media/cmore.png" width="150" height="150">
 </p>
 
 
