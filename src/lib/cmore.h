@@ -164,9 +164,10 @@ extern int cm_vct_fit(cm_vct * vector);
 //void return
 extern void cm_vct_emp(cm_vct * vector);
 
-//void return
-extern int cm_new_vct(cm_vct * vector, const size_t data_sz);
+
 //0 = success, -1 = error, see cm_errno
+extern int cm_new_vct(cm_vct * vector, const size_t data_sz);
+//void return
 extern void cm_del_vct(cm_vct * vector);
 
 
