@@ -629,6 +629,37 @@ START_TEST(test_vct_fit) {
 
 
 
+//cm_vct_rsz() [full fixture]
+START_TEST(test_vct_rsz) {
+
+    int ret;
+
+
+    //first test: resize down to size 8
+    ret = cm_vct_rsz(&v, 8);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(v.sz, 8);
+    ck_assert_int_eq(v.len, 8);
+
+
+    //second test: resize up to 14 (16)
+    ret = cm_vct_rsz(&v, 14);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(v.sz, 16);
+    ck_assert_int_eq(v.len, 8);
+
+
+    //third test: resize down to 2;
+    ret = cm_vct_rsz(&v, 2);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(v.sz, VECTOR_DEFAULT_SIZE);
+    ck_assert_int_eq(v.len, 2);
+
+    return;
+}
+
+
+
 //cm_vct_emp() [full fixture]
 START_TEST(test_vct_emp) {
 
@@ -661,6 +692,7 @@ Suite * vct_suite() {
     TCase * tc_vct_ins;
     TCase * tc_vct_rmv;
     TCase * tc_vct_fit;
+    TCase * tc_vct_rsz;
     TCase * tc_vct_emp;
 
     Suite * s = suite_create("vector");
@@ -710,6 +742,11 @@ Suite * vct_suite() {
     tcase_add_checked_fixture(tc_vct_fit, _setup_emp, _teardown);
     tcase_add_test(tc_vct_fit, test_vct_fit);
 
+    //cm_vct_rsz()
+    tc_vct_rsz = tcase_create("vector_rsz");
+    tcase_add_checked_fixture(tc_vct_rsz, _setup_full, _teardown);
+    tcase_add_test(tc_vct_rsz, test_vct_rsz);
+
     //cm_vct_emp()
     tc_vct_emp = tcase_create("vector_emp");
     tcase_add_checked_fixture(tc_vct_emp, _setup_full, _teardown);
@@ -726,6 +763,7 @@ Suite * vct_suite() {
     suite_add_tcase(s, tc_vct_ins);
     suite_add_tcase(s, tc_vct_rmv);
     suite_add_tcase(s, tc_vct_fit);
+    suite_add_tcase(s, tc_vct_rsz);
     suite_add_tcase(s, tc_vct_emp);
 
     return s;

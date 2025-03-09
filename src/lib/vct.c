@@ -229,6 +229,40 @@ int cm_vct_fit(cm_vct * vector) {
 
 
 
+int cm_vct_rsz(cm_vct * vector, const int entries) {
+
+    size_t entries_size_t = (size_t) entries;
+
+    //reduce the number of entries
+    if (vector->len > entries) vector->len = entries;
+
+    //if requesting a resize up, double the allocation until satisfied
+    if (entries_size_t > vector->sz) {
+        while (entries_size_t > vector->sz) {
+            vector->sz *= 2;
+        }
+
+    //else requesting a resize down, half the allocation until satisfied
+    } else {
+        while (entries_size_t <= (vector->sz / 2)
+               && (vector->sz != VECTOR_DEFAULT_SIZE)) {
+            vector->sz /= 2;
+        }
+    }
+
+    //perform reallocation
+    vector->data = realloc(vector->data, vector->sz * vector->data_sz);
+    if (vector->data == NULL) {
+        
+        cm_errno = CM_ERR_REALLOC;
+        return -1;
+    }
+
+    return 0;
+}
+
+
+
 void cm_vct_emp(cm_vct * vector) {
 
     vector->len = 0;

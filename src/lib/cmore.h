@@ -161,6 +161,7 @@ extern int cm_vct_ins(cm_vct * vector, const int index, const void * data);
 extern int cm_vct_apd(cm_vct * vector, const void * data);
 extern int cm_vct_rmv(cm_vct * vector, const int index);
 extern int cm_vct_fit(cm_vct * vector);
+extern int cm_vct_rsz(cm_vct * vector, const int entries);
 //void return
 extern void cm_vct_emp(cm_vct * vector);
 

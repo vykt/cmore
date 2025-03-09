@@ -47,6 +47,7 @@ int cm_vct_ins(cm_vct * vector, const int index, const void  * data);
 int cm_vct_apd(cm_vct * vector, const void  * data);
 int cm_vct_rmv(cm_vct * vector, const int index);
 int cm_vct_fit(cm_vct * vector);
+int cm_vct_rsz(cm_vct * vector, const int entries);
 void cm_vct_emp(cm_vct * vector);
 
 int cm_new_vct(cm_vct * vector, const size_t data_sz);
