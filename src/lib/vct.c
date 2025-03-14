@@ -234,7 +234,7 @@ int cm_vct_rsz(cm_vct * vector, const int entries) {
     size_t entries_size_t = (size_t) entries;
 
     //reduce the number of entries
-    if (vector->len > entries) vector->len = entries;
+    vector->len = entries;
 
     //if requesting a resize up, double the allocation until satisfied
     if (entries_size_t > vector->sz) {

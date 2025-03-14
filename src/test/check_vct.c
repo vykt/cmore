@@ -646,7 +646,7 @@ START_TEST(test_vct_rsz) {
     ret = cm_vct_rsz(&v, 14);
     ck_assert_int_eq(ret, 0);
     ck_assert_int_eq(v.sz, 16);
-    ck_assert_int_eq(v.len, 8);
+    ck_assert_int_eq(v.len, 14);
 
 
     //third test: resize down to 2;

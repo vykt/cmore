@@ -1,2 +1,2 @@
 #!/bin/sh
-gdb -x init.gdb --args ./test "$@"
+gdb -x cmore.gdb --args ./test "$@"
