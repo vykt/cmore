@@ -7,6 +7,7 @@ extern "C"{
 
 //standard library
 #include <stdbool.h>
+#include <limits.h>
 
 //system headers
 #include <unistd.h>
