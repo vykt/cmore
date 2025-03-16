@@ -10,6 +10,7 @@ extern "C"{
 
 //system headers
 #include <unistd.h>
+#include <linux/limits.h>
 
 
 
@@ -18,6 +19,7 @@ extern "C"{
  */
 
 // [byte]
+#define CM_BYTE_MAX UCHAR_MAX
 typedef unsigned char cm_byte;
 
 
