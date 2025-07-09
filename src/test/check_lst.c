@@ -183,8 +183,10 @@ START_TEST(test_new_del_lst) {
     
     ck_assert_int_eq(l.len, 0);
     ck_assert_int_eq(l.data_sz, sizeof(data));
+    ck_assert_int_eq(l.is_init, true);
 
     cm_del_lst(&l);
+    ck_assert_int_eq(l.is_init, false);
 
     return;
 

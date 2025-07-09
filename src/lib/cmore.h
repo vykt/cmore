@@ -41,6 +41,7 @@ typedef struct {
     int len;
     size_t data_sz;
     cm_lst_node * head;
+    bool is_init;
 
 } cm_lst;
 
@@ -53,6 +54,7 @@ typedef struct {
     size_t sz;   //number of elements allocated
     size_t data_sz;
     void * data;
+    bool is_init;
 
 } cm_vct;
 
@@ -85,6 +87,7 @@ typedef struct {
     size_t key_sz;
     size_t data_sz;
     cm_rbt_node * root;
+    bool is_init;
 
     enum cm_rbt_side (*compare)(const void *, const void *);
 
@@ -167,7 +170,8 @@ extern int cm_vct_fit(cm_vct * vector);
 extern int cm_vct_rsz(cm_vct * vector, const int entries);
 //void return
 extern void cm_vct_emp(cm_vct * vector);
-
+//0 = success, -1 = error, see cm_errno
+extern int cm_vct_cpy(cm_vct * dst_vector, const cm_vct * src_vector);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_new_vct(cm_vct * vector, const size_t data_sz);

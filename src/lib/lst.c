@@ -460,6 +460,7 @@ void cm_new_lst(cm_lst * list, const size_t data_sz) {
     list->len = 0;
     list->data_sz = data_sz;
     list->head = NULL;
+    list->is_init = true;
     return;
 }
 
@@ -479,6 +480,7 @@ void cm_del_lst(cm_lst * list) {
     
     } //end for
 
+    list->is_init = false;
     return;
 }
 

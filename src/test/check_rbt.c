@@ -453,8 +453,10 @@ START_TEST(test_new_del_rbt) {
     ck_assert_int_eq(t.data_sz, sizeof(d));
     ck_assert_ptr_null(t.root);
     ck_assert_ptr_eq(t.compare, compare);
+    ck_assert_int_eq(t.is_init, true);
 
     cm_del_rbt(&t);
+    ck_assert_int_eq(t.is_init, false);
 
     return;
 

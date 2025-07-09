@@ -272,6 +272,27 @@ void cm_vct_emp(cm_vct * vector) {
 
 
 
+int cm_vct_cpy(cm_vct * dst_vector, const cm_vct * src_vector) {
+
+    int ret;
+
+    //initialise the destination vector
+    ret = cm_new_vct(dst_vector, src_vector->data_sz);
+    if (ret != 0) return -1;
+
+    //resize the destination vector to match the source vector
+    ret = cm_vct_rsz(dst_vector, src_vector->len);
+    if (ret != 0) return -1;
+
+    //copy contents of source vector to destination vector
+    memcpy(dst_vector->data, src_vector->data,
+           src_vector->data_sz * src_vector->len);
+
+    return 0;
+}
+
+
+
 int cm_new_vct(cm_vct * vector, const size_t data_sz) {
 
     vector->len = 0;
@@ -279,6 +300,7 @@ int cm_new_vct(cm_vct * vector, const size_t data_sz) {
     vector->data_sz = data_sz;
     
     if (_vct_alloc(vector)) return -1;
+    vector->is_init = true;
     
     return 0;
 }
@@ -288,4 +310,5 @@ int cm_new_vct(cm_vct * vector, const size_t data_sz) {
 void cm_del_vct(cm_vct * vector) {
 
     free(vector->data);
+    vector->is_init = false;
 }

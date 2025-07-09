@@ -166,8 +166,10 @@ START_TEST(test_new_del_vct) {
     ck_assert_int_eq(v.len, 0);
     ck_assert_int_eq(v.sz, VECTOR_DEFAULT_SIZE);
     ck_assert_int_eq(v.data_sz, sizeof(data));
+    ck_assert_int_eq(v.is_init, true);
 
     cm_del_vct(&v);
+    ck_assert_int_eq(v.is_init, false);
 
     return;
 
@@ -676,6 +678,27 @@ START_TEST(test_vct_emp) {
 
 
 
+//cm_vct_cpy() [full fixture]
+START_TEST(test_vct_cpy) {
+
+    int ret;
+    cm_vct w;
+
+
+    //only test: copy vector v into w
+    ret = cm_vct_cpy(&w, &v);
+    ck_assert_int_eq(ret, 0);
+
+    ck_assert_int_eq(memcmp(v.data, w.data, v.data_sz * v.len), 0);
+    ck_assert_int_eq(v.len, w.len);
+        
+    cm_del_vct(&w);
+    return;
+    
+} END_TEST;
+
+
+
 /*
  *  --- [SUITE] ---
  */
@@ -694,6 +717,7 @@ Suite * vct_suite() {
     TCase * tc_vct_fit;
     TCase * tc_vct_rsz;
     TCase * tc_vct_emp;
+    TCase * tc_vct_cpy;
 
     Suite * s = suite_create("vector");
     
@@ -752,6 +776,11 @@ Suite * vct_suite() {
     tcase_add_checked_fixture(tc_vct_emp, _setup_full, _teardown);
     tcase_add_test(tc_vct_emp, test_vct_emp);
 
+    //cm_vct_emp()
+    tc_vct_cpy = tcase_create("vector_cpy");
+    tcase_add_checked_fixture(tc_vct_cpy, _setup_full, _teardown);
+    tcase_add_test(tc_vct_cpy, test_vct_cpy);
+
 
     //add test cases to vector suite
     suite_add_tcase(s, tc_new_del_vct);
@@ -765,6 +794,7 @@ Suite * vct_suite() {
     suite_add_tcase(s, tc_vct_fit);
     suite_add_tcase(s, tc_vct_rsz);
     suite_add_tcase(s, tc_vct_emp);
+    suite_add_tcase(s, tc_vct_cpy);
 
     return s;
 }

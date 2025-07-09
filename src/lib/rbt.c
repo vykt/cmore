@@ -1031,10 +1031,11 @@ void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz,
                 enum cm_rbt_side (*compare) (const void *, const void *)) {
 
     tree->size      = 0;
-    tree->key_sz  = key_sz;
-    tree->data_sz = data_sz;
+    tree->key_sz    = key_sz;
+    tree->data_sz   = data_sz;
     tree->root      = NULL;
     tree->compare   = compare;
+    tree->is_init   = true;
 
     return;
 }
@@ -1044,8 +1045,9 @@ void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz,
 void cm_del_rbt(cm_rbt * tree) {
 
     _rbt_emp_recurse(tree->root);
-    tree->root = NULL;
-    tree->size = 0;
+    tree->root    = NULL;
+    tree->size    = 0;
+    tree->is_init = false;
 
     return;
 }
