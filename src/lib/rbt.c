@@ -740,11 +740,14 @@ int _rbt_fix_rmv(cm_rbt * tree, cm_rbt_node * node,
 DBG_STATIC DBG_INLINE 
 cm_rbt_node * _rbt_add_node(cm_rbt * tree, const void * key, 
                             const void * data, cm_rbt_node * parent, 
-                            const enum cm_rbt_side side) {
+                            const enum cm_rbt_side side, bool is_raw,
+                            enum cm_rbt_colour colour) {
     int ret;
+
 
     //create new node
     cm_rbt_node * node = _rbt_new_node(tree, key, data);
+    if (is_raw == true) node->colour = colour;
 
     //if tree is empty, set root
     if (tree->size == 0) {
@@ -766,11 +769,12 @@ cm_rbt_node * _rbt_add_node(cm_rbt * tree, const void * key,
     tree->size += 1;
 
     //fix violations
-    ret = _rbt_fix_ins(tree, node);
-    if (ret == -1) return NULL;
+    if (is_raw == false) {
+        ret = _rbt_fix_ins(tree, node);
+        if (ret == -1) return NULL;
+    }
 
     return node;
-
 }
 
 
@@ -910,6 +914,40 @@ void _rbt_emp_recurse(cm_rbt_node * node) {
 
 
 
+DBG_STATIC
+int _rbt_cpy_recurse(cm_rbt * dst_tree, cm_rbt_node * dst_parent_node,
+                     cm_rbt_node * src_node) {
+
+    int ret;
+    cm_rbt_node * node;
+
+
+    //create this node in the destination tree
+    node = _rbt_add_node(dst_tree, src_node->key, src_node->data,
+                         dst_parent_node, src_node->parent_side,
+                         true, src_node->colour);
+    if (node == NULL) {
+        cm_del_rbt(dst_tree);
+        return -1;
+    }
+
+    //recurse left
+    if (src_node->left != NULL) {
+        ret = _rbt_cpy_recurse(dst_tree, node, src_node->left);
+        if (ret != 0) return -1;
+    }
+
+    //recurse right
+    if (src_node->right != NULL) {
+        ret = _rbt_cpy_recurse(dst_tree, node, src_node->right);
+        if (ret != 0) return -1;
+    }
+
+    return 0;
+}
+
+
+
 /*
  *  --- [EXTERNAL] ---
  */
@@ -982,7 +1020,7 @@ cm_rbt_node * cm_rbt_set(cm_rbt * tree,
 
     //else create a new node
     } else { 
-        return _rbt_add_node(tree, key, data, node, side);
+        return _rbt_add_node(tree, key, data, node, side, false, RED);
     }
 }
 
@@ -1023,6 +1061,27 @@ void cm_rbt_emp(cm_rbt * tree) {
     tree->size = 0;
 
     return;
+}
+
+
+
+int cm_rbt_cpy(cm_rbt * dst_tree, cm_rbt * src_tree) {
+
+    int ret;
+
+
+    //initialise the destination list
+    cm_new_rbt(dst_tree, src_tree->key_sz,
+               src_tree->data_sz, src_tree->compare);
+
+    //do not recurse if there are no nodes in the source tree
+    if (src_tree->size == 0) return 0;
+
+    //initialise recursion
+    ret = _rbt_cpy_recurse(dst_tree, NULL, src_tree->root);
+    if (ret != 0) return -1;
+
+    return 0;
 }
 
 

@@ -277,6 +277,47 @@ static void _set_fix_data(struct _rbt_fix_data * f_data,
 
 
 
+static void _recurse_compare_trees(cm_rbt_node * node_0,
+                                   cm_rbt_node * node_1) {
+
+    int * data_0, * data_1;
+    int * key_0, * key_1;
+
+
+    //assert both nodes exist or dont exist
+    if ((node_0 == NULL && node_1 != NULL)
+        || (node_0 != NULL && node_1 == NULL)) {
+            ck_assert_ptr_nonnull(node_0);
+            ck_assert_ptr_nonnull(node_1);
+    } //end if
+
+    //return immediately if either node is undefined
+    if (node_0 == NULL) return;
+
+    //perform key & data assertions
+    key_0 = node_0->key;
+    key_1 = node_1->key;
+    bool hmm = *key_0;
+    hmm = *key_1;
+    //ck_assert_int_eq(key_0->x, key_1->x);
+
+    data_0 = node_0->data;
+    data_1 = node_1->data;
+    //ck_assert_int_eq(data_0->x, data_1->x);
+
+    //perform node assertions
+    ck_assert_int_eq(node_0->colour, node_1->colour);
+    ck_assert_int_eq(node_0->parent_side, node_1->parent_side);
+
+    //recurse down
+    _recurse_compare_trees(node_0->left, node_1->left);
+    _recurse_compare_trees(node_0->right, node_1->right);
+
+    return;
+}
+
+
+
 /*
  *  --- [FIXTURES] ---
  */
@@ -1296,13 +1337,38 @@ START_TEST(test_rbt_emp) {
     /*
      *  Using ASAN to check for leaks here.
      */
-     
+
     cm_rbt_emp(&t);
     ck_assert_ptr_null(t.root);
     ck_assert_int_eq(t.size, 0);
 
     return;
     
+} END_TEST
+
+
+
+//cm_rbt_cpy() [sorted stub fixture]
+START_TEST(test_rbt_cpy) {
+
+    int ret;
+    cm_rbt u;
+
+    cm_rbt_node * dst_node, * src_node;
+    data * dst_data, * src_data;
+
+
+    //only test: copy tree t into u
+    ret = cm_rbt_cpy(&u, &t);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(u.size, t.size);
+
+    //recursively compare nodes
+    _recurse_compare_trees(t.root, u.root);
+
+    cm_del_rbt(&u);
+    return;
+
 } END_TEST
 
 
@@ -1357,6 +1423,7 @@ Suite * rbt_suite() {
     TCase * tc_rbt_rmv;
     TCase * tc_rbt_uln;
     TCase * tc_rbt_emp;
+    TCase * tc_rbt_cpy;
     TCase * tc_del_rbt_node;
 
     Suite * s = suite_create("rb_tree");
@@ -1470,6 +1537,11 @@ Suite * rbt_suite() {
     tcase_add_checked_fixture(tc_rbt_emp, _setup_stub, _teardown);
     tcase_add_test(tc_rbt_emp, test_rbt_emp);
 
+    //tc_rbt_cpy
+    tc_rbt_cpy = tcase_create("rb_tree_cpy");
+    tcase_add_checked_fixture(tc_rbt_cpy, _setup_sorted_stub, _teardown);
+    tcase_add_test(tc_rbt_cpy, test_rbt_cpy);
+
     //tc_del_rbt_node
     tc_del_rbt_node = tcase_create("del_rbt_node");
     tcase_add_test(tc_del_rbt_node, test_del_rbt_node);
@@ -1503,6 +1575,7 @@ Suite * rbt_suite() {
     suite_add_tcase(s, tc_rbt_rmv);
     suite_add_tcase(s, tc_rbt_uln);
     suite_add_tcase(s, tc_rbt_emp);
+    suite_add_tcase(s, tc_rbt_cpy);
     suite_add_tcase(s, tc_del_rbt_node);
 
     return s;

@@ -455,6 +455,34 @@ int cm_lst_emp(cm_lst * list) {
 
 
 
+int cm_lst_cpy(cm_lst * dst_list, cm_lst * src_list) {
+
+    cm_lst_node * ret, * node;
+
+    //initialise the destination list
+    cm_new_lst(dst_list, src_list->data_sz);
+
+    //copy each node to the destination list
+    node = src_list->head;
+    for (int i = 0; i < src_list->len; ++i) {
+
+        //copy node `i` from the source list to the destination list
+        ret = cm_lst_apd(dst_list, node->data);
+        if (ret == NULL) {
+            cm_del_lst(dst_list);
+            return 0;
+        }
+
+        //advance iteration
+        node = node->next;
+        
+    } //end for
+
+    return 0;
+}
+
+
+
 void cm_new_lst(cm_lst * list, const size_t data_sz) {
 
     list->len = 0;

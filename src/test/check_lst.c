@@ -1068,7 +1068,38 @@ START_TEST(test_lst_emp) {
 
     return;
 
-} END_TEST;
+} END_TEST
+
+
+
+//cm_lst_cpy() [full fixture]
+START_TEST(test_lst_cpy) {
+
+    int ret;
+    cm_lst m;
+
+    cm_lst_node * dst_node, * src_node;
+    data * dst_data, * src_data;
+
+
+    //only test: copy list l into m
+    ret = cm_lst_cpy(&m, &l);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(l.len, m.len);
+
+    //check each node holds the identical value
+    dst_node = m.head;
+    src_node = l.head;
+    for (int i = 0; i < l.len; ++i) {
+
+        dst_data = (data *) dst_node->data;
+        src_data = (data *) src_node->data;
+        ck_assert_int_eq(dst_data->x, src_data->x);
+    }
+
+    cm_del_lst(&m);
+    
+} END_TEST
 
 
 
@@ -1094,6 +1125,7 @@ Suite * lst_suite() {
     TCase * tc_lst_rmv;
     TCase * tc_lst_rmv_n;
     TCase * tc_lst_emp;
+    TCase * tc_lst_cpy;
 
     Suite * s = suite_create("list");
     
@@ -1172,6 +1204,11 @@ Suite * lst_suite() {
     tcase_add_checked_fixture(tc_lst_emp, _setup_full, teardown);
     tcase_add_test(tc_lst_emp, test_lst_emp);
 
+    //cm_lst_cpy()
+    tc_lst_cpy = tcase_create("list_cpy");
+    tcase_add_checked_fixture(tc_lst_cpy, _setup_full, teardown);
+    tcase_add_test(tc_lst_cpy, test_lst_cpy);
+
 
     //add test cases to list suite
     suite_add_tcase(s, tc_new_del_lst);
@@ -1189,6 +1226,7 @@ Suite * lst_suite() {
     suite_add_tcase(s, tc_lst_rmv);
     suite_add_tcase(s, tc_lst_rmv_n);
     suite_add_tcase(s, tc_lst_emp);
+    suite_add_tcase(s, tc_lst_cpy);
 
     return s;
 }
