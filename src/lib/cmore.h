@@ -145,7 +145,9 @@ extern int cm_lst_rmv_n(cm_lst * list, cm_lst_node * node);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_lst_emp(cm_lst * list);
-extern int cm_lst_cpy(cm_lst * dst_list, cm_lst * src_list);
+extern int cm_lst_cpy(cm_lst * dst_list, const cm_lst * src_list);
+//void return
+extern void cm_lst_mov(cm_lst * dst_list, cm_lst * src_list);
 
 //void return
 extern void cm_new_lst(cm_lst * list, const size_t data_sz);
@@ -173,6 +175,8 @@ extern int cm_vct_rsz(cm_vct * vector, const int entries);
 extern void cm_vct_emp(cm_vct * vector);
 //0 = success, -1 = error, see cm_errno
 extern int cm_vct_cpy(cm_vct * dst_vector, const cm_vct * src_vector);
+//void return
+extern void cm_vct_mov(cm_vct * dst_vector, cm_vct * src_vector);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_new_vct(cm_vct * vector, const size_t data_sz);
@@ -198,7 +202,9 @@ extern cm_rbt_node * cm_rbt_uln(cm_rbt * tree, const void * key);
 //void return
 extern void cm_rbt_emp(cm_rbt * tree);
 //0 = success, -1 = error, see cm_errno
-extern int cm_rbt_cpy(cm_rbt * dst_tree, cm_rbt * src_tree);
+extern int cm_rbt_cpy(cm_rbt * dst_tree, const cm_rbt * src_tree);
+//void return
+extern void cm_rbt_mov(cm_rbt * dst_tree, cm_rbt * src_tree);
 
 //void return
 extern void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz,

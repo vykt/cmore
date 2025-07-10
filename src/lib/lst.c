@@ -455,7 +455,7 @@ int cm_lst_emp(cm_lst * list) {
 
 
 
-int cm_lst_cpy(cm_lst * dst_list, cm_lst * src_list) {
+int cm_lst_cpy(cm_lst * dst_list, const cm_lst * src_list) {
 
     cm_lst_node * ret, * node;
 
@@ -479,6 +479,19 @@ int cm_lst_cpy(cm_lst * dst_list, cm_lst * src_list) {
     } //end for
 
     return 0;
+}
+
+
+
+void cm_lst_mov(cm_lst * dst_list, cm_lst * src_list) {
+
+    //copy control data
+    memcpy(dst_list, src_list, sizeof(cm_lst));
+
+    //set source list as uninitialised
+    src_list->is_init = false;
+
+    return;
 }
 
 

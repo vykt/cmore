@@ -1103,6 +1103,25 @@ START_TEST(test_lst_cpy) {
 
 
 
+//cm_lst_mov() [full fixture]
+START_TEST(test_lst_mov) {
+
+    cm_lst m;
+    
+    //only test: move vector v into w and back
+    cm_lst_mov(&m, &l);
+    ck_assert_int_eq(l.is_init, false);
+    ck_assert_int_eq(m.is_init, true);
+
+    cm_lst_mov(&l, &m);
+    ck_assert_int_eq(l.is_init, true);
+    ck_assert_int_eq(m.is_init, false);
+
+    
+} END_TEST
+
+
+
 /*
  *  --- [SUITE] ---
  */
@@ -1126,6 +1145,7 @@ Suite * lst_suite() {
     TCase * tc_lst_rmv_n;
     TCase * tc_lst_emp;
     TCase * tc_lst_cpy;
+    TCase * tc_lst_mov;
 
     Suite * s = suite_create("list");
     
@@ -1209,6 +1229,11 @@ Suite * lst_suite() {
     tcase_add_checked_fixture(tc_lst_cpy, _setup_full, teardown);
     tcase_add_test(tc_lst_cpy, test_lst_cpy);
 
+    //cm_lst_mov()
+    tc_lst_mov = tcase_create("list_mov");
+    tcase_add_checked_fixture(tc_lst_mov, _setup_full, teardown);
+    tcase_add_test(tc_lst_mov, test_lst_mov);
+
 
     //add test cases to list suite
     suite_add_tcase(s, tc_new_del_lst);
@@ -1227,6 +1252,7 @@ Suite * lst_suite() {
     suite_add_tcase(s, tc_lst_rmv_n);
     suite_add_tcase(s, tc_lst_emp);
     suite_add_tcase(s, tc_lst_cpy);
+    suite_add_tcase(s, tc_lst_mov);
 
     return s;
 }

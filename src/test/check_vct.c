@@ -1,4 +1,5 @@
 //standard library
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -699,6 +700,27 @@ START_TEST(test_vct_cpy) {
 
 
 
+//cm_vct_mov() [full fixture]
+START_TEST(test_vct_mov) {
+
+    cm_vct w;
+
+
+    //only test: move vector v into w and back
+    cm_vct_mov(&w, &v);
+    ck_assert_int_eq(v.is_init, false);
+    ck_assert_int_eq(w.is_init, true);
+
+    cm_vct_mov(&v, &w);
+    ck_assert_int_eq(v.is_init, true);
+    ck_assert_int_eq(w.is_init, false);
+
+    return;
+    
+} END_TEST;
+
+
+
 /*
  *  --- [SUITE] ---
  */
@@ -718,6 +740,7 @@ Suite * vct_suite() {
     TCase * tc_vct_rsz;
     TCase * tc_vct_emp;
     TCase * tc_vct_cpy;
+    TCase * tc_vct_mov;
 
     Suite * s = suite_create("vector");
     
@@ -776,10 +799,15 @@ Suite * vct_suite() {
     tcase_add_checked_fixture(tc_vct_emp, _setup_full, _teardown);
     tcase_add_test(tc_vct_emp, test_vct_emp);
 
-    //cm_vct_emp()
+    //cm_vct_cpy()
     tc_vct_cpy = tcase_create("vector_cpy");
     tcase_add_checked_fixture(tc_vct_cpy, _setup_full, _teardown);
     tcase_add_test(tc_vct_cpy, test_vct_cpy);
+
+    //cm_vct_mov()
+    tc_vct_mov = tcase_create("vector_mov");
+    tcase_add_checked_fixture(tc_vct_mov, _setup_full, _teardown);
+    tcase_add_test(tc_vct_mov, test_vct_mov);
 
 
     //add test cases to vector suite
@@ -795,6 +823,7 @@ Suite * vct_suite() {
     suite_add_tcase(s, tc_vct_rsz);
     suite_add_tcase(s, tc_vct_emp);
     suite_add_tcase(s, tc_vct_cpy);
+    suite_add_tcase(s, tc_vct_mov);
 
     return s;
 }

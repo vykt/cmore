@@ -1065,7 +1065,7 @@ void cm_rbt_emp(cm_rbt * tree) {
 
 
 
-int cm_rbt_cpy(cm_rbt * dst_tree, cm_rbt * src_tree) {
+int cm_rbt_cpy(cm_rbt * dst_tree, const cm_rbt * src_tree) {
 
     int ret;
 
@@ -1082,6 +1082,19 @@ int cm_rbt_cpy(cm_rbt * dst_tree, cm_rbt * src_tree) {
     if (ret != 0) return -1;
 
     return 0;
+}
+
+
+
+void cm_rbt_mov(cm_rbt * dst_tree, cm_rbt * src_tree) {
+
+    //copy control data
+    memcpy(dst_tree, src_tree, sizeof(cm_rbt));
+
+    //set source tree as uninitisalised
+    src_tree->is_init = false;
+
+    return;
 }
 
 

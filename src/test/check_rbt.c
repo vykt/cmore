@@ -432,8 +432,9 @@ static void _setup_sorted_stub() {
 
     t.size = 10;
     t.compare = compare;
-    t.key_sz = sizeof(d.x);
+    t.key_sz  = sizeof(d.x);
     t.data_sz = sizeof(d);
+    t.is_init = true;
 
     cm_rbt_node * n[10];
     int values[10] = {20, 10, 40, 5, 15, 30, 50, 25, 45, 55};
@@ -1373,6 +1374,25 @@ START_TEST(test_rbt_cpy) {
 
 
 
+//cm_rbt_mov() [sorted stub fixture]
+START_TEST(test_rbt_mov) {
+
+    cm_rbt u;
+    
+    //only test: move vector v into w and back
+    cm_rbt_mov(&u, &t);
+    ck_assert_int_eq(t.is_init, false);
+    ck_assert_int_eq(u.is_init, true);
+
+    cm_rbt_mov(&t, &u);
+    ck_assert_int_eq(t.is_init, true);
+    ck_assert_int_eq(u.is_init, false);
+
+    
+} END_TEST
+
+
+
 //cm_del_rbt_node [no fixture]
 START_TEST(test_del_rbt_node) {
 
@@ -1424,6 +1444,7 @@ Suite * rbt_suite() {
     TCase * tc_rbt_uln;
     TCase * tc_rbt_emp;
     TCase * tc_rbt_cpy;
+    TCase * tc_rbt_mov;
     TCase * tc_del_rbt_node;
 
     Suite * s = suite_create("rb_tree");
@@ -1542,6 +1563,11 @@ Suite * rbt_suite() {
     tcase_add_checked_fixture(tc_rbt_cpy, _setup_sorted_stub, _teardown);
     tcase_add_test(tc_rbt_cpy, test_rbt_cpy);
 
+    //tc_rbt_mov
+    tc_rbt_mov = tcase_create("rb_tree_mov");
+    tcase_add_checked_fixture(tc_rbt_mov, _setup_sorted_stub, _teardown);
+    tcase_add_test(tc_rbt_mov, test_rbt_mov);
+
     //tc_del_rbt_node
     tc_del_rbt_node = tcase_create("del_rbt_node");
     tcase_add_test(tc_del_rbt_node, test_del_rbt_node);
@@ -1576,6 +1602,7 @@ Suite * rbt_suite() {
     suite_add_tcase(s, tc_rbt_uln);
     suite_add_tcase(s, tc_rbt_emp);
     suite_add_tcase(s, tc_rbt_cpy);
+    suite_add_tcase(s, tc_rbt_mov);
     suite_add_tcase(s, tc_del_rbt_node);
 
     return s;
