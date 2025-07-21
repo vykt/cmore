@@ -61,8 +61,11 @@ typedef struct {
 
 
 // [red-black tree]
-enum cm_rbt_colour {RED, BLACK};
-enum cm_rbt_side {LESS, EQUAL, MORE, ROOT};
+enum cm_rbt_colour {CM_RBT_RED, CM_RBT_BLACK};
+enum cm_rbt_side {CM_RBT_LESS,
+                  CM_RBT_EQUAL,
+                  CM_RBT_MORE,
+                  CM_RBT_ROOT};
 
 
 struct _cm_rbt_node {

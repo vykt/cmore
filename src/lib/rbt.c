@@ -34,7 +34,7 @@ cm_rbt_node * _rbt_traverse(const cm_rbt * tree,
 
     cm_rbt_node * node = tree->root;
     bool found = false;
-    *side = ROOT;
+    *side = CM_RBT_ROOT;
 
 
     //traverse tree
@@ -44,22 +44,22 @@ cm_rbt_node * _rbt_traverse(const cm_rbt * tree,
 
         switch (*side) {
 
-            case LESS:
+            case CM_RBT_LESS:
                 if (!node->left) return node;
                 node = node->left;
                 break;
 
-            case EQUAL:
+            case CM_RBT_EQUAL:
                 found = true;
                 break;
 
-            case MORE:
+            case CM_RBT_MORE:
                 if (!node->right) return node;
                 node = node->right;
                 break;
 
             //makes clangd quiet
-            case ROOT:
+            case CM_RBT_ROOT:
                 break;
 
         } //end switch
@@ -108,7 +108,7 @@ cm_rbt_node * _rbt_new_node(const cm_rbt * tree,
     new_node->right  = NULL;
 
     //set colour to red
-    new_node->colour = RED;
+    new_node->colour = CM_RBT_RED;
 
     return new_node;
 }
@@ -130,8 +130,8 @@ void _rbt_del_node(cm_rbt_node * node) {
 DBG_STATIC DBG_INLINE 
 void _rbt_set_root(cm_rbt * tree, cm_rbt_node * node) {
 
-    node->colour      = BLACK;
-    node->parent_side = ROOT;    
+    node->colour      = CM_RBT_BLACK;
+    node->parent_side = CM_RBT_ROOT;    
     tree->root = node;
 
     return;
@@ -149,7 +149,7 @@ void _rbt_left_rotate(cm_rbt * tree, cm_rbt_node * node) {
     //rotate node
     node->right       = node->right->left;
     node->parent      = right_child;
-    node->parent_side = LESS;
+    node->parent_side = CM_RBT_LESS;
 
     //rotate node's former right child
     right_child->left        = node;
@@ -160,7 +160,7 @@ void _rbt_left_rotate(cm_rbt * tree, cm_rbt_node * node) {
     if (node->right != NULL) {
         node->right->parent = node;
         node->right->parent_side 
-            = node->right->parent_side == MORE ? LESS : MORE;
+            = node->right->parent_side == CM_RBT_MORE ? CM_RBT_LESS : CM_RBT_MORE;
     }
 
     //update parent
@@ -168,8 +168,8 @@ void _rbt_left_rotate(cm_rbt * tree, cm_rbt_node * node) {
         _rbt_set_root(tree, right_child);
     
     } else {
-        if (parent_side == LESS) parent->left = right_child;
-        if (parent_side == MORE) parent->right = right_child;
+        if (parent_side == CM_RBT_LESS) parent->left = right_child;
+        if (parent_side == CM_RBT_MORE) parent->right = right_child;
     }
 
     return;
@@ -187,7 +187,7 @@ void _rbt_right_rotate(cm_rbt * tree, cm_rbt_node * node) {
     //rotate node
     node->left        = node->left->right;
     node->parent      = left_child;
-    node->parent_side = MORE;
+    node->parent_side = CM_RBT_MORE;
 
     //rotate node's former right child
     left_child->right       = node;
@@ -198,7 +198,7 @@ void _rbt_right_rotate(cm_rbt * tree, cm_rbt_node * node) {
     if (node->left != NULL) {
         node->left->parent = node;
         node->left->parent_side 
-            = node->left->parent_side == MORE ? LESS : MORE;
+            = node->left->parent_side == CM_RBT_MORE ? CM_RBT_LESS : CM_RBT_MORE;
     }
 
     //update parent
@@ -206,8 +206,8 @@ void _rbt_right_rotate(cm_rbt * tree, cm_rbt_node * node) {
         _rbt_set_root(tree, left_child);
     
     } else {
-        if (parent_side == LESS) parent->left = left_child;
-        if (parent_side == MORE) parent->right = left_child;
+        if (parent_side == CM_RBT_LESS) parent->left = left_child;
+        if (parent_side == CM_RBT_MORE) parent->right = left_child;
     }
 
     return;
@@ -239,8 +239,8 @@ void _rbt_transplant(cm_rbt * tree,
     } else {
 
         //update subject node's parent
-        if (subj_node->parent_side == MORE) subj_node->parent->right = tgt_node;
-        if (subj_node->parent_side == LESS) subj_node->parent->left  = tgt_node;
+        if (subj_node->parent_side == CM_RBT_MORE) subj_node->parent->right = tgt_node;
+        if (subj_node->parent_side == CM_RBT_LESS) subj_node->parent->left  = tgt_node;
 
         //if target node is not NULL
         if (tgt_node != NULL) {
@@ -282,8 +282,8 @@ cm_rbt_node * _rbt_left_max(cm_rbt_node * node) {
 DBG_STATIC DBG_INLINE 
 enum cm_rbt_colour _rbt_get_colour(const cm_rbt_node * node) {
 
-    if (node == NULL) return BLACK;
-    return node->colour == BLACK ? BLACK : RED;
+    if (node == NULL) return CM_RBT_BLACK;
+    return node->colour == CM_RBT_BLACK ? CM_RBT_BLACK : CM_RBT_RED;
 }
 
 
@@ -302,15 +302,15 @@ void _rbt_populate_fix_data(const cm_rbt_node * node,
     f_data->grandparent = f_data->parent->parent;
 
     //get uncle
-    if (f_data->parent->parent_side == LESS)
+    if (f_data->parent->parent_side == CM_RBT_LESS)
         f_data->uncle = f_data->grandparent->right;
-    if (f_data->parent->parent_side == MORE)
+    if (f_data->parent->parent_side == CM_RBT_MORE)
         f_data->uncle = f_data->grandparent->left;
 
     //get sibling
-    if (node->parent_side == LESS)
+    if (node->parent_side == CM_RBT_LESS)
         f_data->sibling = f_data->parent->right;
-    if (node->parent_side == MORE)
+    if (node->parent_side == CM_RBT_MORE)
         f_data->sibling = f_data->parent->left;
 
     return;
@@ -329,9 +329,9 @@ void _rbt_ins_case_1(cm_rbt * tree,
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     //swap colours per red uncle case
-    f_data->parent->colour = BLACK;
-    f_data->uncle->colour  = BLACK;
-    if (tree->root != f_data->grandparent) f_data->grandparent->colour = RED;
+    f_data->parent->colour = CM_RBT_BLACK;
+    f_data->uncle->colour  = CM_RBT_BLACK;
+    if (tree->root != f_data->grandparent) f_data->grandparent->colour = CM_RBT_RED;
 
     //advance node to grandparent
     *node = f_data->grandparent;
@@ -350,7 +350,7 @@ DBG_STATIC DBG_INLINE
 void _rbt_ins_case_2(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
-    f_data->parent->colour = BLACK;
+    f_data->parent->colour = CM_RBT_BLACK;
 
     return;
 }
@@ -370,7 +370,7 @@ void _rbt_ins_case_3(cm_rbt * tree,
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
     
     //node is left child
-    if ((*node)->parent_side == LESS) {
+    if ((*node)->parent_side == CM_RBT_LESS) {
         _rbt_right_rotate(tree, f_data->parent);
         *node = (*node)->right;
     
@@ -397,7 +397,7 @@ void _rbt_ins_case_4(cm_rbt * tree,
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
     //node is left child
-    if ((*node)->parent_side == LESS) {
+    if ((*node)->parent_side == CM_RBT_LESS) {
         _rbt_right_rotate(tree, f_data->grandparent);
     
     } else {
@@ -405,8 +405,8 @@ void _rbt_ins_case_4(cm_rbt * tree,
     }
 
     //recolour parent and grandparent
-    f_data->grandparent->colour = RED;
-    f_data->parent->colour      = BLACK;
+    f_data->grandparent->colour = CM_RBT_RED;
+    f_data->parent->colour      = CM_RBT_BLACK;
 
     return;
 }
@@ -429,11 +429,11 @@ void _rbt_rmv_case_1(cm_rbt * tree,
     enum cm_rbt_side sibling_side = f_data->sibling->parent_side;
 
     //recolour sibling and parent
-    f_data->sibling->colour = BLACK;
-    f_data->parent->colour  = RED;
+    f_data->sibling->colour = CM_RBT_BLACK;
+    f_data->parent->colour  = CM_RBT_RED;
 
     //rotate parent to make sibling the new grandparent 
-    if (f_data->sibling->parent_side == LESS) {
+    if (f_data->sibling->parent_side == CM_RBT_LESS) {
         _rbt_right_rotate(tree, f_data->parent);
     
     } else {
@@ -442,7 +442,7 @@ void _rbt_rmv_case_1(cm_rbt * tree,
 
     //update fix data
     f_data->grandparent = f_data->parent->parent;
-    if (sibling_side == MORE) {
+    if (sibling_side == CM_RBT_MORE) {
         f_data->sibling = f_data->parent->right;
     } else {
         f_data->sibling = f_data->parent->left;
@@ -463,15 +463,15 @@ DBG_STATIC DBG_INLINE
 void _rbt_rmv_case_2(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
-    f_data->sibling->colour = RED;
+    f_data->sibling->colour = CM_RBT_RED;
     
-    if (f_data->parent->colour == RED) {
+    if (f_data->parent->colour == CM_RBT_RED) {
 
         //apply fix
         *node = tree->root;
 
         //update fix data        
-        f_data->parent->colour = BLACK;
+        f_data->parent->colour = CM_RBT_BLACK;
     
     } else {
 
@@ -498,12 +498,12 @@ DBG_STATIC DBG_INLINE
 void _rbt_rmv_case_3(cm_rbt * tree, 
                      cm_rbt_node ** node, struct _rbt_fix_data * f_data) {
 
-    //colour close nephew black, set sibling's colour to RED, rotate 
-    if (f_data->sibling->parent_side == LESS) {    
+    //colour close nephew black, set sibling's colour to CM_RBT_RED, rotate 
+    if (f_data->sibling->parent_side == CM_RBT_LESS) {    
 
         //perform fix
-        f_data->sibling->right->colour = BLACK;
-        f_data->sibling->colour       = RED;
+        f_data->sibling->right->colour = CM_RBT_BLACK;
+        f_data->sibling->colour       = CM_RBT_RED;
         _rbt_left_rotate(tree, f_data->sibling);
 
         //update fix data
@@ -512,8 +512,8 @@ void _rbt_rmv_case_3(cm_rbt * tree,
     } else {
 
         //perform fix
-        f_data->sibling->left->colour = BLACK; 
-        f_data->sibling->colour       = RED;
+        f_data->sibling->left->colour = CM_RBT_BLACK; 
+        f_data->sibling->colour       = CM_RBT_RED;
         _rbt_right_rotate(tree, f_data->sibling);
     
         //update fix data
@@ -539,17 +539,17 @@ void _rbt_rmv_case_4(cm_rbt * tree,
 
     //recolour nodes
     f_data->sibling->colour        = f_data->parent->colour;
-    f_data->parent->colour         = BLACK;
+    f_data->parent->colour         = CM_RBT_BLACK;
 
     //colour far nephew black, rotate
-    if (f_data->sibling->parent_side == LESS) {
+    if (f_data->sibling->parent_side == CM_RBT_LESS) {
         
-        f_data->sibling->left->colour = BLACK;
+        f_data->sibling->left->colour = CM_RBT_BLACK;
         _rbt_right_rotate(tree, f_data->parent);
     
     } else {
         
-        f_data->sibling->right->colour = BLACK;
+        f_data->sibling->right->colour = CM_RBT_BLACK;
         _rbt_left_rotate(tree, f_data->parent);
     }
 
@@ -569,23 +569,23 @@ int _rbt_determine_ins_case(const cm_rbt_node * node,
 
 
     //if node is root and is red, no fix necessary
-    if (node->parent_side == ROOT) return 0;
+    if (node->parent_side == CM_RBT_ROOT) return 0;
 
     //determine if parent is black
-    parent_black = _rbt_get_colour(f_data->parent) == BLACK ? true : false;
+    parent_black = _rbt_get_colour(f_data->parent) == CM_RBT_BLACK ? true : false;
 
     //if parent is black, no fix necessary
     if (parent_black) return 0;
 
     //determine if uncle is black
-    uncle_black = _rbt_get_colour(f_data->uncle) == BLACK ? true : false;
+    uncle_black = _rbt_get_colour(f_data->uncle) == CM_RBT_BLACK ? true : false;
 
     //if uncle is red, case 1
     if (!uncle_black)
-        if (f_data->uncle->colour == RED) return 1;
+        if (f_data->uncle->colour == CM_RBT_RED) return 1;
 
     //if parent is root, case 2
-    if (f_data->parent->parent_side == ROOT) return 2;
+    if (f_data->parent->parent_side == CM_RBT_ROOT) return 2;
 
     //determine 'triangle' or 'line' case
     if (uncle_black) {
@@ -621,26 +621,26 @@ int _rbt_determine_rmv_case(const cm_rbt * tree, const cm_rbt_node * node,
     if (tree->root == node) return 0;
 
     //if sibling is red, case 1
-    if (_rbt_get_colour(f_data->sibling) == RED) return 1;
+    if (_rbt_get_colour(f_data->sibling) == CM_RBT_RED) return 1;
 
     //get sibling's child colours
     left_colour = _rbt_get_colour(f_data->sibling->left);
     right_colour = _rbt_get_colour(f_data->sibling->right);
 
     //if both sibling's children are black, case 2
-    if ((left_colour == BLACK) && (right_colour == BLACK)) return 2;
+    if ((left_colour == CM_RBT_BLACK) && (right_colour == CM_RBT_BLACK)) return 2;
 
     //case 3 and 4 work with 'close' and 'distant' nephews
-    close_colour = f_data->sibling->parent_side == LESS 
+    close_colour = f_data->sibling->parent_side == CM_RBT_LESS 
                    ? right_colour : left_colour;
-    distant_colour = f_data->sibling->parent_side == LESS 
+    distant_colour = f_data->sibling->parent_side == CM_RBT_LESS 
                      ? left_colour : right_colour;
 
     //if sibling's left child is red and right child is black, case 3
-    if ((close_colour == RED) && (distant_colour == BLACK)) return 3;
+    if ((close_colour == CM_RBT_RED) && (distant_colour == CM_RBT_BLACK)) return 3;
 
     //if sibling's right child's colour is red, case 4
-    if (distant_colour == RED) return 4;
+    if (distant_colour == CM_RBT_RED) return 4;
 
     //otherwise invalid state, error out
     cm_errno = CM_ERR_RB_INVALID_STATE;
@@ -705,7 +705,7 @@ int _rbt_fix_rmv(cm_rbt * tree, cm_rbt_node * node,
     int fix_case;
 
     //move up tree and correct violations until fixed or root is reached
-    while (node != tree->root && node_colour == BLACK) {
+    while (node != tree->root && node_colour == CM_RBT_BLACK) {
 
         //determine remove case
         fix_case = _rbt_determine_rmv_case(tree, node, f_data);
@@ -757,11 +757,11 @@ cm_rbt_node * _rbt_add_node(cm_rbt * tree, const void * key,
     //else connect node
     } else {
         node->parent = parent;
-        if (side == LESS) {
-            node->parent_side = LESS;
+        if (side == CM_RBT_LESS) {
+            node->parent_side = CM_RBT_LESS;
             parent->left = node;
         } else {
-            node->parent_side = MORE;
+            node->parent_side = CM_RBT_MORE;
             parent->right = node;
         }
     }
@@ -793,13 +793,13 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
     
 
     //do not apply fixes by default
-    unlink_colour = RED;
+    unlink_colour = CM_RBT_RED;
     
     //get relevant node
     node = _rbt_traverse(tree, key, &side);
 
     //if a node doesn't exist for this key, error out
-    if (side != EQUAL || node == NULL) {
+    if (side != CM_RBT_EQUAL || node == NULL) {
         cm_errno = CM_ERR_USER_KEY;
         return NULL;
     }
@@ -813,18 +813,18 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
         fix_node = max_node->left;
 
         
-        if (max_node->colour == BLACK && 
-            _rbt_get_colour(fix_node) == RED) {
+        if (max_node->colour == CM_RBT_BLACK && 
+            _rbt_get_colour(fix_node) == CM_RBT_RED) {
 
             //can replace min node with its child and 
             //colour it black, no fix necessary
-            fix_node->colour = BLACK;
+            fix_node->colour = CM_RBT_BLACK;
 
         } else {
 
             //save state prior to removal for use during fixing
             unlink_colour = max_node->colour;
-            if (unlink_colour == BLACK) 
+            if (unlink_colour == CM_RBT_BLACK) 
                 _rbt_populate_fix_data(max_node, &f_data);
         }
 
@@ -851,8 +851,8 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
         //replace node with child
         _rbt_transplant(tree, node, node->left);
         
-        //convert node to BLACK, this is guaranteed to maintain balance
-        node->left->colour = BLACK;
+        //convert node to CM_RBT_BLACK, this is guaranteed to maintain balance
+        node->left->colour = CM_RBT_BLACK;
 
     //only a right child
     } else if (node->left == NULL && node->right != NULL) {
@@ -860,8 +860,8 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
         //replace node with child
         _rbt_transplant(tree, node, node->right);
         
-        //convert node to BLACK, this is guaranteed to maintain balance
-        node->right->colour = BLACK;
+        //convert node to CM_RBT_BLACK, this is guaranteed to maintain balance
+        node->right->colour = CM_RBT_BLACK;
     
     //no children present
     } else {
@@ -870,10 +870,10 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
 
         //save state prior to removal for use during fixing
         unlink_colour = node->colour;
-        if (unlink_colour == BLACK) 
+        if (unlink_colour == CM_RBT_BLACK) 
             _rbt_populate_fix_data(node, &f_data);
 
-        if (node->parent_side == ROOT) {
+        if (node->parent_side == CM_RBT_ROOT) {
 
             //set tree root to NULL
             tree->root = NULL;
@@ -881,7 +881,7 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
         } else {
 
             //remove node from parent
-            if (node->parent_side == LESS) {
+            if (node->parent_side == CM_RBT_LESS) {
                 node->parent->left = NULL;
             } else {
                 node->parent->right = NULL;
@@ -892,7 +892,7 @@ cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key) {
     tree->size -= 1;
 
     //if a black node was removed, must correct tree
-    if (unlink_colour == BLACK) {
+    if (unlink_colour == CM_RBT_BLACK) {
         ret = _rbt_fix_rmv(tree, fix_node, unlink_colour, &f_data);
         if (ret == -1) return NULL;
     }
@@ -1016,7 +1016,7 @@ int cm_rbt_get(const cm_rbt * tree, const void * key, void * buf) {
 
     //get the node
     cm_rbt_node * node = _rbt_traverse(tree, key, &side);
-    if (side != EQUAL) {
+    if (side != CM_RBT_EQUAL) {
         
         cm_errno = CM_ERR_USER_KEY;
         return -1;
@@ -1035,7 +1035,7 @@ void * cm_rbt_get_p(const cm_rbt * tree, const void * key) {
 
     //get the node
     cm_rbt_node * node = _rbt_traverse(tree, key, &side);
-    if (side != EQUAL) {
+    if (side != CM_RBT_EQUAL) {
     
         cm_errno = CM_ERR_USER_KEY;
         return NULL;
@@ -1052,7 +1052,7 @@ cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key) {
 
     //get the node
     cm_rbt_node * node = _rbt_traverse(tree, key, &side);
-    if (side != EQUAL) {
+    if (side != CM_RBT_EQUAL) {
         
         cm_errno = CM_ERR_USER_KEY;
         return NULL;
@@ -1136,13 +1136,13 @@ cm_rbt_node * cm_rbt_set(cm_rbt * tree,
     cm_rbt_node * node = _rbt_traverse(tree, key, &side);
 
     //if a node already exists for this key, update its value
-    if (side == EQUAL) {
+    if (side == CM_RBT_EQUAL) {
         memcpy(node->data, data, tree->data_sz);
         return node;
 
     //else create a new node
     } else { 
-        return _rbt_add_node(tree, key, data, node, side, false, RED);
+        return _rbt_add_node(tree, key, data, node, side, false, CM_RBT_RED);
     }
 }
 
