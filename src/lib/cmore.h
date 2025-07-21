@@ -192,6 +192,17 @@ extern int cm_rbt_get(const cm_rbt * tree, const void * key, void * buf);
 extern void * cm_rbt_get_p(const cm_rbt * tree, const void * key);
 extern cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key);
 
+/*
+ *  NOTE: Indexed traversal is not iterator based and is O(n). Traverse
+ *        manually if performance is a requirement.
+ */
+
+//0 = success, -1 = error, see cm_errno
+extern int cm_rbt_idx_get(const cm_rbt * tree, const int idx, void * buf);
+//pointer = success, NULL = error, see cm_errno
+extern void * cm_rbt_idx_get_p(const cm_rbt * tree, const int idx);
+extern cm_rbt_node * cm_rbt_idx_get_n(const cm_rbt * tree, const int idx);
+
 //pointer = success, NULL = error, see cm_errno
 extern cm_rbt_node * cm_rbt_set(cm_rbt * tree, 
                                 const void * key, const void * data);

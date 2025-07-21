@@ -1,5 +1,6 @@
 //standard library
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 //system headers
@@ -948,6 +949,63 @@ int _rbt_cpy_recurse(cm_rbt * dst_tree, cm_rbt_node * dst_parent_node,
 
 
 
+DBG_STATIC
+cm_rbt_node * _rbt_idx_recurse(const cm_rbt * tree, cm_rbt_node * node,
+                               int * cur_idx, int tgt_idx) {
+
+    int ret;
+    cm_rbt_node * ret_node;
+
+
+    //recurse left
+    if (node->left != NULL) {
+        ret_node = _rbt_idx_recurse(tree, node->left,
+                                    cur_idx, tgt_idx);
+        if (ret_node != NULL) return ret_node;
+    }
+
+    //check own node
+    if (*cur_idx == tgt_idx) return node;
+    *cur_idx += 1;
+
+    //recurse right
+    if (node->right != NULL) {
+        ret_node = _rbt_idx_recurse(tree, node->right,
+                                    cur_idx, tgt_idx);
+        if (ret_node != NULL) return ret_node;
+    }
+
+    return NULL;
+}
+
+
+
+DBG_STATIC DBG_INLINE 
+int _rbt_assert_index_range(const cm_rbt * tree, const int index) {
+   
+    if (abs(index) >= tree->size) {
+        cm_errno = CM_ERR_USER_INDEX;
+        return -1;
+    }
+
+    return 0;
+}
+
+
+
+DBG_STATIC DBG_INLINE 
+int _rbt_normalise_index(const cm_rbt * tree, int index) {
+
+    //if negative index supplied
+    if (index < 0) {
+        index = tree->size + index;
+    }
+
+    return index;
+}
+
+
+
 /*
  *  --- [EXTERNAL] ---
  */
@@ -997,6 +1055,70 @@ cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key) {
     if (side != EQUAL) {
         
         cm_errno = CM_ERR_USER_KEY;
+        return NULL;
+    }
+
+    return node;
+}
+
+
+
+int cm_rbt_idx_get(const cm_rbt * tree, const int index, void * buf) {
+
+
+
+
+int _rbt_normalise_index(const cm_rbt * tree, int index);
+
+    int norm_index = _rbt_normalise_index(tree, index);
+    if (_rbt_assert_index_range(tree, norm_index)) return -1;
+
+    //get the node
+    int cur_idx = 0;
+    cm_rbt_node * node = _rbt_idx_recurse(tree, tree->root,
+                                          &cur_idx, norm_index);
+    if (node == NULL) {
+        cm_errno = CM_ERR_USER_INDEX;
+        return -1;
+    }
+
+    memcpy(buf, node->data, tree->data_sz);
+
+    return 0;
+}
+
+
+
+void * cm_rbt_idx_get_p(const cm_rbt * tree, const int index) {
+
+    int norm_index = _rbt_normalise_index(tree, index);
+    if (_rbt_assert_index_range(tree, norm_index)) return NULL;
+
+    //get the node
+    int cur_idx = 0;
+    cm_rbt_node * node = _rbt_idx_recurse(tree, tree->root,
+                                          &cur_idx, norm_index);
+    if (node == NULL) {
+        cm_errno = CM_ERR_USER_INDEX;
+        return NULL;
+    }
+
+    return node->data;
+}
+
+
+
+cm_rbt_node * cm_rbt_idx_get_n(const cm_rbt * tree, const int index) {
+
+    int norm_index = _rbt_normalise_index(tree, index);
+    if (_rbt_assert_index_range(tree, norm_index)) return NULL;
+
+    //get the node
+    int cur_idx = 0;
+    cm_rbt_node * node = _rbt_idx_recurse(tree, tree->root,
+                                          &cur_idx, norm_index);
+    if (node == NULL) {
+        cm_errno = CM_ERR_USER_INDEX;
         return NULL;
     }
 

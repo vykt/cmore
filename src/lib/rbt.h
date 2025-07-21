@@ -81,6 +81,10 @@ int cm_rbt_get(const cm_rbt * tree, const void * key, void * buf);
 void * cm_rbt_get_p(const cm_rbt * tree, const void * key);
 cm_rbt_node * cm_rbt_get_n(const cm_rbt * tree, const void * key);
 
+int cm_rbt_idx_get(const cm_rbt * tree, const int idx, void * buf);
+void * cm_rbt_idx_get_p(const cm_rbt * tree, const int idx);
+cm_rbt_node * cm_rbt_idx_get_n(const cm_rbt * tree, const int idx);
+
 cm_rbt_node * cm_rbt_set(cm_rbt * tree, 
                          const void * key, const void * data);
 int cm_rbt_rmv(cm_rbt * tree, const void * key);

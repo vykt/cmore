@@ -1119,6 +1119,62 @@ START_TEST(test__rmv_case_4) {
 
 
 
+//cm_rbt_get [sorted stub fixture]
+START_TEST(test_rbt_get) {
+
+    int ret;
+    data ret_data;
+    data * ret_data_ptr;
+    cm_rbt_node * ret_node;
+
+
+    //first test: get the root node's value
+    d.x = 20;
+    ret = cm_rbt_get(&t, &d.x, &ret_data);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(ret_data.x, d.x);
+
+    //second test: get a value pointer to a leaf node
+    d.x = 15;
+    ret_data_ptr = cm_rbt_get_p(&t, &d.x);
+    ck_assert_ptr_ne(ret_data_ptr, NULL);
+    ck_assert_int_eq(ret_data_ptr->x, d.x);
+
+    //third test: get a node pointer to a non-leaf node
+    d.x = 30;
+    ret_node = cm_rbt_get_n(&t, &d.x);
+    ck_assert_ptr_ne(ret_node, NULL);
+    ck_assert_int_eq(((data *) ret_node->data)->x, d.x);
+
+
+    //fourth test: fetch index 0
+    ret = cm_rbt_idx_get(&t, 0, &ret_data);
+    ck_assert_int_eq(ret, 0);
+    ck_assert_int_eq(ret_data.x, 5);
+
+    //fifth test: fetch a non-leaf node by index
+    ret_data_ptr = cm_rbt_idx_get_p(&t, 6);
+    ck_assert_ptr_ne(ret_data_ptr, NULL);
+    ck_assert_int_eq(ret_data_ptr->x, 40);
+
+    //sixth test: fetch the final index node
+    ret_node = cm_rbt_idx_get_n(&t, 9);
+    ck_assert_ptr_ne(ret_node, NULL);
+    ck_assert_int_eq(((data *) ret_node->data)->x, 55);
+
+    //seventh test: fetch the final index node via negative index
+    ret_node = cm_rbt_idx_get_n(&t, -1);
+    ck_assert_ptr_ne(ret_node, NULL);
+    ck_assert_int_eq(((data *) ret_node->data)->x, 55);
+
+    //eighth test: fetch an out of bounds index
+    ret = cm_rbt_idx_get(&t, 10, &ret_data);
+    ck_assert_int_eq(ret, -1);
+
+} END_TEST
+
+
+
 //cm_rbt_set [empty fixture]
 START_TEST(test_rbt_set) {
 
@@ -1439,6 +1495,7 @@ Suite * rbt_suite() {
     #endif
 
     //test cases (cont.)
+    TCase * tc_rbt_get;
     TCase * tc_rbt_set;
     TCase * tc_rbt_rmv;
     TCase * tc_rbt_uln;
@@ -1538,6 +1595,11 @@ Suite * rbt_suite() {
     tcase_add_test(tc__rmv_case_4, test__rmv_case_4);
     #endif
 
+    //tc_rbt_get
+    tc_rbt_get = tcase_create("rb_tree_get");
+    tcase_add_checked_fixture(tc_rbt_get, _setup_sorted_stub, _teardown);
+    tcase_add_test(tc_rbt_get, test_rbt_get);
+
     //tc_rbt_set
     tc_rbt_set = tcase_create("rb_tree_set");
     tcase_add_checked_fixture(tc_rbt_set, _setup_emp, _teardown);
@@ -1597,6 +1659,7 @@ Suite * rbt_suite() {
     #endif
 
     //add test cases to red-black tree suite (cont.)
+    suite_add_tcase(s, tc_rbt_get);
     suite_add_tcase(s, tc_rbt_set);
     suite_add_tcase(s, tc_rbt_rmv);
     suite_add_tcase(s, tc_rbt_uln);
