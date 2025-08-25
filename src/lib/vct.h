@@ -20,7 +20,7 @@ enum _vct_index_mode {INDEX = 0, ADD_INDEX = 1};
 enum _vct_shift_mode {SHIFT_UP = 1, SHIFT_DOWN = -1};
 
 
-#ifdef DEBUG
+#ifdef CM_DEBUG
 //internal
 int _vct_alloc(cm_vct * vector);
 int _vct_grow(cm_vct * vector)

@@ -6,7 +6,7 @@
  *  Do not define internal functions as static in debug builds
  */
 
-#ifdef DEBUG 
+#ifdef CM_DEBUG 
 #define DBG_STATIC
 #define DBG_INLINE
 #else

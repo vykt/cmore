@@ -506,7 +506,7 @@ START_TEST(test_new_del_rbt) {
 
 
 
-#ifdef DEBUG
+#ifdef CM_DEBUG
 //_rbt_new_node() & _rbt_del_node() [no fixture]
 START_TEST(test__new_del_node) {
     
@@ -1474,7 +1474,7 @@ Suite * rbt_suite() {
     TCase * tc_new_del_rbt;
 
     //internal test cases for debug builds
-    #ifdef DEBUG
+    #ifdef CM_DEBUG
     TCase * tc__new_del_node;
     TCase * tc__left_rotate;
     TCase * tc__right_rotate;
@@ -1511,7 +1511,7 @@ Suite * rbt_suite() {
     tc_new_del_rbt = tcase_create("new_del_cm_rbt");
     tcase_add_test(tc_new_del_rbt, test_new_del_rbt);
 
-    #ifdef DEBUG
+    #ifdef CM_DEBUG
     //tc__new_del_node()
     tc__new_del_node = tcase_create("_new_del_node");
     tcase_add_test(tc__new_del_node, test__new_del_node);
@@ -1638,7 +1638,7 @@ Suite * rbt_suite() {
     //add test cases to red-black tree suite
     suite_add_tcase(s, tc_new_del_rbt);
     
-    #ifdef DEBUG
+    #ifdef CM_DEBUG
     suite_add_tcase(s, tc__new_del_node);
     suite_add_tcase(s, tc__left_rotate);
     suite_add_tcase(s, tc__right_rotate);

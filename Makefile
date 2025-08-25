@@ -28,7 +28,7 @@ HEADER=cmore.h
 
 #[set build options]
 ifeq ($(build),debug)
-	CFLAGS      += -O0 -ggdb3 -fsanitize=address -DDEBUG
+	CFLAGS      += -O0 -ggdb3 -fsanitize=address -DCM_DEBUG
 	CFLAGS_TEST += -DDEBUG
 	LDFLAGS     += -static-libasan
 else

@@ -9,6 +9,7 @@
 Suite * lst_suite();
 Suite * vct_suite();
 Suite * rbt_suite();
+Suite * alg_suite();
 
 //other tests
 void rbt_explore();

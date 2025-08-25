@@ -14,7 +14,7 @@ CFLAGS=${_CFLAGS}
 WARN_OPTS=${_WARN_OPTS} -Wno-unused-parameter
 LDFLAGS=${_LDFLAGS}
 
-SOURCES_LIB=lst.c vct.c error.c rbt.c
+SOURCES_LIB=lst.c vct.c rbt.c alg.c error.c
 OBJECTS_LIB=${SOURCES_LIB:%.c=${BUILD_DIR}/%.o}
 
 SHARED=libcmore.so

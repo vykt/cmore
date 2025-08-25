@@ -228,6 +228,12 @@ extern void cm_del_rbt_node(cm_rbt_node * node);
 
 
 
+// [algorithms]
+//clamped value return
+long cm_clamp(const long value, const long lower, const long upper);
+
+
+
 // [error handling]
 //void return
 extern void cm_perror(const char * prefix);

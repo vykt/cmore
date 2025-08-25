@@ -14,7 +14,7 @@
 enum _lst_index_mode {INDEX = 0, ADD_INDEX = 1};
 
 
-#ifdef DEBUG
+#ifdef CM_DEBUG
 //internal
 cm_lst_node * _lst_traverse(const cm_lst * list, int index);
 

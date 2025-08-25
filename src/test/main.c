@@ -56,6 +56,7 @@ static void _run_unit_tests() {
     Suite * s_vct;
     Suite * s_lst;
     Suite * s_rbt;
+    Suite * s_alg;
     Suite * s_error;
 
     SRunner * sr;
@@ -64,11 +65,13 @@ static void _run_unit_tests() {
     s_vct = vct_suite();
     s_lst = lst_suite();
     s_rbt = rbt_suite(); 
+    s_alg = alg_suite();
 
     //create suite runner
     sr = srunner_create(s_vct);
     srunner_add_suite(sr, s_lst);
     srunner_add_suite(sr, s_rbt);
+    srunner_add_suite(sr, s_alg);
 
     //run tests
     srunner_run_all(sr, CK_VERBOSE);

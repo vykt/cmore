@@ -19,7 +19,7 @@ struct _rbt_fix_data {
 };
 
 
-#ifdef DEBUG
+#ifdef CM_DEBUG
 //internal
 cm_rbt_node * _rbt_traverse(const cm_rbt * tree, 
                             const void * key, enum cm_rbt_side * side);
