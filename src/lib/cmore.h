@@ -109,6 +109,41 @@ typedef struct {
  */
 
 
+
+// [meta type]
+typedef struct {
+
+    int type_id;
+    size_t sz;
+    void * data;
+    bool is_init;
+
+} cm_meta_type;
+
+
+
+// [monad]
+typedef struct {
+
+    //function list
+    cm_lst /* <cm_meta_type * (*)(cm_meta_type *, void *)> */ thunk;
+    bool is_init;
+
+} cm_monad;
+
+#define CM_MONAD_FAIL_TYPE 0
+
+/*
+ *  Meta types store metadata about a type relevant to the monad. The
+ *  monad stores a list of functions that process data as a pipeline, 
+ *  either modifying the value of the type or even converting it to a 
+ *  different type. To use monads, the user must define functions to
+ *  compose the monad from, and the type IDs that wlll be associated
+ *  with each type the monad may interact with.
+ */
+
+
+
 /*
  *  --- [FUNCTIONS] ---
  */
@@ -230,7 +265,37 @@ extern void cm_del_rbt_node(cm_rbt_node * node);
 
 // [algorithms]
 //clamped value return
-long cm_clamp(const long value, const long lower, const long upper);
+extern long cm_clamp(const long value, const long lower, const long upper);
+
+
+
+// [meta type]
+//void returm
+extern void cm_meta_type_set(cm_meta_type * value, const void * data);
+extern int cm_meta_type_upd(cm_meta_type * value, const int type_id,
+                            const void * data, const size_t sz);
+//0 = success, -1 = error, see cm_errno
+extern int cm_meta_type_cpy(cm_meta_type * dst_value,
+                            const cm_meta_type * src_value);
+
+//0 = success. -1 = errpr, see cm_errno
+extern int cm_new_meta_type(cm_meta_type * value, const int type_id,
+                            const void * data, const size_t sz);
+//void return
+extern void cm_del_meta_type(cm_meta_type * meta_value);
+
+
+
+// [monad]
+//0 = success, -1 = errpr, see cm_errno
+extern int cm_monad_compose(cm_monad * monad,
+                            cm_meta_type * (* cb)(cm_meta_type *, void * ctx));
+extern int cm_monad_eval(cm_monad * monad,
+                         cm_meta_type * value, void * ctx);
+
+//void return
+extern void cm_new_monad(cm_monad * monad);
+extern void cm_del_monad(cm_monad * monad);
 
 
 

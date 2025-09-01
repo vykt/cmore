@@ -9,6 +9,8 @@
 #include "debug.h"
 
 
+// -- [list]
+
 //controls if user provided index should be verified for accessing elements
 //or for adding new elements
 enum _lst_index_mode {INDEX = 0, ADD_INDEX = 1};

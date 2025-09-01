@@ -15,7 +15,7 @@ WARN_OPTS+=${_WARN_OPTS} -Wno-unused-variable -Wno-unused-but-set-variable
 LDFLAGS=-L${LIB_BIN_DIR} -Wl,-rpath=${LIB_BIN_DIR} \
         -lcmore -lcheck -lsubunit -static-libasan
 
-SOURCES_TEST=main.c check_lst.c check_vct.c check_rbt.c check_alg.c
+SOURCES_TEST=main.c check_lst.c check_vct.c check_rbt.c check_alg.c check_func.c
 OBJECTS_TEST=${SOURCES_TEST:%.c=${BUILD_DIR}/%.o}
 
 TESTS=test

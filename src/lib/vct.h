@@ -9,6 +9,8 @@
 #include "debug.h"
 
 
+// -- [vector]
+
 #define VECTOR_DEFAULT_SIZE 8
 
 

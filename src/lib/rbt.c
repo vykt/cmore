@@ -21,7 +21,7 @@
 
 
 /*
- *  --- [INTERNAL] ---
+ *  --- [RED-BLACK TREE - INTERNAL] ---
  */
 
 /*
@@ -1007,7 +1007,7 @@ int _rbt_normalise_index(const cm_rbt * tree, int index) {
 
 
 /*
- *  --- [EXTERNAL] ---
+ *  --- [RED-BLACK TREE - EXTERNAL] ---
  */
 
 int cm_rbt_get(const cm_rbt * tree, const void * key, void * buf) {

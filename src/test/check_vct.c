@@ -81,6 +81,8 @@ static void _assert_state(const int len, const size_t size,
     ck_assert_int_eq(v.len, len);
     ck_assert_int_eq(v.sz, size);
     ck_assert_int_eq(V_GET(v, index)->x, value);
+
+    return;
 }
 
 

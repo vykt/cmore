@@ -14,7 +14,7 @@
 
 
 /*
- *  --- [INTERNAL] ---
+ *  --- [LIST - INTERNAL] ---
  */
 
 DBG_STATIC 
@@ -194,7 +194,7 @@ int _lst_assert_index_range(const cm_lst * list,
 
 
 /*
- *  --- [EXTERNAL] ---
+ *  --- [LIST - EXTERNAL] ---
  */
 
 int cm_lst_get(const cm_lst * list, const int index, void * buf) {
@@ -502,6 +502,7 @@ void cm_new_lst(cm_lst * list, const size_t data_sz) {
     list->data_sz = data_sz;
     list->head = NULL;
     list->is_init = true;
+
     return;
 }
 

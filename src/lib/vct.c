@@ -13,7 +13,7 @@
 
 
 /*
- *  --- [INTERNAL] ---
+ *  --- [VECTOR - INTERNAL] ---
  */
 
 DBG_STATIC
@@ -123,7 +123,7 @@ int _vct_assert_index_range(const cm_vct * vector,
 
 
 /*
- *  --- [EXTERNAL] ---
+ *  --- [VECTOR -EXTERNAL] ---
  */
 
 int cm_vct_get(const cm_vct * vector, const int index, void * buf) {

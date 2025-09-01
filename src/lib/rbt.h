@@ -9,6 +9,8 @@
 #include "debug.h"
 
 
+// -- [red-black tree]
+
 //stores pointers to nodes relevant for correction operations
 struct _rbt_fix_data {
 
