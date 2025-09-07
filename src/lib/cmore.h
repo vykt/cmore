@@ -187,6 +187,11 @@ extern int cm_lst_cpy(cm_lst * dst_list, const cm_lst * src_list);
 //void return
 extern void cm_lst_mov(cm_lst * dst_list, cm_lst * src_list);
 
+//0 = success, -1 = error, see cm_errno
+extern int cm_lst_iter(const cm_lst * list,
+                       int (* callback)(const cm_lst_node * node, void * ctx),
+                       void * ctx);
+
 //void return
 extern void cm_new_lst(cm_lst * list, const size_t data_sz);
 //0 = success, -1 = error, see cm_errno
@@ -215,6 +220,11 @@ extern void cm_vct_emp(cm_vct * vector);
 extern int cm_vct_cpy(cm_vct * dst_vector, const cm_vct * src_vector);
 //void return
 extern void cm_vct_mov(cm_vct * dst_vector, cm_vct * src_vector);
+
+//0 = success, -1 = error, see cm_errno
+extern int cm_vct_iter(const cm_vct * vector,
+                       int (* callback)(const void * data, void * ctx),
+                       void * ctx);
 
 //0 = success, -1 = error, see cm_errno
 extern int cm_new_vct(cm_vct * vector, const size_t data_sz);
@@ -254,6 +264,11 @@ extern void cm_rbt_emp(cm_rbt * tree);
 extern int cm_rbt_cpy(cm_rbt * dst_tree, const cm_rbt * src_tree);
 //void return
 extern void cm_rbt_mov(cm_rbt * dst_tree, cm_rbt * src_tree);
+
+//0 = success, -1 = errpr, see cm_errno
+extern int cm_rbt_iter(const cm_rbt * tree,
+                       int (* callback)(const cm_rbt_node * node, void * ctx),
+                       void * ctx);
 
 //void return
 extern void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz,
@@ -318,6 +333,7 @@ extern __thread int cm_errno;
 // 1XX - user errors
 #define CM_ERR_USER_INDEX       1100
 #define CM_ERR_USER_KEY         1101
+#define CM_ERR_CALLBACK         1102
 
 // 2XX - internal errors
 #define CM_ERR_INTERNAL_INDEX   1200
@@ -333,6 +349,7 @@ extern __thread int cm_errno;
 // 1XX - user errors
 #define CM_ERR_USER_INDEX_MSG       "Index out of range.\n"
 #define CM_ERR_USER_KEY_MSG         "Key not present in tree.\n"
+#define CM_ERR_CALLBACK_MSG         "Callback returned an error.\n"
 
 // 2XX - internal errors
 #define CM_ERR_INTERNAL_INDEX_MSG   "Internal indexing error.\n"

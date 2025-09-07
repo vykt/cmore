@@ -75,6 +75,11 @@ cm_rbt_node * _rbt_add_node(cm_rbt * tree, const void * key,
 cm_rbt_node * _rbt_uln_node(cm_rbt * tree, const void * key);
 
 void _rbt_emp_recurse(cm_rbt_node * node);
+int _rbt_cpy_recurse(cm_rbt * dst_tree,
+                     cm_rbt_node * dst_parent_node, cm_rbt_node * src_node);
+int _rbt_callback_recurse(cm_rbt_node * node,
+                          int (* callback)(const cm_rbt_node *, void * ctx),
+                          void * ctx);
 #endif
 
 
@@ -94,6 +99,10 @@ cm_rbt_node * cm_rbt_uln(cm_rbt * tree, const void * key);
 void cm_rbt_emp(cm_rbt * tree);
 int cm_rbt_cpy(cm_rbt * dst_tree, const cm_rbt * src_tree);
 void cm_rbt_mov(cm_rbt * dst_tree, cm_rbt * src_tree);
+
+int cm_rbt_iter(const cm_rbt * tree,
+                int (* callback)(const cm_rbt_node * node, void * ctx),
+                void * ctx);
 
 void cm_new_rbt(cm_rbt * tree, const size_t key_sz, const size_t data_sz, 
                 enum cm_rbt_side (*compare)(const void *, const void *));

@@ -53,6 +53,9 @@ int cm_vct_rsz(cm_vct * vector, const int entries);
 void cm_vct_emp(cm_vct * vector);
 int cm_vct_cpy(cm_vct * dst_vector, const cm_vct * src_vector);
 void cm_vct_mov(cm_vct * dst_vector, cm_vct * src_vector);
+int cm_vct_iter(const cm_vct * vector,
+                int (* callback)(const void * data, void * ctx),
+                void * ctx);
 
 int cm_new_vct(cm_vct * vector, const size_t data_sz);
 void cm_del_vct(cm_vct * vector);

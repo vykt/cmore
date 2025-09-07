@@ -22,6 +22,10 @@ void cm_perror(const char * prefix) {
             fprintf(stderr, "%s: %s", prefix, CM_ERR_USER_KEY_MSG);
             break;
 
+        case CM_ERR_CALLBACK:
+            fprintf(stderr, "%s: %s", prefix, CM_ERR_CALLBACK_MSG);
+            break;
+
         // 2XX - internal errors
         case CM_ERR_INTERNAL_INDEX:
             fprintf(stderr, "%s: %s", prefix, CM_ERR_INTERNAL_INDEX_MSG);
@@ -60,6 +64,9 @@ const char * cm_strerror(const int cm_errnum) {
 
         case CM_ERR_USER_KEY:
             return CM_ERR_USER_KEY_MSG;
+
+        case CM_ERR_CALLBACK:
+            return CM_ERR_CALLBACK_MSG;
 
         // 2XX - internal errors
         case CM_ERR_INTERNAL_INDEX:

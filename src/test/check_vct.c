@@ -87,6 +87,32 @@ static void _assert_state(const int len, const size_t size,
 
 
 
+struct _assert_callback_ctx {
+
+    int idx;
+    int values[10];
+};
+
+static int _assert_callback(const void * data, void * ctx) {
+
+    //type cast context
+    struct _assert_callback_ctx * real_ctx
+        = (struct _assert_callback_ctx *) ctx;
+
+    //fetch this node's data
+    int real_data = *(int *) data;
+
+    //assert data
+    ck_assert_int_eq(real_data, real_ctx->values[real_ctx->idx]);
+
+    //increment index
+    real_ctx->idx += 1;
+
+    return 0;
+}
+
+
+
 /*
  *  --- [FIXTURES] ---
  */
@@ -722,6 +748,26 @@ START_TEST(test_vct_mov) {
 
 
 
+//cm_vct_iter() [full fixture]
+START_TEST(test_vct_iter) {
+
+    int ret;
+
+
+    //only test: use a callback to assert evaluation order
+    struct _assert_callback_ctx ctx = {
+        0,
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+    };
+
+    ret = cm_vct_iter(&v, _assert_callback, &ctx);
+    ck_assert_int_eq(ret, 0);
+
+    return;
+}
+
+
+
 /*
  *  --- [SUITE] ---
  */
@@ -742,6 +788,7 @@ Suite * vct_suite() {
     TCase * tc_vct_emp;
     TCase * tc_vct_cpy;
     TCase * tc_vct_mov;
+    TCase * tc_vct_iter;
 
     Suite * s = suite_create("vector");
     
@@ -810,6 +857,11 @@ Suite * vct_suite() {
     tcase_add_checked_fixture(tc_vct_mov, _setup_full, _teardown);
     tcase_add_test(tc_vct_mov, test_vct_mov);
 
+    //cm_vct_iter()
+    tc_vct_iter = tcase_create("vector_iter");
+    tcase_add_checked_fixture(tc_vct_iter, _setup_full, _teardown);
+    tcase_add_test(tc_vct_iter, test_vct_iter);
+
 
     //add test cases to vector suite
     suite_add_tcase(s, tc_new_del_vct);
@@ -825,6 +877,7 @@ Suite * vct_suite() {
     suite_add_tcase(s, tc_vct_emp);
     suite_add_tcase(s, tc_vct_cpy);
     suite_add_tcase(s, tc_vct_mov);
+    suite_add_tcase(s, tc_vct_iter);
 
     return s;
 }

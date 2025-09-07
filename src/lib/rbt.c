@@ -950,6 +950,41 @@ int _rbt_cpy_recurse(cm_rbt * dst_tree, cm_rbt_node * dst_parent_node,
 
 
 DBG_STATIC
+int _rbt_callback_recurse(cm_rbt_node * node,
+                          int (* callback)(const cm_rbt_node *, void * ctx),
+                          void * ctx) {
+
+    int ret;
+
+
+    //node empty
+    if (node == NULL) return 0;
+
+    //recurse left
+    if (node->left != NULL) {
+        ret = _rbt_callback_recurse(node->left, callback, ctx);
+        if (ret != 0) return -1;
+    }
+
+    //process own node
+    ret = callback(node, ctx);
+    if (ret != 0) {
+        cm_errno = CM_ERR_CALLBACK;
+        return -1;
+    }
+
+    //recurse right
+    if (node->right != NULL) {
+        ret = _rbt_callback_recurse(node->right, callback, ctx);
+        if (ret != 0) return -1;
+    }
+
+    return 0;
+}
+
+
+
+DBG_STATIC
 cm_rbt_node * _rbt_idx_recurse(const cm_rbt * tree, cm_rbt_node * node,
                                int * cur_idx, int tgt_idx) {
 
@@ -1217,6 +1252,15 @@ void cm_rbt_mov(cm_rbt * dst_tree, cm_rbt * src_tree) {
     src_tree->is_init = false;
 
     return;
+}
+
+
+
+int cm_rbt_iter(const cm_rbt * tree,
+                int (* callback)(const cm_rbt_node * node, void * ctx),
+                void * ctx) {
+
+    return _rbt_callback_recurse(tree->root, callback, ctx);
 }
 
 

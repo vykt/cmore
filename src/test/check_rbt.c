@@ -318,6 +318,34 @@ static void _recurse_compare_trees(cm_rbt_node * node_0,
 
 
 
+struct _assert_callback_ctx {
+
+    int idx;
+    int values[10];
+};
+
+static int _assert_callback(const cm_rbt_node * node, void * ctx) {
+
+    //type cast context
+    struct _assert_callback_ctx * real_ctx
+        = (struct _assert_callback_ctx *) ctx;
+
+    //fetch this node's key and data
+    int key  = *(int *) node->key;
+    int data = *(int *) node->data;
+
+    //assert key and data values
+    ck_assert_int_eq(key, real_ctx->values[real_ctx->idx]);
+    ck_assert_int_eq(key, real_ctx->values[real_ctx->idx]);
+
+    //increment index
+    real_ctx->idx += 1;
+
+    return 0;
+}
+
+
+
 /*
  *  --- [FIXTURES] ---
  */
@@ -419,7 +447,7 @@ static void _setup_stub() {
 static void _setup_sorted_stub() {
 
     /*
-     *  Sorted stub tree (sorted by value):
+     *  Sorted stub tree (sorted by key & value):
      *
      *        _ 20b _
      *       /       \
@@ -1449,6 +1477,26 @@ START_TEST(test_rbt_mov) {
 
 
 
+//cm_rbt_iter() [sorted stub vector]
+START_TEST(test_rbt_iter) {
+
+    int ret;
+
+
+    //only test: use a callback to assert evaluation order
+    struct _assert_callback_ctx ctx = {
+        0,
+        {5, 10, 15, 20, 25, 30, 40, 45, 50, 55}
+    };
+
+    ret = cm_rbt_iter(&t, _assert_callback, &ctx);
+    ck_assert_int_eq(ret, 0);
+
+    return;
+    
+} END_TEST
+
+
 //cm_del_rbt_node [no fixture]
 START_TEST(test_del_rbt_node) {
 
@@ -1502,6 +1550,7 @@ Suite * rbt_suite() {
     TCase * tc_rbt_emp;
     TCase * tc_rbt_cpy;
     TCase * tc_rbt_mov;
+    TCase * tc_rbt_iter;
     TCase * tc_del_rbt_node;
 
     Suite * s = suite_create("rb_tree");
@@ -1630,6 +1679,11 @@ Suite * rbt_suite() {
     tcase_add_checked_fixture(tc_rbt_mov, _setup_sorted_stub, _teardown);
     tcase_add_test(tc_rbt_mov, test_rbt_mov);
 
+    //tc_rbt_iter
+    tc_rbt_iter = tcase_create("rb_tree_iter");
+    tcase_add_checked_fixture(tc_rbt_iter, _setup_sorted_stub, _teardown);
+    tcase_add_test(tc_rbt_iter, test_rbt_iter);
+
     //tc_del_rbt_node
     tc_del_rbt_node = tcase_create("del_rbt_node");
     tcase_add_test(tc_del_rbt_node, test_del_rbt_node);
@@ -1666,6 +1720,7 @@ Suite * rbt_suite() {
     suite_add_tcase(s, tc_rbt_emp);
     suite_add_tcase(s, tc_rbt_cpy);
     suite_add_tcase(s, tc_rbt_mov);
+    suite_add_tcase(s, tc_rbt_iter);
     suite_add_tcase(s, tc_del_rbt_node);
 
     return s;

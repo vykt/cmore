@@ -496,6 +496,33 @@ void cm_lst_mov(cm_lst * dst_list, cm_lst * src_list) {
 
 
 
+int cm_lst_iter(const cm_lst * list,
+                int (* callback)(const cm_lst_node * node, void * ctx),
+                void * ctx) {
+
+    int ret;
+
+
+    //for every node in the list
+    cm_lst_node * node = list->head;
+    for (int i = 0; i < list->len; ++i) {
+
+        //process next node
+        ret = callback(node, ctx);
+        if (ret != 0) {
+            cm_errno = CM_ERR_CALLBACK;
+            return -1;
+        }
+
+        //advance iteration
+        node = node->next;
+    }
+
+    return 0;
+}
+
+
+
 void cm_new_lst(cm_lst * list, const size_t data_sz) {
 
     list->len = 0;

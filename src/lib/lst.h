@@ -65,6 +65,10 @@ int cm_lst_emp(cm_lst * list);
 int cm_lst_cpy(cm_lst * dst_list, const cm_lst * src_list);
 void cm_lst_mov(cm_lst * dst_list, cm_lst * src_list);
 
+int cm_lst_iter(const cm_lst * list,
+                int (* callback)(const cm_lst_node * node, void * ctx),
+                void * ctx);
+
 void cm_new_lst(cm_lst * list, const size_t data_sz);
 void cm_del_lst(cm_lst * list);
 void cm_del_lst_node(cm_lst_node * node);

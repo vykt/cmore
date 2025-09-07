@@ -306,6 +306,31 @@ void cm_vct_mov(cm_vct * dst_vector, cm_vct * src_vector) {
 
 
 
+int cm_vct_iter(const cm_vct * vector,
+                int (* callback)(const void * data, void * ctx),
+                void * ctx) {
+
+    int ret;
+    void * data;
+
+
+    //for every element in the vector
+    for (int i = 0; i < vector->len; ++i) {
+
+        //process next element
+        data = _vct_traverse(vector, i);
+        ret = callback(data, ctx);
+        if (ret != 0) {
+            cm_errno = CM_ERR_CALLBACK;
+            return -1;
+        }
+    }
+
+    return 0;
+}
+
+
+
 int cm_new_vct(cm_vct * vector, const size_t data_sz) {
 
     vector->len = 0;

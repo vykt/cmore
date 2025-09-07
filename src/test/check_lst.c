@@ -86,6 +86,32 @@ static void _assert_state(const int len, const int index, const int value) {
 
 
 
+struct _assert_callback_ctx {
+
+    int idx;
+    int values[10];
+};
+
+static int _assert_callback(const cm_lst_node * node, void * ctx) {
+
+    //type cast context
+    struct _assert_callback_ctx * real_ctx
+        = (struct _assert_callback_ctx *) ctx;
+
+    //fetch this node's data
+    int data = *(int *) node->data;
+
+    //assert data
+    ck_assert_int_eq(data, real_ctx->values[real_ctx->idx]);
+
+    //increment index
+    real_ctx->idx += 1;
+
+    return 0;
+}
+
+
+
 /*
  *  --- [FIXTURES] ---
  */
@@ -1122,6 +1148,26 @@ START_TEST(test_lst_mov) {
 
 
 
+//cm_lst_iter() [full fixture]
+START_TEST(test_lst_iter) {
+
+    int ret;
+
+
+    //only test: use a callback to assert evaluation order
+    struct _assert_callback_ctx ctx = {
+        0,
+        {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+    };
+
+    ret = cm_lst_iter(&l, _assert_callback, &ctx);
+    ck_assert_int_eq(ret, 0);
+
+    return;
+}
+
+
+
 /*
  *  --- [SUITE] ---
  */
@@ -1146,6 +1192,7 @@ Suite * lst_suite() {
     TCase * tc_lst_emp;
     TCase * tc_lst_cpy;
     TCase * tc_lst_mov;
+    TCase * tc_lst_iter;
 
     Suite * s = suite_create("list");
     
@@ -1234,6 +1281,11 @@ Suite * lst_suite() {
     tcase_add_checked_fixture(tc_lst_mov, _setup_full, teardown);
     tcase_add_test(tc_lst_mov, test_lst_mov);
 
+    //cm_lst_iter()
+    tc_lst_iter = tcase_create("list_iter");
+    tcase_add_checked_fixture(tc_lst_iter, _setup_full, teardown);
+    tcase_add_test(tc_lst_iter, test_lst_iter);
+
 
     //add test cases to list suite
     suite_add_tcase(s, tc_new_del_lst);
@@ -1253,6 +1305,7 @@ Suite * lst_suite() {
     suite_add_tcase(s, tc_lst_emp);
     suite_add_tcase(s, tc_lst_cpy);
     suite_add_tcase(s, tc_lst_mov);
+    suite_add_tcase(s, tc_lst_iter);
 
     return s;
 }
