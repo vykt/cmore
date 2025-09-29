@@ -7,7 +7,7 @@ INCLUDE_INSTALL_DIR=/usr/local/include
 LD_DIR=/etc/ld.so.conf.d
 
 CC=gcc
-CFLAGS=
+CFLAGS=-O2 -flto -funroll-loops -ftree-vectorize
 CFLAGS_TEST=-ggdb3 -O0
 WARN_OPTS=-Wall -Wextra
 LDFLAGS=
