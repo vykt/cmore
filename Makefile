@@ -7,7 +7,7 @@ INCLUDE_INSTALL_DIR=/usr/local/include
 LD_DIR=/etc/ld.so.conf.d
 
 CC=gcc
-CFLAGS=-O2 -flto -funroll-loops -ftree-vectorize
+CFLAGS=
 CFLAGS_TEST=-ggdb3 -O0
 WARN_OPTS=-Wall -Wextra
 LDFLAGS=
@@ -32,7 +32,7 @@ ifeq ($(build),debug)
 	CFLAGS_TEST += -DDEBUG
 	LDFLAGS     += -static-libasan
 else
-	CFLAGS += -O3
+	CFLAGS += -O2 -flto -funroll-loops -ftree-vectorize
 endif
 
 
